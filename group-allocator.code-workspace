@@ -1,0 +1,12 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "Group Allocator"
+        }
+    ],
+    "settings": {
+        "prettier.requireConfig": true,
+        "prettier.configPath": "./frontend/.prettierrc"
+    }
+}
