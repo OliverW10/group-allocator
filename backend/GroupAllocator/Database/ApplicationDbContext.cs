@@ -2,7 +2,7 @@
 
 namespace GroupAllocator.Database
 {
-	public class ApplicationDbContext : DbContext
+	public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 	{
 	}
 }

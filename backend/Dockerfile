@@ -14,4 +14,5 @@ WORKDIR /App
 COPY --from=build /App/out .
 ENTRYPOINT ["dotnet", "GroupAllocator.dll"]
 
-EXPOSE 7000
+# Base aspnet image sets ASPNETCORE_HTTP_PORTS=8080
+EXPOSE 8080
