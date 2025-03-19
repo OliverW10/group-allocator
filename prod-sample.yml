@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: group-allocator
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password1234
+      POSTGRES_DB: GroupAllocator
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+  backend: 
+    image: ghcr.io/oliverw10/group-allocator:main
+    container_name: group-allocator-backend
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    depends_on:
+      - db
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      DATABASE_URL: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: user
+      DATABASE_PASSWORD: password1234
+      DATABASE_NAME: GroupAllocator
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 300
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"
