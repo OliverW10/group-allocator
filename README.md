@@ -1,32 +1,42 @@
+# GroupAllocator 🤖🤖🤖🚀🔥🎉💥💯💎✨🎊🦾
 
-# GroupAllocator 🤖🤖🤖
+<style>
+  img {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 150px;
+    height: auto;
+  }
+</style>
 
-# Fullstack Setup (Testing)
+![Cool GIF](images/mygif.gif)
 
-1. Install Docker Desktop ([https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/))
-1. Run `docker compose up --build --force-recreate` (Ctrl+C to stop)
+# Fullstack Setup (Testing) 🧑‍💻🛠️🐳🚀💡⚡💻🎯
 
-# Frontend Setup (Development)
+1. Install Docker Desktop 🐋💻🛳️📦 ([https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)) 🎉🎊
+1. Run `docker compose up --build --force-recreate` 🏗️⚡💥🚀 (Ctrl+C to stop ⛔🛑❌)
 
-1. Install Node.js ([https://volta.sh/](https://volta.sh/))
-1. Install PNPM (`npm i -g pnpm`)
-1. Install dependencies (`pnpm i`)
-1. Run `pnpm dev`
+# Frontend Setup (Development) 🎨💻🚀🖥️🎭🔥🌟
 
-# Backend Setup (Development)
+1. Install Node.js 🍃💚🟢💾 ([https://volta.sh/](https://volta.sh/)) 🏆✨
+1. Install PNPM 🏎️💨💾 (`npm i -g pnpm`)
+1. Install dependencies 📦📥📀 (`pnpm i`) 🚀🎊
+1. Run `pnpm dev` 🚀💥🎯💡🔥
 
-## Database
+# Backend Setup (Development) 🖥️⚙️💡🛠️🔙🎯
 
-1. Install docker & docker-compose
-1. Run `docker-compose -f database.yml up -d`
+## Database 🗄️🐘💾🔍💡⚙️
 
-### Application - Windows
+1. Install docker & docker-compose 🐳🔧🛳️📦✅
+1. Run `docker-compose -f database.yml up -d` 🚀✅💾⚡🔥
 
-1. Install Visual Studio with ASP.NET workload and .NET 9.0 component.
-1. Run
+### Application - Windows 🏢🖥️🪟💻🔵💾
 
+1. Install Visual Studio 🎨🖌️🎭✨ with ASP.NET workload and .NET 9.0 component 🎯💡🔵
+1. Run 🏃‍♂️💨💥🚀✅
 
-### Application - Mac/Linux
+### Application - Mac/Linux 🍏🐧💻🛠️🔴🖥️
 
-1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-1. In `backend/GroupAllocator.Backend` run `dotnet run`
+1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) 🛠️💻🔥⚙️
+1. In `backend/GroupAllocator.Backend` run `dotnet run` 🚀🎉🔥💯💡🎯
