@@ -1,16 +1,5 @@
 # GroupAllocator 🤖🤖🤖🚀🔥🎉💥💯💎✨🎊🦾
 
-<style>
-  img {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 150px;
-    height: auto;
-  }
-</style>
-
-![Cool GIF](images/mygif.gif)
 
 # Fullstack Setup (Testing) 🧑‍💻🛠️🐳🚀💡⚡💻🎯
 
@@ -40,3 +29,5 @@
 
 1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) 🛠️💻🔥⚙️
 1. In `backend/GroupAllocator.Backend` run `dotnet run` 🚀🎉🔥💯💡🎯
+
+![Cool GIF](images/mygif.gif)
