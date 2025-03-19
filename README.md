@@ -1,6 +1,5 @@
 # GroupAllocator 🤖🤖🤖🚀🔥🎉💥💯💎✨🎊🦾
 
-
 # Fullstack Setup (Testing) 🧑‍💻🛠️🐳🚀💡⚡💻🎯
 
 1. Install Docker Desktop 🐋💻🛳️📦 ([https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)) 🎉🎊
@@ -30,4 +29,4 @@
 1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) 🛠️💻🔥⚙️
 1. In `backend/GroupAllocator.Backend` run `dotnet run` 🚀🎉🔥💯💡🎯
 
-![Cool GIF](images/mygif.gif)
+![Cool GIF](images/help.gif)
