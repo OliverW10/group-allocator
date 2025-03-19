@@ -29,4 +29,4 @@
 1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) 🛠️💻🔥⚙️
 1. In `backend/GroupAllocator.Backend` run `dotnet run` 🚀🎉🔥💯💡🎯
 
-![Cool GIF](images/help.gif)
+![Cool GIF](readme-images/help.gif)
