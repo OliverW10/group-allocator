@@ -2,9 +2,9 @@
 {
 	public class StudentPreferencesDto
 	{
-		public int[] Preferences { get; set; }
-		public bool WillingToSignContract { get; set; }
-		public string[] FileNames { get; set; }
-		public byte[][] FileBlobs { get; set; }
+		public required int[] Preferences { get; set; }
+		public required bool WillingToSignContract { get; set; }
+		public required string[] FileNames { get; set; }
+		public required byte[][] FileBlobs { get; set; }
 	}
 }
