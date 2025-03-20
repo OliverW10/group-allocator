@@ -1,28 +1,27 @@
 ﻿using GroupAllocator.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GroupAllocator.Controllers
+namespace GroupAllocator.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class StudentController : ControllerBase
 {
-	[Controller]
-	[Route("/api/[controller]")]
-	public class StudentController : Controller
+	[HttpGet]
+	public IActionResult GetPreferences()
 	{
-		[HttpGet]
-		public IActionResult GetPreferences()
-		{
-			return Ok();
-		}
+		return Ok();
+	}
 
-		[HttpPost]
-		public IActionResult PostPreferences(StudentPreferencesDto data)
-		{
-			return Ok();
-		}
+	[HttpPost]
+	public IActionResult PostPreferences(StudentPreferencesDto data)
+	{
+		return Ok();
+	}
 
-		[HttpGet]
-		public IActionResult GetProjects()
-		{
-			return Ok();
-		}
+	[HttpGet]
+	public IActionResult GetProjects()
+	{
+		return Ok();
 	}
 }

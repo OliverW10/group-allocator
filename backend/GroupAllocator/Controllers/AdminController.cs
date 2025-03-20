@@ -1,16 +1,14 @@
-﻿using GroupAllocator.Database.Model;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace GroupAllocator.Controllers
+namespace GroupAllocator.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class AdminController : ControllerBase
 {
-	[Controller()]
-	[Route("/api/[controller]")]
-	public class AdminController
+	[HttpGet("status")]
+	public IActionResult Status()
 	{
-		[HttpGet]
-		public IActionResult Status()
-		{
-			return "yep";
-		}
+		return Content("yep");
 	}
 }
