@@ -12,7 +12,12 @@ const items = ref([
     label: 'Account',
     icon: 'i-mdi-account',
     url: '/account'
-  }
+  },
+  {
+    label: 'Preferences',
+    icon: 'i-mdi-settings',
+    url: '/student/preferences'
+  },
 ]);
 </script>
 

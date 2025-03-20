@@ -8,7 +8,11 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/account',
         component: () => import('./views/Account.vue')
-    }
+    },
+    {
+        path: '/student/preferences',
+        component: () => import('./views/StudentPreferences.vue')
+    },
 ]
 
 export default createRouter({
