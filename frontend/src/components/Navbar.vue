@@ -17,12 +17,12 @@ const items = ref([
 </script>
 
 <template>
-  <Menubar :model="items">
+  <!-- <Menubar :model="items">
     <template #item="menuitem">
       <router-link :to="menuitem.item.url ?? '/'" class="flex items-center py-1 px-2 transition-all">
         <div :class="menuitem.item.icon" style="margin-right: 8px;"></div>
         <span>{{ menuitem.label }}</span>
       </router-link>
     </template>
-  </Menubar>
+  </Menubar> -->
 </template>

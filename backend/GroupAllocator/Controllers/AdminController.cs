@@ -4,7 +4,6 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Authenticate]
 public class AdminController : ControllerBase
 {
 	[HttpGet("status")]
