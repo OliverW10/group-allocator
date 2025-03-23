@@ -17,5 +17,7 @@ jobs:
           dotnet-version: '9.x'
       - name: Install dependencies
         run: dotnet restore
+      - name: Install tool dependencies
+        run: dotnet tool restore
       - name: Build
         run: dotnet build --no-restore
