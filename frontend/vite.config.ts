@@ -7,4 +7,9 @@ export default defineConfig({
     vue(),
     UnoCSS()
   ],
+  server: {
+    watch: {
+      usePolling: true
+    }
+  }
 })
