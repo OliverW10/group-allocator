@@ -3,17 +3,10 @@ import router from '../router';
 import { useAuthStore } from '../store/auth';
 import { getOidcUrl } from "../helpers/oauth";
 import { onMounted } from 'vue';
+import type { UserInfoDto } from '../dtos/user-info-dto';
 
 const authStore = useAuthStore();
-const isLoggedIn = authStore.userInfo;
-if (isLoggedIn) {
-  const isAdmin = authStore.userInfo?.isAdmin ?? false;
-  if (isAdmin) {
-    router.push({ name: 'Dashboard' });
-  } else {
-    router.push({ name: 'Form' });
-  }
-}
+
 const is_dev = import.meta.env.DEV;
 
 const navigateToOidc = () =>{
@@ -25,12 +18,23 @@ onMounted(async ()=>{
     const id_token = new URLSearchParams(window.location.hash).get("id_token")
     // TODO: replace with ApiService
     const backendUrl = "https://localhost:7000"
-    await fetch(`${backendUrl}/auth/login-google?idToken=${id_token}`)
-    // send it to /auth/login?
-    // save response in auth store
-    // redirect to clear url
+    const result = await fetch(`${backendUrl}/auth/login-google?idToken=${id_token}`)
+    authStore.userInfo = (await result.json()) as UserInfoDto;
   }
+  redirectIfLoggedIn();
 });
+
+const redirectIfLoggedIn = () => {
+  const isLoggedIn = authStore.userInfo;
+  if (isLoggedIn) {
+    const isAdmin = authStore.userInfo?.isAdmin ?? false;
+    if (isAdmin) {
+      router.push('/form');
+    } else {
+      router.push('/dashboard');
+    }
+  }
+}
 
 </script>
 

@@ -1,9 +1,10 @@
-﻿using GroupAllocator.Database.Model;
-using TypeGen.Core.TypeAnnotations;
-
+﻿using TypeGen.Core.TypeAnnotations;
 namespace GroupAllocator.DTOs;
 
 [ExportTsClass]
-public class UserInfoDto : UserModel
+public class UserInfoDto
 {
+    public required bool IsAdmin { get; set; }
+    public required string Name { get; set; }
+    public required string Email { get; set; }
 }

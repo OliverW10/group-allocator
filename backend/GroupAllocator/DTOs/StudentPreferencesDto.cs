@@ -9,4 +9,5 @@ public class StudentPreferencesDto
 	public required bool WillingToSignContract { get; set; }
 	public required string[] FileNames { get; set; }
 	public required byte[][] FileBlobs { get; set; }
+	public required int Id { get; set; }
 }

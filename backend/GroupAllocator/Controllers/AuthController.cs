@@ -32,7 +32,6 @@ public class AuthController(IUserService userService, IAutheticationService toke
             Name = user.Name,
             Email = user.Email,
             IsAdmin = user.IsAdmin,
-            Id = user.Id,
         });
     }
 
