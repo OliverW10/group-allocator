@@ -33,8 +33,8 @@ const navigateToOidc = () =>{
     <h1 class="heading py-4">My Account</h1>
     <div>
       <button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
-        Sign in with Microsoft
-        <i class="i-logos-microsoft-icon ml-2"></i>
+        Sign in with Google
+        <i class="i-logos-google-icon ml-2"></i>
       </button>
     </div>
     <div v-if="is_dev">
