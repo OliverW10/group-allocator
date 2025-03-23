@@ -1,9 +1,9 @@
 ﻿namespace GroupAllocator.Database.Model;
 
-public class Client
+public class ProjectModel
 {
 	public required int Id { get; set; }
 	public required string Name { get; set; }
-	public required int MinProjects { get; set; }
-	public required int MaxProjects { get; set; }
+	public required bool RequiresContract { get; set; }
+	public required ClientModel Client { get; set; }
 }
