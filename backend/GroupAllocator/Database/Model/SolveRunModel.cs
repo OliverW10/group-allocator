@@ -1,6 +1,6 @@
 ﻿namespace GroupAllocator.Database.Model;
 
-public class SolveRun
+public class SolveRunModel
 {
 	public required int Id { get; set; }
 	public required DateTime Timestamp { get; set; }

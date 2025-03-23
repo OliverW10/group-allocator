@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 namespace GroupAllocator.Database.Model;
 
 [PrimaryKey(nameof(Id))]
-public class Student
+public class StudentModel
 {
-	[ForeignKey(nameof(User.Id))]
+	[ForeignKey(nameof(UserModel.Id))]
 	public int Id { get; set; }
 	public required bool WillSignContract { get; set; }
 }
