@@ -13,10 +13,6 @@ public class UserService(ApplicationDbContext db) : IUserService
 {
     public async Task<UserModel> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
     {
-        if (!email.Split("@").Last().Contains("uts"))
-        {
-            throw new InvalidOperationException("Must use UTS email");
-        }
         var knownIsAdmin = isAdmin ?? ShouldBeAdmin(email);
         return await db.Users.FirstOrDefaultAsync(x => x.Email == email) ?? await CreateNewUser(name, email, knownIsAdmin);
     }

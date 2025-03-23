@@ -7,7 +7,9 @@ import type { UserInfoDto } from '../dtos/user-info-dto';
 
 const authStore = useAuthStore();
 let devName = defineModel<string>("name");
+devName.value = "Dummy User"
 let devEmail = defineModel<string>("email");
+  devEmail.value = "email@domain.com"
 let devIsAdmin = defineModel<boolean>("isAdmin")
 
 const is_dev = import.meta.env.DEV;
@@ -18,26 +20,32 @@ const navigateToOidc = () =>{
 
 onMounted(async ()=>{
   if (window.location.hash) {
-    const id_token = new URLSearchParams(window.location.hash).get("id_token")
-    // TODO: replace with ApiService
-    const backendUrl = "https://localhost:7000"
-    const result = await fetch(`${backendUrl}/auth/login-google?idToken=${id_token}`, {
-        credentials: "include"
-    })
-    authStore.userInfo = (await result.json()) as UserInfoDto;
+    await loginWithGoogle();
   }
-  redirectIfLoggedIn();
 });
 
-const redirectIfLoggedIn = () => {
-  const isLoggedIn = authStore.userInfo;
-  if (isLoggedIn) {
-    const isAdmin = authStore.userInfo?.isAdmin ?? false;
-    if (isAdmin) {
-      router.push('/dashboard');
-    } else {
-      router.push('/form');
-    }
+// TODO: replace with ApiService and get from env var
+const backendUrl = "https://localhost:7000";
+
+async function loginWithGoogle() {
+  const id_token = new URLSearchParams(window.location.hash).get("id_token");
+  login(`${backendUrl}/auth/login-google?idToken=${id_token}`);
+}
+
+async function loginForDev() {
+  login(`${backendUrl}/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
+}
+
+async function login(url: string) {
+  const result = await fetch(url, {
+    credentials: "include"
+  });
+  authStore.userInfo = (await result.json()) as UserInfoDto;
+  const isAdmin = authStore.userInfo?.isAdmin ?? false;
+  if (isAdmin) {
+    router.push('/dashboard');
+  } else {
+    router.push('/form');
   }
 }
 
@@ -47,7 +55,7 @@ const redirectIfLoggedIn = () => {
   <div class="flex flex-col justify-center items-center">
     <h1 class="heading py-4">My Account</h1>
     <div>
-      <button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
+      <button @click="navigateToOidc" class="flex items-center w-max p-3 rounded-md m-3">
         Sign in with Google
         <i class="i-logos-google-icon ml-2"></i>
       </button>
@@ -63,7 +71,7 @@ const redirectIfLoggedIn = () => {
       <label for="devAdminInput">Admin:</label>
       <input id="devAdminInput" type="checkbox" v-model="devIsAdmin">
 
-      <button class="flex items-center w-max p-3 rounded-md">
+      <button @click="loginForDev" class="flex items-center w-max p-3 rounded-md">
         Development Test Login
         <i class="i-mdi-robot ml-2"></i>
       </button>

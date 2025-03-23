@@ -21,12 +21,7 @@ public class AuthController(IUserService userService, IAutheticationService toke
 
         await SignIn(user);
 
-        return new JsonResult(new UserInfoDto()
-        {
-            Name = user.Name,
-            Email = user.Email,
-            IsAdmin = user.IsAdmin,
-        });
+        return UserDto(user);
     }
 
     [HttpGet("login-dev")]
@@ -36,7 +31,17 @@ public class AuthController(IUserService userService, IAutheticationService toke
 
         await SignIn(user);
 
-        return Ok();
+        return UserDto(user);
+    }
+
+    static IActionResult UserDto(UserModel user)
+    {
+        return new JsonResult(new UserInfoDto()
+        {
+            Name = user.Name,
+            Email = user.Email,
+            IsAdmin = user.IsAdmin,
+        });
     }
 
     async Task SignIn(UserModel user)
