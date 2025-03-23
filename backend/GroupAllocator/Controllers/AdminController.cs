@@ -9,6 +9,6 @@ public class AdminController : ControllerBase
 	[HttpGet("status")]
 	public IActionResult Status()
 	{
-		return Content("yep");
+		return new JsonResult(Request.Cookies);
 	}
 }

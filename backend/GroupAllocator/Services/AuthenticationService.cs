@@ -1,8 +1,6 @@
 ﻿using GroupAllocator.Database.Model;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using System.Text;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace GroupAllocator.Services;
@@ -26,11 +24,7 @@ public class AuthenticationService : IAutheticationService
 
         };
 
-        //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("asdfqwerty"));
-        //var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        //return new JwtSecurityTokenHandler().WriteToken(token);
-
-        var id = new ClaimsIdentity(claims, "ApplicationCookie");
+        var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         return new ClaimsPrincipal(id);
     }
 }

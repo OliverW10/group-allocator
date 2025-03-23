@@ -2,5 +2,5 @@
 </script>
 
 <template>
-  <router-view class="p-4"></router-view>
+  <router-view></router-view>
 </template>

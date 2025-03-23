@@ -6,6 +6,9 @@ import { onMounted } from 'vue';
 import type { UserInfoDto } from '../dtos/user-info-dto';
 
 const authStore = useAuthStore();
+let devName = defineModel<string>("name");
+let devEmail = defineModel<string>("email");
+let devIsAdmin = defineModel<boolean>("isAdmin")
 
 const is_dev = import.meta.env.DEV;
 
@@ -18,7 +21,9 @@ onMounted(async ()=>{
     const id_token = new URLSearchParams(window.location.hash).get("id_token")
     // TODO: replace with ApiService
     const backendUrl = "https://localhost:7000"
-    const result = await fetch(`${backendUrl}/auth/login-google?idToken=${id_token}`)
+    const result = await fetch(`${backendUrl}/auth/login-google?idToken=${id_token}`, {
+        credentials: "include"
+    })
     authStore.userInfo = (await result.json()) as UserInfoDto;
   }
   redirectIfLoggedIn();
@@ -29,9 +34,9 @@ const redirectIfLoggedIn = () => {
   if (isLoggedIn) {
     const isAdmin = authStore.userInfo?.isAdmin ?? false;
     if (isAdmin) {
-      router.push('/form');
-    } else {
       router.push('/dashboard');
+    } else {
+      router.push('/form');
     }
   }
 }
@@ -47,7 +52,17 @@ const redirectIfLoggedIn = () => {
         <i class="i-logos-google-icon ml-2"></i>
       </button>
     </div>
+    <hr class="border">
     <div v-if="is_dev">
+      <label for="devNameInput">Name:</label>
+      <input id="devNameInput" type="text" v-model="devName" class="border">
+
+      <label for="devEmailInput">Email:</label>
+      <input id="devEmailInput" type="email" v-model="devEmail" class="border">
+
+      <label for="devAdminInput">Admin:</label>
+      <input id="devAdminInput" type="checkbox" v-model="devIsAdmin">
+
       <button class="flex items-center w-max p-3 rounded-md">
         Development Test Login
         <i class="i-mdi-robot ml-2"></i>
