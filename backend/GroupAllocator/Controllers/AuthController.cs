@@ -6,8 +6,18 @@ namespace GroupAllocator.Controllers;
 [Route("[controller]")]
 public class AuthController
 {
-    // generate and login with a dev jwt
+    [HttpGet("login-google")]
+    void LoginGoogle(string token)
+    {
+        Console.WriteLine("yep");
+        // verify token
+        // generate and send our own jwt
+    }
 
-    // verify and login with a microsoft sso jwt
-    // https://learn.microsoft.com/en-us/entra/identity-platform/access-tokens#validate-tokens
+    [HttpGet("login-dev")]
+    void LoginDev()
+    {
+        // verify and login with a microsoft sso jwt
+        // https://learn.microsoft.com/en-us/entra/identity-platform/access-tokens#validate-tokens
+    }
 }
