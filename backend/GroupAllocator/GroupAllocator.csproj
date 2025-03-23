@@ -15,7 +15,7 @@
         <PackageReference Include="TypeGen" Version="6.0.2" />
     </ItemGroup>
 
-  <Target Name="GenerateClient" BeforeTargets="Build" Inputs="@(DtoFiles)" Outputs="Generated">
+  <Target Name="GenerateClient" BeforeTargets="Build" Inputs="@(DtoFiles)" Outputs="Generated" Condition=" '$(Configuration)' == 'Debug' ">
     <Exec Command="dotnet typegen generate" />
     <Exec Command="mv ./*.ts ../../frontend/src/dtos" />
   </Target>
