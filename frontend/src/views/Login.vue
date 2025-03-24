@@ -24,8 +24,7 @@ onMounted(async ()=>{
   }
 });
 
-// TODO: replace with ApiService and get from env var
-const backendUrl = "https://localhost:7000";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 async function loginWithGoogle() {
   const id_token = new URLSearchParams(window.location.hash).get("id_token");
