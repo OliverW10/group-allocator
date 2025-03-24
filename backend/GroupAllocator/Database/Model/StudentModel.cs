@@ -9,4 +9,5 @@ public class StudentModel
 	[ForeignKey(nameof(UserModel.Id))]
 	public int Id { get; set; }
 	public required bool WillSignContract { get; set; }
+	public required UserModel User { get; set; }
 }
