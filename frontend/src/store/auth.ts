@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { type UserInfo } from '../types'
+import type { UserInfoDto } from '../dtos/user-info-dto'
 
 export const useAuthStore = defineStore('auth', () => {
     return {
-        token: ref<string | null>(null),
-        userInfo: ref<UserInfo | null>(null),
+        userInfo: ref<UserInfoDto | null>(null),
     }
 })
