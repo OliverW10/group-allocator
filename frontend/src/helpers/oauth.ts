@@ -1,7 +1,7 @@
 
 
 export function getOidcUrl(): string {
-    const my_url = "http://localhost:5173";
+    const my_url = window.location.href;
     // https://developers.google.com/identity/openid-connect/openid-connect#authenticationuriparameters
     const search_params = new URLSearchParams({
       // TODO: read these from env variables or backend or something
