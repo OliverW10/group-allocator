@@ -3,7 +3,7 @@
         <h1 class="heading">Student Preference Form</h1>
         <Card>
             <template #content>
-                <form @submit.prevent="submitForm" class="flex flex-col gap-4">
+                <form class="flex flex-col gap-4" @submit.prevent="submitForm">
                     <div class="flex-auto">
                         <label for="firstName" class="font-bold block mb-2">First Name</label>
                         <InputText id="firstName" v-model="form.firstName" placeholder="Enter First Name" />
@@ -25,18 +25,14 @@
                         <Checkbox id="consent" v-model="form.hasProvidedConsentForm" :binary="true" />
                         <label for="consent" class="font-bold block mb-2">Has Provided Consent Form?</label>
                     </div>
-                       
+
                     <Divider />
 
                     <div class="flex-auto">
                         <label class="font-bold block mb-2">Available Preferences</label>
 
-                        <OrderList v-if="form.preferences.length > 0"            
-                            v-model="form.preferences"
-                            dragdrop
-                            data-key="id"
-                            :list-style="{'height': '250px'}"
-                            >
+                        <OrderList v-if="form.preferences.length > 0" v-model="form.preferences" dragdrop data-key="id"
+                            :list-style="{ 'height': '250px' }">
 
                             <template #option="{ option }">
                                 {{ option }}
@@ -44,8 +40,10 @@
                         </OrderList>
 
                         <div class="p-3 flex justify-between">
-                            <Button label="Add New" severity="secondary" text size="small" icon="pi pi-plus" @click="showAddPreferenceDialog = true" />
-                            <Button label="Remove All" severity="danger" text size="small" icon="pi pi-times" @click="removeAll" />
+                            <Button label="Add New" severity="secondary" text size="small" icon="pi pi-plus"
+                                @click="showAddPreferenceDialog = true" />
+                            <Button label="Remove All" severity="danger" text size="small" icon="pi pi-times"
+                                @click="removeAll" />
                         </div>
 
                         <Card v-if="showAddPreferenceDialog && allAvailablePreferences.length > 0" class="p-4">
@@ -54,7 +52,8 @@
                             </template>
 
                             <template #content>
-                                <Listbox @update:model-value="addPreference" multiple :options="allAvailablePreferences" optionLabel="name" />
+                                <Listbox multiple :options="allAvailablePreferences" option-label="name"
+                                    @update:model-value="addPreference" />
                             </template>
                         </Card>
                     </div>

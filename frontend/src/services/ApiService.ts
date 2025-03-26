@@ -4,7 +4,7 @@ export default class ApiService {
         return response.json()
     }
 
-    static async post<T>(url: string, data: any): Promise<T> {
+    static async post<T>(url: string, data: unknown): Promise<T> {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
