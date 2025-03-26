@@ -6,19 +6,20 @@ import { onMounted } from 'vue';
 import type { UserInfoDto } from '../dtos/user-info-dto';
 
 const authStore = useAuthStore();
-let devName = defineModel<string>("name");
+const devName = defineModel<string>("name");
+const devEmail = defineModel<string>("email");
+const devIsAdmin = defineModel<boolean>("isAdmin")
+
 devName.value = "Dummy User"
-let devEmail = defineModel<string>("email");
-  devEmail.value = "email@domain.com"
-let devIsAdmin = defineModel<boolean>("isAdmin")
+devEmail.value = "email@domain.com"
 
 const is_dev = import.meta.env.DEV;
 
-const navigateToOidc = () =>{
+const navigateToOidc = () => {
   location.href = getOidcUrl();
 };
 
-onMounted(async ()=>{
+onMounted(async () => {
   if (window.location.hash) {
     await loginWithGoogle();
   }
@@ -54,7 +55,7 @@ async function login(url: string) {
   <div class="flex flex-col justify-center items-center">
     <h1 class="heading py-4">My Account</h1>
     <div>
-      <button @click="navigateToOidc" class="flex items-center w-max p-3 rounded-md m-3">
+      <button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
         Sign in with Google
         <i class="i-logos-google-icon ml-2"></i>
       </button>
@@ -62,15 +63,15 @@ async function login(url: string) {
     <hr class="border">
     <div v-if="is_dev">
       <label for="devNameInput">Name:</label>
-      <input id="devNameInput" type="text" v-model="devName" class="border">
+      <input id="devNameInput" v-model="devName" type="text" class="border">
 
       <label for="devEmailInput">Email:</label>
-      <input id="devEmailInput" type="email" v-model="devEmail" class="border">
+      <input id="devEmailInput" v-model="devEmail" type="email" class="border">
 
       <label for="devAdminInput">Admin:</label>
-      <input id="devAdminInput" type="checkbox" v-model="devIsAdmin">
+      <input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
 
-      <button @click="loginForDev" class="flex items-center w-max p-3 rounded-md">
+      <button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
         Development Test Login
         <i class="i-mdi-robot ml-2"></i>
       </button>
