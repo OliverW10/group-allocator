@@ -3,5 +3,4 @@
 
 <template>
   <router-view></router-view>
-  asdf <
 </template>
