@@ -1,13 +1,19 @@
 name: .NET Build
 
-on: [push]
+on:
+  push:
+    branches:    
+      - '*'
+      - '*/*'
+      - '**'
+      - '!main'
 
 defaults:
   run:
     working-directory: backend
 
 jobs:
-  build:
+  dotnet-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

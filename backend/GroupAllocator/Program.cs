@@ -5,6 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseDefaultServiceProvider(options =>
+{
+    options.ValidateScopes = true;
+    options.ValidateOnBuild = true;
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -37,11 +42,13 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    using (var scope = app.Services.CreateScope())
-    {
-        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();
-    }
+	app.MapOpenApi();
+}
+using (var scope = app.Services.CreateScope())
+{
+	var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+	db.Database.EnsureDeleted();
+    db.Database.EnsureCreated();
 }
 
 app.MapControllers();

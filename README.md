@@ -22,6 +22,7 @@
 ### Application - Windows 🏢🖥️🪟💻🔵💾
 
 1. Install Visual Studio 🎨🖌️🎭✨ with ASP.NET workload and .NET 9.0 component 🎯💡🔵
+1. Run `dotnet tool install` in the backend directory 🔨✂️🔦🔥
 1. Run 🏃‍♂️💨💥🚀✅
 
 ### Application - Mac/Linux 🍏🐧💻🛠️🔴🖥️

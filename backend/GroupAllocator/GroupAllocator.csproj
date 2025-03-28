@@ -17,8 +17,7 @@
     </ItemGroup>
 
   <Target Name="GenerateClient" BeforeTargets="Build" Inputs="@(DtoFiles)" Outputs="Generated" Condition=" '$(Configuration)' == 'Debug' ">
-    <Exec Command="dotnet typegen generate" />
-    <Exec Command="mv ./*.ts ../../frontend/src/dtos" />
+    <Exec Command="dotnet typegen generate --output-folder ../../frontend/src/dtos" />
   </Target>
 
   <ItemGroup>
