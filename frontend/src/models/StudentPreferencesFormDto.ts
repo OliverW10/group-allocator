@@ -1,5 +1,7 @@
 import type GroupAllocationOption from "./GroupAllocationOption"
 
+//must be moved to use backed dtos
+
 export default interface StudentPreferencesFormDto {
     firstName: string
     lastName: string
