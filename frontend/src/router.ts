@@ -11,10 +11,6 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: '/form',
-        component: () => import('./views/StudentFormView.vue'),
-    },
-    {
-        path: '/student/preferences',
         component: () => import('./views/StudentPreferencesView.vue')
     },
 ]

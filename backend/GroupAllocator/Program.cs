@@ -28,8 +28,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = SameSiteMode.None;
 });
+
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 // TODO: work out proper migrations setup for dev and prod
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("MainDb")));
 builder.Services.AddControllers();
@@ -43,6 +45,8 @@ app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 using (var scope = app.Services.CreateScope())
 {

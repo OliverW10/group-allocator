@@ -18,10 +18,4 @@ public class StudentController : ControllerBase
 	{
 		return Ok();
 	}
-
-	[HttpGet]
-	public IActionResult GetProjects()
-	{
-		return Ok();
-	}
 }
