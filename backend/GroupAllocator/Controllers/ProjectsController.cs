@@ -71,6 +71,32 @@ public class ProjectsController : ControllerBase
 		});
 	}
 
+	[HttpPost("{id}")]
+	public IActionResult UpdateProject(int id, [FromBody] ProjectDto projectDto)
+	{
+		var project = _dbContext.Projects.Find(id);
+		if (project == null)
+		{
+			return BadRequest("Id not found");
+		}
+
+		project.Name = projectDto.Name;
+		project.RequiresNda = projectDto.RequiresNda;
+		project.MaxStudents = projectDto.MaxStudents;
+		project.MinStudents = projectDto.MinStudents;
+
+		_dbContext.SaveChanges();
+
+		return Ok(new ProjectDto
+		{
+			Id = project.Id,
+			Name = project.Name,
+			RequiresNda = project.RequiresNda,
+			MinStudents = project.MinStudents,
+			MaxStudents = project.MaxStudents
+		});
+	}
+
 	[HttpDelete("{id}")]
 	public IActionResult DeleteProject(int id)
 	{
