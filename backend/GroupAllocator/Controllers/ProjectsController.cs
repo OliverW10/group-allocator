@@ -70,4 +70,19 @@ public class ProjectsController : ControllerBase
 			MaxStudents = project.MaxStudents
 		});
 	}
+
+	[HttpDelete("{id}")]
+	public IActionResult DeleteProject(int id)
+	{
+		var project = _dbContext.Projects.Find(id);
+		if (project == null)
+		{
+			return NotFound();
+		}
+
+		_dbContext.Projects.Remove(project);
+		_dbContext.SaveChanges();
+
+		return Ok();
+	}
 }
