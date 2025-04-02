@@ -1,4 +1,5 @@
-﻿using GroupAllocator.Services;
+﻿using GroupAllocator.Database;
+using GroupAllocator.Services;
 
 namespace GroupAllocator;
 
@@ -9,6 +10,7 @@ public static class ServicesRegistration
         collection
             .AddScoped<IUserService, UserService>()
             .AddScoped<IAutheticationService, AuthenticationService>()
+            .AddTransient<ApplicationDbContext>()
             ;
     }
 }
