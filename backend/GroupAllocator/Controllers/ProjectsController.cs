@@ -1,4 +1,4 @@
-using GroupAllocator.Database;
+﻿using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,8 @@ public class ProjectsController : ControllerBase
 	public ProjectsController(ApplicationDbContext dbContext)
 	{
 		_dbContext = dbContext;
-	} 
+	}
+
 	[HttpGet]
 	public IActionResult GetProjects()
 	{
@@ -25,6 +26,25 @@ public class ProjectsController : ControllerBase
 			MinStudents = p.MinStudents,
 			MaxStudents = p.MaxStudents
 		}));
+	}
+
+	[HttpGet("{id}")]
+	public IActionResult GetProject(int id)
+	{
+		var project = _dbContext.Projects.Find(id);
+		if (project == null)
+		{
+			return NotFound();
+		}
+
+		return Ok(new ProjectDto
+		{
+			Id = project.Id,
+			Name = project.Name,
+			RequiresNda = project.RequiresNda,
+			MinStudents = project.MinStudents,
+			MaxStudents = project.MaxStudents
+		});
 	}
 
 	[HttpPost]
