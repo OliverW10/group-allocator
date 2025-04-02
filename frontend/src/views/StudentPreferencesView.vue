@@ -75,11 +75,11 @@ const form = ref({
 } as StudentPreferencesDto);
 
 const allAvailablePreferences = ref([
-    { id: 1, name: "Preference 1", description: "", requiresContract: false },
-    { id: 2, name: "Preference 2", description: "", requiresContract: true },
-    { id: 3, name: "Preference 3", description: "", requiresContract: false },
-    { id: 4, name: "Preference 4", description: "", requiresContract: true },
-    { id: 5, name: "Preference 5", description: "", requiresContract: false },
+    { id: 1, name: "Preference 1", requiresNda: false, minStudents: 1, maxStudents: 2 },
+    { id: 2, name: "Preference 2", requiresNda: true, minStudents: 1, maxStudents: 2 },
+    { id: 3, name: "Preference 3", requiresNda: false, minStudents: 1, maxStudents: 2 },
+    { id: 4, name: "Preference 4", requiresNda: true, minStudents: 1, maxStudents: 2 },
+    { id: 5, name: "Preference 5", requiresNda: false, minStudents: 1, maxStudents: 2 },
 ] as ProjectDto[]);
 
 
