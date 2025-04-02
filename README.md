@@ -19,6 +19,59 @@
 1. Install docker & docker-compose
 1. Run `docker-compose -f database.yml up -d`
 
+```mermaid
+erDiagram
+    ClientModel {
+        int Id
+        string Name
+        int MinProjects
+        int MaxProjects
+    }
+    
+    PreferenceModel {
+        int Id
+        double Strength
+    }
+    
+    ProjectModel {
+        int Id
+        string Name
+        bool RequiresContract
+        int MinStudents
+        int MaxStudents
+    }
+    
+    SolveRunModel {
+        int Id
+        DateTime Timestamp
+        double Evaluation
+    }
+    
+    StudentAssignmentModel {
+        int Id
+    }
+    
+    StudentModel {
+        int Id
+        bool WillSignContract
+    }
+    
+    UserModel {
+        int Id
+        bool IsAdmin
+        string Name
+        string Email
+    }
+    
+    ProjectModel ||--|| ClientModel : belongs_to
+    PreferenceModel ||--|| StudentModel : references
+    PreferenceModel ||--|| ProjectModel : references
+    StudentAssignmentModel ||--|| StudentModel : references
+    StudentAssignmentModel ||--|| ProjectModel : references
+    StudentAssignmentModel ||--|| SolveRunModel : references
+    StudentModel ||--|| UserModel : has_one
+```
+
 ### Application - Windows
 
 1. Install Visual Studio with ASP.NET workload and .NET 9.0 component
