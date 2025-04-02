@@ -1,4 +1,4 @@
-﻿using GroupAllocator.Database;
+using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +42,12 @@ public class ProjectsController : ControllerBase
 		_dbContext.Projects.Add(project);
 		_dbContext.SaveChanges();
 		
-		return CreatedAtAction(nameof(GetProjects), new { id = project.Id }, project);
+		return CreatedAtAction(nameof(GetProjects), new ProjectDto {
+			Id = project.Id,
+			Name = project.Name,
+			RequiresNda = project.RequiresNda,
+			MinStudents = project.MinStudents,
+			MaxStudents = project.MaxStudents
+		});
 	}
 }
