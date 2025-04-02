@@ -41,11 +41,15 @@ List<ProjectModel> projects = [
         Client = clients[0],
         Name = "AI Slop",
         RequiresContract = false,
+        MinStudents = 1,
+        MaxStudents = 2
     },
     new ProjectModel() {
         Client = clients[0],
         Name = "Crypto Scam",
         RequiresContract = true,
+        MinStudents = 3,
+        MaxStudents = 4
     }
 ];
 
