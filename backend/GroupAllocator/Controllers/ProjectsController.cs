@@ -1,4 +1,5 @@
 ﻿using GroupAllocator.Database;
+using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,5 +25,23 @@ public class ProjectsController : ControllerBase
 			MinStudents = p.MinStudents,
 			MaxStudents = p.MaxStudents
 		}));
+	}
+
+	[HttpPost]
+	public IActionResult AddProject([FromBody] ProjectDto projectDto)
+	{
+		var project = new ProjectModel
+		{
+			Name = projectDto.Name,
+			RequiresNda = projectDto.RequiresNda,
+			MinStudents = projectDto.MinStudents,
+			MaxStudents = projectDto.MaxStudents,
+			Client = null
+		};
+		
+		_dbContext.Projects.Add(project);
+		_dbContext.SaveChanges();
+		
+		return CreatedAtAction(nameof(GetProjects), new { id = project.Id }, project);
 	}
 }
