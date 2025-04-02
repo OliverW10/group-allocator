@@ -62,7 +62,7 @@ public class ProjectsController : ControllerBase
 		_dbContext.Projects.Add(project);
 		_dbContext.SaveChanges();
 		
-		return CreatedAtAction(nameof(GetProjects), new ProjectDto {
+		return CreatedAtAction(nameof(GetProject), new { id = project.Id }, new ProjectDto {
 			Id = project.Id,
 			Name = project.Name,
 			RequiresNda = project.RequiresNda,
