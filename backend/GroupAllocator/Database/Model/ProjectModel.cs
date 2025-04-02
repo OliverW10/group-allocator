@@ -6,4 +6,6 @@ public class ProjectModel
 	public required string Name { get; set; }
 	public required bool RequiresContract { get; set; }
 	public required ClientModel Client { get; set; }
+
+	// variable that tracks max and min students that can be assigned needs to be added
 }
