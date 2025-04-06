@@ -22,7 +22,8 @@ export default typescriptEslint.config(
             },
         },
         rules: {
-          "vue/first-attribute-linebreak": "off"
+          "vue/first-attribute-linebreak": "off",
+          "vue/multi-word-component-names": "off"
         },
     },
     eslintConfigPrettier
