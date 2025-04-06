@@ -13,6 +13,15 @@ const routes: RouteRecordRaw[] = [
         path: '/form',
         component: () => import('./views/StudentPreferencesView.vue')
     },
+    {
+        path: '/projects',
+        component: () => import('./views/Projects.vue')
+    },
+    {
+        path: '/project/:projectId',
+        component: () => import('./views/ProjectDetailsView.vue'),
+        props: true,
+    }
 ]
 
 export default createRouter({
