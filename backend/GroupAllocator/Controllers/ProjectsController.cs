@@ -1,6 +1,7 @@
 ﻿using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
+using GroupAllocator.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GroupAllocator.Controllers;
@@ -9,46 +10,36 @@ namespace GroupAllocator.Controllers;
 [Route("[controller]")]
 public class ProjectsController : ControllerBase
 {
-	private readonly ApplicationDbContext _dbContext;
-	public ProjectsController(ApplicationDbContext dbContext)
+	private readonly IProjectService _projectService;
+	public ProjectsController(IProjectService projectService)
 	{
-		_dbContext = dbContext;
+		_projectService = projectService;
 	}
 
 	[HttpGet]
-	public IActionResult GetProjects()
+	[Route("get")]
+	public async Task<IActionResult> GetProjects()
 	{
-		return Ok(_dbContext.Projects.ToList().Select(p => new ProjectDto
-		{
-			Id = p.Id,
-			Name = p.Name,
-			RequiresNda = p.RequiresNda,
-			MinStudents = p.MinStudents,
-			MaxStudents = p.MaxStudents
-		}));
+		var projects = await _projectService.GetProjects();
+		return Ok(projects.Select(x => x.ToDto()));
 	}
 
-	[HttpGet("{id}")]
-	public IActionResult GetProject(int id)
+	[HttpGet]
+	[Route("get/{id}")]
+	public async Task<IActionResult> GetProject(int id)
 	{
-		var project = _dbContext.Projects.Find(id);
+		var project = await _projectService.GetProject(id);
 		if (project == null)
 		{
 			return NotFound();
 		}
 
-		return Ok(new ProjectDto
-		{
-			Id = project.Id,
-			Name = project.Name,
-			RequiresNda = project.RequiresNda,
-			MinStudents = project.MinStudents,
-			MaxStudents = project.MaxStudents
-		});
+		return Ok(project.ToDto());
 	}
 
 	[HttpPost]
-	public IActionResult AddProject([FromBody] ProjectDto projectDto)
+	[Route("add")]
+	public async Task<ActionResult> AddProject([FromBody] ProjectDto projectDto)
 	{
 		var project = new ProjectModel
 		{
@@ -56,59 +47,43 @@ public class ProjectsController : ControllerBase
 			RequiresNda = projectDto.RequiresNda,
 			MinStudents = projectDto.MinStudents,
 			MaxStudents = projectDto.MaxStudents,
+			RequiresContract = projectDto.RequiresContract,
 			Client = null
 		};
-		
-		_dbContext.Projects.Add(project);
-		_dbContext.SaveChanges();
-		
+
+		await _projectService.AddProject(project);
+
 		return CreatedAtAction(nameof(GetProject), new { id = project.Id }, new ProjectDto {
 			Id = project.Id,
 			Name = project.Name,
 			RequiresNda = project.RequiresNda,
 			MinStudents = project.MinStudents,
-			MaxStudents = project.MaxStudents
+			MaxStudents = project.MaxStudents,
+			RequiresContract = project.RequiresContract
 		});
 	}
 
-	[HttpPost("{id}")]
-	public IActionResult UpdateProject(int id, [FromBody] ProjectDto projectDto)
+	[HttpPut]
+	[Route("update/{id}")]
+	public async Task<IActionResult> UpdateProject(int id, [FromBody] ProjectDto projectDto)
 	{
-		var project = _dbContext.Projects.Find(id);
-		if (project == null)
-		{
-			return BadRequest("Id not found");
-		}
+		var project = await _projectService.GetProject(id);
 
-		project.Name = projectDto.Name;
-		project.RequiresNda = projectDto.RequiresNda;
-		project.MaxStudents = projectDto.MaxStudents;
-		project.MinStudents = projectDto.MinStudents;
-
-		_dbContext.SaveChanges();
-
-		return Ok(new ProjectDto
-		{
-			Id = project.Id,
-			Name = project.Name,
-			RequiresNda = project.RequiresNda,
-			MinStudents = project.MinStudents,
-			MaxStudents = project.MaxStudents
-		});
-	}
-
-	[HttpDelete("{id}")]
-	public IActionResult DeleteProject(int id)
-	{
-		var project = _dbContext.Projects.Find(id);
 		if (project == null)
 		{
 			return NotFound();
 		}
 
-		_dbContext.Projects.Remove(project);
-		_dbContext.SaveChanges();
+		var updated = await _projectService.UpdateProject(project);
 
+		return Ok(updated.ToDto());
+	}
+
+	[HttpDelete]
+	[Route("delete/{id}")]
+	public async Task<IActionResult> DeleteProject(int id)
+	{
+		await _projectService.DeleteProject(id);
 		return Ok();
 	}
 }

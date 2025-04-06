@@ -4,7 +4,6 @@
         <Message severity="error" v-if="!loading && !projectDetails" message="Failed to load project details." />
         <Card v-else>
             <h1>{{ projectDetails?.name }}</h1>
-            <p>{{ projectDetails?.description }}</p>
         </Card>
     </div>
 </template>

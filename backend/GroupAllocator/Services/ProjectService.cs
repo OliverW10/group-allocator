@@ -8,6 +8,9 @@ public interface IProjectService
 {
 	Task<ProjectModel?> GetProject(int id);
 	Task<List<ProjectModel>> GetProjects();
+	Task<ProjectModel> AddProject(ProjectModel project);
+	Task<ProjectModel> UpdateProject(ProjectModel project);
+	Task DeleteProject(int id);
 }
 
 public class ProjectService : IProjectService
@@ -27,5 +30,29 @@ public class ProjectService : IProjectService
 	public async Task<List<ProjectModel>> GetProjects()
 	{
 		return await db.Projects.ToListAsync();
+	}
+
+	public async Task<ProjectModel> AddProject(ProjectModel project)
+	{
+		db.Projects.Add(project);
+		await db.SaveChangesAsync();
+		return project;
+	}
+
+	public async Task<ProjectModel> UpdateProject(ProjectModel project)
+	{
+		db.Projects.Update(project);
+		await db.SaveChangesAsync();
+		return project;
+	}
+
+	public async Task DeleteProject(int id)
+	{
+		var project = await GetProject(id);
+		if (project != null)
+		{
+			db.Projects.Remove(project);
+			await db.SaveChangesAsync();
+		}
 	}
 }

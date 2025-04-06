@@ -10,10 +10,7 @@ public class ProjectModel
 	public required ClientModel? Client { get; set; }
 	public required int MinStudents { get; set; }
 	public required int MaxStudents { get; set; }
-}
-	public string Description { get; set; } = string.Empty;
-	public required bool RequiresContract { get; set; }
-	public required ClientModel Client { get; set; }
+	public bool RequiresContract { get; set; }
 }
 
 public static class ProjectModelExtensions
@@ -24,8 +21,10 @@ public static class ProjectModelExtensions
 		{
 			Id = model.Id,
 			Name = model.Name,
-			Description = model.Client.Name,
-			RequiresContract = model.RequiresContract
+			RequiresContract = model.RequiresContract,
+			RequiresNda = model.RequiresNda,
+			MinStudents = model.MinStudents,
+			MaxStudents = model.MaxStudents,
 		};
 	}
 }

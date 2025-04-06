@@ -4,8 +4,10 @@
         <Divider />
         <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20]">
             <Column field="name" header="Name"></Column>
-            <Column field="description" header="Description"></Column>
-            <Column field="requiresContract" header="RequiresContract"></Column>
+            <Column field="requiresContract" header="Requires Contract"></Column>
+            <Column field="requiresNda" header="Requires Nda"></Column>
+            <Column field="minStudents" header="Min Students"></Column>
+            <Column field="maxStudents" header="maxStudents"></Column>
             <Column field="id" header="Actions">
                 <template #body="slotProps">
                     <Button label="View" @click="openProjectDetails(slotProps.data.id)" class="p-button-text" />
