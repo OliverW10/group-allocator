@@ -20,26 +20,197 @@ public class AllocationSolver : IAllocationSolver
     public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences)
     {
         // Create "SCIP" Solver
+        Solver solver = Solver.CreateSolver("SCIP");
+        if (solver == null)
+        {
+            throw new Exception("Could not create solver");
+        }
+
+        var studentList = students.ToList();
+        var projectList = projects.ToList();
+        var variables = new Dictionary<(int studentId, int projectId), Variable>();
+        var projectActivityMap = new Dictionary<int, Variable>();
+
+
 
         // Create a 2d array of boolean (0 or 1) 'Variable's
         // each row represents one student and each column is one project
         // and each variable is if that student is assigned to that project
+        foreach (var student in studentList)
+        {
+            foreach (var project in projectList)
+            {
+
+                //don't aissign variable if student won't sign contract and project needs one
+                if (!student.WillSignContract && project.RequiresNda)
+                {
+                    continue;
+                }
+
+                //makes variable
+                variables[(student.Id, project.Id)] = solver.MakeIntVar(0, 1, $"x_{student.Id}_{project.Id}");
+
+            }
+        }
+
+              
 
         // Create constraint for each student is only assigned to one project
+        foreach (var student in studentList)
+        {
 
-        // Create constraint for each project has 3, 4 or 0 students (todo: how to forulate constraint with gap?)
+            //creates a list of variables based on the projects for specific student
+            var terms = projectList
+                .Where(p => variables.ContainsKey((student.Id, p.Id)))
+                .Select(p => variables[(student.Id, p.Id)]);
 
-        // Create constraint that no student that has said no to a contract is assigned to a project requiring one
+            if (terms.Any())
+            {
+                //sum of variables must be equal to 1 (student can only do 1 project)
+                Constraint constraint = solver.MakeConstraint(1, 1, $"student_{student.Id}_assignment");
 
-        // Create constraint for each client that the number of their projects that have any students is within their bound (todo: how to formulate 'any' in constraint)
+                foreach (var variable in terms)
+                {
+                    constraint.SetCoefficient(variable, 1);
+                }
+            }
 
-        // Create objective function with a coefficient for each preference with a value of the .Strength of the preference
-        // might also need to set all other coefficients to zero (idk)
+        }
 
-        // Invoke solver for minimization
 
-        // for each variable that has .SolutionValue of 1(ish) create a StudentAssignmentModel
+        // Each project must have either 0, 3, or 4 students
+        foreach (var project in projectList)
+        {
 
-        return new List<StudentAssignmentModel>();
+            //list of student variables for specific project
+            var assignedVars = studentList
+                .Where(s => variables.ContainsKey((s.Id, project.Id)))
+                .Select(s => variables[(s.Id, project.Id)])
+                .ToList();
+
+            //variable that will represent number of students assigned to projects
+            //on creation the max amount is all students but this will be narrowed down later
+            var countVar = solver.MakeIntVar(0, studentList.Count, $"count_proj_{project.Id}");
+
+            LinearExpr sumExpr = assignedVars.First();
+
+            //this creates an equation of the variables added togther for a specific project
+            foreach (var v in assignedVars.Skip(1))
+            {
+                sumExpr += v;
+            }
+
+            //allows us to compare countVar and sumExpr and determine how many variable we can make 1
+            solver.Add(countVar == sumExpr);
+
+            //binary decision variable for determining how many people per project
+            var isZero = solver.MakeIntVar(0, 1, $"isZero_{project.Id}");
+            var isThree = solver.MakeIntVar(0, 1, $"isZero_{project.Id}");
+            var isFour = solver.MakeIntVar(0, 1, $"isZero_{project.Id}");
+
+            //this contraint forces the solver to pick only one of the group options
+            solver.Add(isZero + isThree + isFour == 1);
+
+            //these are the options for countVar
+            //if the decision variable is 1 then it means countVar has to be that number
+            //which then determines how many student variables for specific projects in sumExpr are 1
+            solver.Add((isZero * 0) + (isThree * 3) + (isFour * 4) == countVar);
+
+   
+            //variable for whether or not project is running (3 or 4 people in a group)
+            var isActive = solver.MakeIntVar(0, 1, $"isActive_{project.Id}");
+
+            solver.Add(isActive == isThree + isFour);
+
+            //this will track what projects are active
+            projectActivityMap[project.Id] = isActive;
+
+        }
+
+
+        //Client project limits
+        foreach (var client in clients)
+        {
+            //list of projects for specific client
+            var clientProjects = projectList
+                .Where(p => p.Client == client)
+                .Select(p => projectActivityMap[client.Id])
+                .ToList();
+
+
+            LinearExpr projectCountExpr = clientProjects.First();
+
+            //this makes an equation which is the isActive variables added together
+            foreach (var v in clientProjects.Skip(1))
+            {
+                projectCountExpr += v;
+            }
+
+            //the sets the bounds for the amount of isActive variables in the projectCountExpr equation that can be 1
+            solver.Add(projectCountExpr >= client.MinProjects);
+            solver.Add(projectCountExpr <= client.MaxProjects);
+
+        }
+
+        //Preference-based objective function
+        Objective objective = solver.Objective();
+
+        foreach (var pref in preferences)
+        {
+            var key = (pref.Student.Id, pref.Project.Id);
+
+            if (variables.ContainsKey(key))
+            {
+                //this sets the coefficients for the variables based on strengths
+                objective.SetCoefficient(variables[key], pref.Strength);
+            }
+
+        }
+
+        //Invoke solver for maximation
+        objective.SetMaximization();
+
+        //Solve the model
+        var resultStatus = solver.Solve();
+
+        //if no solution return empty list
+        if (resultStatus != Solver.ResultStatus.OPTIMAL && resultStatus != Solver.ResultStatus.FEASIBLE)
+        {
+            Console.WriteLine("solver failed: " + resultStatus);
+;            return new List<StudentAssignmentModel>();
+        }
+
+        //if there is a solution
+
+        var assignments = new List<StudentAssignmentModel>();
+
+        int idCounter = 1;
+
+        //loops through dictionary of variables
+        foreach (var((studentId, projectId), variable) in variables) 
+        {
+
+            //if the variable has assigned student to project
+            if (variable.SolutionValue() > 0.5)
+            {
+                //assign student to first student in student list where the id matches with the studentId we are iterated to
+                var student = studentList.First(s => s.Id == studentId);
+                var project = projectList.First(p => p.Id == projectId);
+
+                assignments.Add(new StudentAssignmentModel
+                {
+                    Id = idCounter++,
+                    Student = student,
+                    Project = project,
+                    Run = null! 
+                });
+
+            }
+
+        }
+
+
+
+        return assignments;
     }
 }
