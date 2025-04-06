@@ -94,9 +94,9 @@ List<ClientModel> clients = [
 ];
 
 List<ProjectModel> projects = [
-    new ProjectModel { Id = 1, Name = "AI Tutor",         RequiresContract = false, Client = clients[0] },
-    new ProjectModel { Id = 2, Name = "Health Tracker",   RequiresContract = true,  Client = clients[1] },
-    new ProjectModel { Id = 3, Name = "Blockchain Ledger",RequiresContract = false, Client = clients[0] }
+    new ProjectModel { Id = 1, Name = "AI Tutor",         RequiresNda = false, Client = clients[0], MinStudents = 3, MaxStudents = 4 },
+    new ProjectModel { Id = 2, Name = "Health Tracker",   RequiresNda = true,  Client = clients[1], MinStudents = 3, MaxStudents = 4},
+    new ProjectModel { Id = 3, Name = "Blockchain Ledger",RequiresNda = false, Client = clients[0], MinStudents = 3, MaxStudents = 4}
 ];
 
 List<PreferenceModel> preferences = [

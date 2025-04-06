@@ -42,7 +42,7 @@ public class AllocationSolver : IAllocationSolver
             {
 
                 //don't aissign variable if student won't sign contract and project needs one
-                if (!student.WillSignContract && project.RequiresContract)
+                if (!student.WillSignContract && project.RequiresNda)
                 {
                     continue;
                 }
