@@ -9,6 +9,7 @@ public static class ServicesRegistration
         collection
             .AddScoped<IUserService, UserService>()
             .AddScoped<IAutheticationService, AuthenticationService>()
-            ;
+			.AddScoped<IProjectService, ProjectService>()
+			;
     }
 }
