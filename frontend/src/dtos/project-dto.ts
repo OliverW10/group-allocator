@@ -6,6 +6,7 @@
 export class ProjectDto {
     id: number;
     name: string;
-    description: string;
-    requiresContract: boolean;
+    requiresNda: boolean;
+    minStudents: number;
+    maxStudents: number;
 }

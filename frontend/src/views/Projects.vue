@@ -2,7 +2,7 @@
     <div>
         <h1 class="heading">Projects</h1>
         <Divider />
-        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]">
+        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20]">
             <Column field="name" header="Name"></Column>
             <Column field="description" header="Description"></Column>
             <Column field="requiresContract" header="RequiresContract"></Column>
