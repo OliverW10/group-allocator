@@ -35,9 +35,7 @@
 <script lang="ts">
     import { defineComponent, ref } from "vue";
     
-    interface FormData {
-        projectTitle: string;
-        projectDescription: string;
+    interface File {
         projectFile: File | null;
     }
     
@@ -51,18 +49,14 @@
         },
         emits: ["close", "upload"],
         setup(props, { emit }) {
-        const form = ref<FormData>({
-            projectTitle: "",
-            projectDescription: "",
-            projectFile: null,
-        });
+        let projectFile = null as File|null;
         const isSubmitting = ref(false);
         const errorMessage = ref("");
     
         const handleFileChange = (event: Event) => {
             const fileInput = event.target as HTMLInputElement;
             if (fileInput.files && fileInput.files.length > 0) {
-            form.value.projectFile = fileInput.files[0];
+                projectFile = fileInput.files[0] as unknown as File | null;
             }
         };
     
@@ -70,7 +64,7 @@
             if(!props.showModal){
                 closeModal()
             }
-            if (!form.value.projectFile) {
+            if (!projectFile) {
             errorMessage.value = "Please select a project file.";
             return;
             }
@@ -83,7 +77,7 @@
             await new Promise((resolve) => setTimeout(resolve, 2000));
     
             // Emit the form data to the parent component
-            emit("upload", form.value);
+            emit("upload", projectFile);
             closeModal();
             } catch (error) {
             errorMessage.value = "An error occurred while uploading the project.";
@@ -98,7 +92,7 @@
         };
     
         return {
-            form,
+            projectFile,
             isSubmitting,
             errorMessage,
             handleFileChange,
