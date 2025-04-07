@@ -1,7 +1,7 @@
 <template>
     <div class="project-details-view">
         <ProgressSpinner v-if="loading" />
-        <Message severity="error" v-if="!loading && !projectDetails" message="Failed to load project details." />
+        <Message v-if="!loading && !projectDetails" severity="error" message="Failed to load project details." />
         <Card v-else>
             <h1>{{ projectDetails?.name }}</h1>
         </Card>

@@ -13,11 +13,11 @@
             <div class="form-group">
                 <label for="fileInput">Upload Project File:</label>
                 <input
-                type="file"
                 id="fileInput"
-                @change="handleFileChange"
+                type="file"
                 accept=".csv"
                 required
+                @change="handleFileChange"
                 />
             </div>
     
@@ -67,6 +67,9 @@
         };
     
         const handleSubmit = async () => {
+            if(!props.showModal){
+                closeModal()
+            }
             if (!form.value.projectFile) {
             errorMessage.value = "Please select a project file.";
             return;
@@ -84,6 +87,7 @@
             closeModal();
             } catch (error) {
             errorMessage.value = "An error occurred while uploading the project.";
+            console.error(error);
             } finally {
             isSubmitting.value = false;
             }

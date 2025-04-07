@@ -7,7 +7,7 @@
 
         <ProjectUploadForm
             v-if="showModal"
-            :showModal="showModal"
+            :show-modal="showModal"
             @close="showModal = false"
             @upload="handleProjectUpload"
         />
@@ -20,7 +20,7 @@
             <Column field="maxStudents" header="maxStudents"></Column>
             <Column field="id" header="Actions">
                 <template #body="slotProps">
-                    <Button label="View" @click="openProjectDetails(slotProps.data.id)" class="p-button-text" />
+                    <Button label="View" class="p-button-text" @click="openProjectDetails(slotProps.data.id)" />
                 </template> 
             </Column>
         </DataTable>
@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type { ProjectDto } from '../dtos/project-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
@@ -37,10 +37,6 @@ import Column from 'primevue/column';
 import ProjectService from '../services/ProjectService';
 import ProjectUploadForm from '../components/UploadProjectsComponent.vue';
 import { useRouter } from 'vue-router';
-
-components: {
-    ProjectUploadForm
-}
 
 const projects = ref([] as ProjectDto[]);
 
@@ -66,7 +62,7 @@ const getProjects = async () => {
     }
 };
 
-const handleProjectUpload = (formData: any) => {
+const handleProjectUpload = (formData: File) => {
       console.log("Project uploaded:", formData);
       // You can send the data to your API or perform other actions here
     };
