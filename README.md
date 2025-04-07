@@ -75,7 +75,9 @@ erDiagram
 ### Application - Windows
 
 1. Install Visual Studio with ASP.NET workload and .NET 9.0 component
-2. Run `dotnet tool install` in the backend directory
+2. In the Group-allocator/backend/group-allocator directory, run the following commands:
+   a. `dotnet tool restore`
+   b. `dotnet run`
 
 ### Application - Mac/Linux
 
