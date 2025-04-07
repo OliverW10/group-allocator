@@ -78,7 +78,7 @@ public class AllocationSolver : IAllocationSolver
         }
 
 
-        // Each project must have either 0, 3, or 4 students
+        // Project constraint for the amount of students allowed in groups
         foreach (var project in projectList)
         {
 
@@ -100,27 +100,18 @@ public class AllocationSolver : IAllocationSolver
                 sumExpr += v;
             }
 
-            //allows us to compare countVar and sumExpr and determine how many variable we can make 1
+            //this countVar will track the amount students are assigned to a project based on how many variables in the sumExpr are 1
             solver.Add(countVar == sumExpr);
 
-            //binary decision variable for determining how many people per project
-            var isZero = solver.MakeIntVar(0, 1, $"isZero_{project.Id}");
-            var isThree = solver.MakeIntVar(0, 1, $"isZero_{project.Id}");
-            var isFour = solver.MakeIntVar(0, 1, $"isZero_{project.Id}");
 
-            //this contraint forces the solver to pick only one of the group options
-            solver.Add(isZero + isThree + isFour == 1);
-
-            //these are the options for countVar
-            //if the decision variable is 1 then it means countVar has to be that number
-            //which then determines how many student variables for specific projects in sumExpr are 1
-            solver.Add((isZero * 0) + (isThree * 3) + (isFour * 4) == countVar);
-
-   
-            //variable for whether or not project is running (3 or 4 people in a group)
+            //variable for whether or not project is running
             var isActive = solver.MakeIntVar(0, 1, $"isActive_{project.Id}");
 
-            solver.Add(isActive == isThree + isFour);
+            //if the project isActive then the countVar must be between the min and max (inclusive)
+            //if isActive is 0 then the countVar will be 0 as this project isn't running so it has no students
+            solver.Add(isActive * project.MinStudents <= countVar);
+            solver.Add(countVar <= isActive * project.MaxStudents);
+
 
             //this will track what projects are active
             projectActivityMap[project.Id] = isActive;
@@ -209,7 +200,7 @@ public class AllocationSolver : IAllocationSolver
 
         }
 
-
+        
 
         return assignments;
     }
