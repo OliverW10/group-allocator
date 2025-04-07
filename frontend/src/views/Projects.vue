@@ -2,6 +2,16 @@
     <div>
         <h1 class="heading">Projects</h1>
         <Divider />
+
+        <button @click="showModal = true">Upload Project</button>
+
+        <ProjectUploadForm
+            v-if="showModal"
+            :showModal="showModal"
+            @close="showModal = false"
+            @upload="handleProjectUpload"
+        />
+
         <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20]">
             <Column field="name" header="Name"></Column>
             <Column field="requiresContract" header="Requires Contract"></Column>
@@ -18,18 +28,25 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import type { ProjectDto } from '../dtos/project-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import Column from 'primevue/column';
 import ProjectService from '../services/ProjectService';
+import ProjectUploadForm from '../components/UploadProjectsComponent.vue';
 import { useRouter } from 'vue-router';
+
+components: {
+    ProjectUploadForm
+}
 
 const projects = ref([] as ProjectDto[]);
 
 const loading = ref(false);
+
+const showModal = ref(false);
 
 const router = useRouter();
 
@@ -48,6 +65,11 @@ const getProjects = async () => {
         loading.value = false;
     }
 };
+
+const handleProjectUpload = (formData: any) => {
+      console.log("Project uploaded:", formData);
+      // You can send the data to your API or perform other actions here
+    };
 
 const openProjectDetails = (projectId: string) => {
     const route = `/projects/${projectId}`;
