@@ -101,6 +101,6 @@ else
 {
     foreach (var assignment in assignments)
     {
-        Console.WriteLine($"{assignment.Student.User.Name} assigned to {assignment.Project.Name}");
+        Console.WriteLine($"student:{assignment.Student.User.Name}_{assignment.Student.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id}");
     }
 }

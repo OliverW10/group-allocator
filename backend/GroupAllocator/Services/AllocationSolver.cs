@@ -125,7 +125,7 @@ public class AllocationSolver : IAllocationSolver
             //list of projects for specific client
             var clientProjects = projectList
                 .Where(p => p.Client == client)
-                .Select(p => projectActivityMap[client.Id])
+                .Select(p => projectActivityMap[p.Id])
                 .ToList();
 
 
