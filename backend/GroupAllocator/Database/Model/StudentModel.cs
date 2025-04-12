@@ -14,6 +14,7 @@ public class StudentModel
 	public required UserModel User { get; set; }
 
     public ICollection<PreferenceModel> Preferences { get; } = new List<PreferenceModel>();
+    public ICollection<FileModel> Files { get; } = new List<FileModel>();
 }
 
 public static class StudentModelExtensions
@@ -25,7 +26,8 @@ public static class StudentModelExtensions
             Id = model.Id,
             Email = model.User.Email,
             WillSignContract = model.WillSignContract,
-            OrderedPreferences = model.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Name),
+            OrderedPreferences = model.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Name).ToList(),
+            FileNames = model.Files.Select(f => f.Name).ToArray()
         };
     }
 }

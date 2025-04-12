@@ -9,5 +9,5 @@ public class StudentDto
     public required string Email { get; set; }
     public required IEnumerable<string> OrderedPreferences { get; set; }
     public required bool WillSignContract { get; set; }
-    public required string[] FileNames { get; set; }
+    public required IEnumerable<string> FileNames { get; set; }
 }

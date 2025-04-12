@@ -25,7 +25,9 @@ public class ProjectService : IProjectService
 
 	public async Task<ProjectModel?> GetProject(int id)
 	{
-		return await db.Projects.FirstOrDefaultAsync(x => x.Id == id);
+		return await db.Projects
+			.Include(p => p.Client)
+			.FirstOrDefaultAsync(x => x.Id == id);
 	}
 
 	public async Task<List<ProjectModel>> GetProjects()

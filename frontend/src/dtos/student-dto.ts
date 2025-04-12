@@ -8,4 +8,5 @@ export class StudentDto {
     email: string;
     orderedPreferences: string[];
     willSignContract: boolean;
+    fileNames: string[];
 }

@@ -28,6 +28,9 @@ export default class ApiService {
             options.body = body;
         }
         const response = await fetch(url, options)
+        if (!response.ok){
+            return undefined;
+        }
         return response.json()
     }
 }
