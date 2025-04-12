@@ -28,7 +28,6 @@ public class ProjectsController(IProjectService projectService, ApplicationDbCon
     }
 
 	[HttpGet]
-	[Route("get")]
 	[Authorize]
 	public async Task<IActionResult> GetProjects()
 	{

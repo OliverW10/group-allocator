@@ -3,7 +3,7 @@ import ApiService from "./ApiService";
 
 export default class ProjectService {
     static getProjects() : Promise<ProjectDto[]> {
-        return ApiService.get<ProjectDto[]>("/projects/get");
+        return ApiService.get<ProjectDto[]>("/projects");
     }
 
     static deleteProject(projectId: string) : Promise<ProjectDto[]> {

@@ -5,14 +5,18 @@
     <DataTable :value="students" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
         <Column field="email" header="Email"></Column>
         <Column field="willSignContract" header="Contract?"></Column>
-        <Column field="orderedPreferences" header="Preferences"></Column>
+        <Column field="orderedPreferences" header="Preferences">
+            <template #body="slotProps">
+                {{ projects.find(x => x.id == slotProps.data.id)?.name }}
+            </template>
+        </Column>
         <Column field="id" header="Actions">
             <template #body="slotProps">
                 <Button label="X" class="p-button-text" @click="remove(slotProps.data.id)" />
             </template> 
         </Column>
     </DataTable>
-    <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" choose-label="Upload Students File" @select="onSelect" />
+    <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" choose-label="Upload Students Validation List" @select="onSelect" />
 
 </template>
 <script setup lang="ts">
@@ -24,28 +28,28 @@ import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
+import FileUpload from 'primevue/fileupload';
 import type { FileUploadSelectEvent } from 'primevue';
+import { ProjectDto } from '../../dtos/project-dto';
 
 // TODO: refactor 3 table views into generic component
 
 const students = ref([] as StudentDto[]);
+const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const filterList = ref(undefined as string[] | undefined)
 
-onMounted(() => {
-    getStudents();
-});
-
-const getStudents = async () => {
-    try {
+onMounted(async () => {
+    try{
         loading.value = true;
         setStudents(await ApiService.get<StudentDto[]>("/students"))
+        projects.value = await ApiService.get<ProjectDto[]>("/projects")
     } catch (error) {
         console.error(error);
     } finally {
         loading.value = false;
     }
-};
+});
 
 const setStudents = (data: StudentDto[]) => {
     students.value = data;

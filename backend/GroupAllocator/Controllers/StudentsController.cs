@@ -1,6 +1,7 @@
 ﻿using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
+using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,14 +13,13 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class StudentsController(ApplicationDbContext db) : ControllerBase
+public class StudentsController(ApplicationDbContext db, IStudentService studentService) : ControllerBase
 {
 	[HttpGet]
 	[Authorize(Policy = "AdminOnly")]
 	public async Task<IActionResult> GetAll()
 	{
-		// move to a service if it pleases you
-		return Ok(await db.Student.Select(s => s.ToDto()).ToListAsync());
+		return Ok(await studentService.GetStudents().Select(s => s.ToDto()).ToListAsync());
 	}
 
 	[HttpGet("me")]
@@ -32,12 +32,7 @@ public class StudentsController(ApplicationDbContext db) : ControllerBase
 			return BadRequest("Not logged in");
 		}
 
-		var student = await db.Student
-			.Include(s => s.User)
-			.Include(s => s.Preferences)
-				.ThenInclude(p => p.Project)
-			.Include(s => s.Files)
-			.Where(s => s.User.Email == userEmail).FirstOrDefaultAsync();
+		var student = await studentService.GetStudents().Where(s => s.User.Email == userEmail).FirstOrDefaultAsync();
 		if (student == null)
 		{
 			return NotFound();
@@ -110,6 +105,7 @@ public class StudentsController(ApplicationDbContext db) : ControllerBase
 	public async Task<IActionResult> Delete(int id)
 	{
 		await db.Users.Where(u => u.Id == id).ExecuteDeleteAsync();
+		db.SaveChanges();
 		return await GetAll();
 	}
 }
