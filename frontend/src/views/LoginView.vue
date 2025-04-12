@@ -43,7 +43,7 @@ async function login(url: string) {
   authStore.userInfo = (await result.json()) as UserInfoDto;
   const isAdmin = authStore.userInfo?.isAdmin ?? false;
   if (isAdmin) {
-    router.push('/dashboard');
+    router.push('/admin/projects');
   } else {
     router.push('/form');
   }

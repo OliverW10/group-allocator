@@ -29,13 +29,13 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import type { ProjectDto } from '../dtos/project-dto';
+import type { ProjectDto } from '../../dtos/project-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import Column from 'primevue/column';
-import ProjectService from '../services/ProjectService';
-import ProjectUploadForm from '../components/UploadProjectsComponent.vue';
+import ProjectService from '../../services/ProjectService';
+import ProjectUploadForm from '../../components/UploadProjectsComponent.vue';
 import { useRouter } from 'vue-router';
 
 const projects = ref([] as ProjectDto[]);
