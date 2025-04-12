@@ -6,7 +6,7 @@
 export class StudentDto {
     id: number;
     email: string;
-    orderedPreferences: string[];
+    orderedPreferences: number[];
     willSignContract: boolean;
     fileNames: string[];
 }

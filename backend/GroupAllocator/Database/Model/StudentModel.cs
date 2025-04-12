@@ -26,7 +26,7 @@ public static class StudentModelExtensions
             Id = model.Id,
             Email = model.User.Email,
             WillSignContract = model.WillSignContract,
-            OrderedPreferences = model.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Name).ToList(),
+            OrderedPreferences = model.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList(),
             FileNames = model.Files.Select(f => f.Name).ToArray()
         };
     }

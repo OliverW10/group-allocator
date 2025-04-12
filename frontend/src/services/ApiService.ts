@@ -11,18 +11,21 @@ export default class ApiService {
     }
 
     static post<T>(path: string, data: unknown): Promise<T> {
-        return this.#makeRequest(path, 'POST', JSON.stringify(data))
+        return this.#makeRequest(path, 'POST', JSON.stringify(data), {
+            "Content-Type": "application/json",
+        })
     }
 
     static async postRaw<T>(path: string, body: BodyInit | undefined): Promise<T> {
         return this.#makeRequest(path, 'POST', body)
     }
 
-    static async #makeRequest(path: string, method: string, body: BodyInit | undefined = undefined){
+    static async #makeRequest(path: string, method: string, body: BodyInit | undefined = undefined, headers: HeadersInit = []){
         const url = new URL(path, BACKEND_URL);
         const options: RequestInit = {
             method: method,
-            credentials: "include"
+            credentials: "include",
+            headers: headers
         };
         if (body != undefined) {
             options.body = body;

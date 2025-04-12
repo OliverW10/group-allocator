@@ -20,9 +20,9 @@
                     </template>
                 </PickList>
                 <label for="switch1">Are you willing to sign a contract to work on a project</label>
-                <ToggleSwitch input-id="switch1" v-model="student.willSignContract" />
+                <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
 
-                <FileUpload name="demo[]" url="/api/upload" @upload="onAdvancedUpload($event)" :multiple="true" accept="image/*" :maxFileSize="10000000">
+                <FileUpload name="demo[]" url="/api/upload" @upload="onUpload($event)" :multiple="true" accept="image/*" :maxFileSize="10000000">
                     <template #empty>
                         <span>Drag and drop files to here to upload.</span>
                     </template>
@@ -40,16 +40,17 @@
 import Button from "primevue/button";
 import Card from "primevue/card";
 import ToggleSwitch from "primevue/toggleswitch";
-import FileUpload from "primevue/fileupload";
-import type { StudentPreferencesDto } from "../dtos/student-preferences-dto";
+import FileUpload, { type FileUploadUploadEvent } from "primevue/fileupload";
 import { ProjectDto } from "../dtos/project-dto";
 import LogoutButton from "../components/LogoutButton.vue";
 import { onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
 import ApiService from "../services/ApiService";
-import type { StudentDto } from "../dtos/student-dto";
+import { StudentDto } from "../dtos/student-dto";
 import { useToast } from "primevue/usetoast";
+import { useAuthStore } from '../store/auth'
 
+const authStore = useAuthStore();
 const toast = useToast();
 
 const DEFAULT_STUDENT: StudentDto = {
@@ -63,28 +64,41 @@ const student = ref(DEFAULT_STUDENT)
 const projects = ref([[], []] as ProjectDto[][]);
 
 onMounted(async () => {
-    const maybeStudent = await ApiService.get<StudentDto | undefined>("/students/mine")
+    const maybeStudent = await ApiService.get<StudentDto | undefined>("/students/me")
     if (maybeStudent){
         student.value = maybeStudent
         toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
     }
     const allProjects = await ApiService.get<ProjectDto[]>("/projects/get")
-    projects.value = [allProjects, []]
-    if (projects.value.length == 0){
+    if (allProjects.length == 0){
+        console.warn("no projects")
         toast.add({ severity: 'warn', detail: 'No projects found in system'})
+        return
+    }
+    projects.value = [allProjects, []]
+    for (const selectedProj of student.value.orderedPreferences){
+        const relevant = projects.value[0].filter(x => x.id == selectedProj)[0]
+        projects.value[1].push(relevant)
+        projects.value[0] = projects.value[0].filter(x => x.id != relevant.id)
     }
 })
 
-const form = ref({
-    preferences: [],
-    willingToSignContract: false,
-    fileNames: [],
-    fileBlobs: [],
-    id: 0,
-} as StudentPreferencesDto);
-
 const submitForm = () => {
-    console.log("Form submitted", form.value);
+    const submitModel: StudentDto = {
+        id: student.value.id,
+        email: authStore.userInfo?.email ?? student.value.email,
+        fileNames: student.value.fileNames,
+        orderedPreferences: projects.value[1].map(p => p.id), // should this be id's or names?
+        willSignContract: student.value.willSignContract
+    }
+    ApiService.post("/students/me", submitModel);
     toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 3000 });
 };
+
+const onUpload = (event: FileUploadUploadEvent) => {
+    // todo
+    // probably don't want a seperate upload button for the files
+    console.log(event)
+}
+
 </script>

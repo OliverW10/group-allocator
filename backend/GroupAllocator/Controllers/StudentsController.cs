@@ -1,8 +1,10 @@
 ﻿using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
+using GroupAllocator.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using TypeGen.Core.TypeAnnotations;
 
@@ -20,7 +22,7 @@ public class StudentsController(ApplicationDbContext db) : ControllerBase
 		return Ok(await db.Student.Select(s => s.ToDto()).ToListAsync());
 	}
 
-	[HttpGet("mine")]
+	[HttpGet("me")]
 	[Authorize]
 	public async Task<IActionResult> Get()
 	{
@@ -30,7 +32,12 @@ public class StudentsController(ApplicationDbContext db) : ControllerBase
 			return BadRequest("Not logged in");
 		}
 
-		var student = await db.Student.Where(s => s.User.Email == userEmail).FirstOrDefaultAsync();
+		var student = await db.Student
+			.Include(s => s.User)
+			.Include(s => s.Preferences)
+				.ThenInclude(p => p.Project)
+			.Include(s => s.Files)
+			.Where(s => s.User.Email == userEmail).FirstOrDefaultAsync();
 		if (student == null)
 		{
 			return NotFound();
@@ -39,7 +46,66 @@ public class StudentsController(ApplicationDbContext db) : ControllerBase
 		return Ok(student.ToDto());
 	}
 
-	[HttpDelete("{id}")]
+    [HttpPost("me")]
+    [Authorize]
+    public async Task<IActionResult> Post([FromBody] StudentDto preferences)
+    {
+        var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+        if (userEmail == null)
+        {
+            return BadRequest("Not logged in");
+        }
+
+		var user = db.Users.FirstOrDefault(u => u.Email == userEmail);
+
+        if (user == null)
+        {
+			// database resets often in development
+            return BadRequest("User doesn't exist");
+        }
+
+        using var transaction = db.Database.BeginTransaction();
+		await db.Student.Where(s => s.User.Email == userEmail).ExecuteDeleteAsync();
+		var student = new StudentModel()
+		{
+			User = user,
+			WillSignContract = preferences.WillSignContract,
+		};
+		var preferenceModels = new List<PreferenceModel>();
+		var allProjects = await db.Projects.ToListAsync();
+
+		double strength = 1.0;
+		foreach (var preference in preferences.OrderedPreferences.Take(10))
+		{
+			var proj = allProjects.FirstOrDefault(x => x.Id == preference);
+
+            if (proj == null) throw new InvalidOperationException("Project doesn't exist");
+			
+			if (preferenceModels.Any(p => p.Project == proj)) throw new InvalidOperationException("Duplicate preferences");
+
+			var newPreference = new PreferenceModel
+			{
+				Project = proj,
+				Student = student,
+				Strength = strength,
+			};
+
+			db.Add(newPreference);
+			preferenceModels.Add(newPreference);
+			strength -= 0.1;
+		}
+
+		// TODO: handle files
+
+		db.Student.Add(student);
+
+		await db.SaveChangesAsync();
+		await transaction.CommitAsync();
+
+        return Ok();
+    }
+
+    [HttpDelete("{id}")]
 	[Authorize(Policy = "AdminOnly")]
 	public async Task<IActionResult> Delete(int id)
 	{

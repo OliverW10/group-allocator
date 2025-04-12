@@ -12,6 +12,8 @@
             </template> 
         </Column>
     </DataTable>
+    <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" choose-label="Upload Students File" @select="onSelect" />
+
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
@@ -22,11 +24,13 @@ import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
+import type { FileUploadSelectEvent } from 'primevue';
 
 // TODO: refactor 3 table views into generic component
 
 const students = ref([] as StudentDto[]);
 const loading = ref(false);
+const filterList = ref(undefined as string[] | undefined)
 
 onMounted(() => {
     getStudents();
@@ -50,5 +54,18 @@ const setStudents = (data: StudentDto[]) => {
 const remove = async (id: string) => {
     const newProjects = await ApiService.delete<StudentDto[]>(`/students/${id}`);
     setStudents(newProjects);
+}
+
+const onSelect = async (event: FileUploadSelectEvent) => {
+    if (!event.files) {
+        console.error('selected no file, ignoring')
+    }
+    const selectedFile = event.files[0]
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        const contents = e.target?.result as string; // :P
+        filterList.value = contents.split("\n")
+    }
+    reader.readAsText(selectedFile)
 }
 </script>
