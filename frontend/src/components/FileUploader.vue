@@ -13,9 +13,9 @@
     </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import FileUpload from 'primevue/fileupload'
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import ApiService from '../services/ApiService'
@@ -26,7 +26,7 @@ const emit = defineEmits(['projectsChanged'])
 const showHelp = ref(false)
 const toast = useToast();
 
-const onSelect = async (event) => {
+const onSelect = async (event: FileUploadSelectEvent) => {
     if (!event.files) {
         console.error('selected no file, ignoring')
     }

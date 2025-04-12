@@ -3,11 +3,12 @@
     <h1 class="heading">Students</h1>
     <Divider />
     <DataTable :value="students" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
+        <Column field="name" header="Name"></Column>
         <Column field="email" header="Email"></Column>
         <Column field="willSignContract" header="Contract?"></Column>
         <Column field="orderedPreferences" header="Preferences">
             <template #body="slotProps">
-                {{ projects.find(x => x.id == slotProps.data.id)?.name }}
+                {{ slotProps.data.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) => projId == proj.id)?.name) }}
             </template>
         </Column>
         <Column field="id" header="Actions">
@@ -42,7 +43,7 @@ const filterList = ref(undefined as string[] | undefined)
 onMounted(async () => {
     try{
         loading.value = true;
-        setStudents(await ApiService.get<StudentDto[]>("/students"))
+        students.value = await ApiService.get<StudentDto[]>("/students")
         projects.value = await ApiService.get<ProjectDto[]>("/projects")
     } catch (error) {
         console.error(error);

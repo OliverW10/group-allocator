@@ -54,7 +54,8 @@ const authStore = useAuthStore();
 const toast = useToast();
 
 const DEFAULT_STUDENT: StudentDto = {
-    email: "loading",
+    name: "",
+    email: "",
     id: -1,
     orderedPreferences: [],
     fileNames: [],
@@ -69,7 +70,7 @@ onMounted(async () => {
         student.value = maybeStudent
         toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
     }
-    const allProjects = await ApiService.get<ProjectDto[]>("/projects/get")
+    const allProjects = await ApiService.get<ProjectDto[]>("/projects")
     if (allProjects.length == 0){
         console.warn("no projects")
         toast.add({ severity: 'warn', detail: 'No projects found in system'})
@@ -85,6 +86,7 @@ onMounted(async () => {
 
 const submitForm = () => {
     const submitModel: StudentDto = {
+        name: student.value.name,
         id: student.value.id,
         email: authStore.userInfo?.email ?? student.value.email,
         fileNames: student.value.fileNames,
