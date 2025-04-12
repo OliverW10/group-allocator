@@ -4,14 +4,7 @@
         <h1 class="heading">Projects</h1>
         <Divider />
 
-        <FileUploader></FileUploader>
-
-        <ProjectUploadForm
-            v-if="showModal"
-            :show-modal="showModal"
-            @close="showModal = false"
-            @upload="handleProjectUpload"
-        />
+        <FileUploader @projects-changed="setProjects"></FileUploader>
 
         <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20]">
             <Column field="name" header="Name"></Column>
@@ -21,7 +14,7 @@
             <Column field="maxStudents" header="maxStudents"></Column>
             <Column field="id" header="Actions">
                 <template #body="slotProps">
-                    <Button label="View" class="p-button-text" @click="openProjectDetails(slotProps.data.id)" />
+                    <Button label="X" class="p-button-text" @click="deleteProject(slotProps.data.id)" />
                 </template> 
             </Column>
         </DataTable>
@@ -40,10 +33,7 @@ import AdminNavBar from '../../components/AdminNavBar.vue';
 import FileUploader from '../../components/FileUploader.vue';
 
 const projects = ref([] as ProjectDto[]);
-
 const loading = ref(false);
-
-const showModal = ref(false);
 
 onMounted(() => {
     getProjects();
@@ -52,8 +42,7 @@ onMounted(() => {
 const getProjects = async () => {
     try {
         loading.value = true;
-        const response = await ProjectService.getProjects();
-        projects.value = response;
+        setProjects(await ProjectService.getProjects())
     } catch (error) {
         console.error(error);
     } finally {
@@ -61,9 +50,13 @@ const getProjects = async () => {
     }
 };
 
-const handleProjectUpload = (formData: File) => {
-    console.log("Project uploaded:", formData);
-    // You can send the data to your API or perform other actions here
-};
+const setProjects = (data: ProjectDto[]) => {
+    projects.value = data;
+}
+
+const deleteProject = async (id: string) => {
+    const newProjects = await ProjectService.deleteProject(id);
+    setProjects(newProjects);
+}
 
 </script>

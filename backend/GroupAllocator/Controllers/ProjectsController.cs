@@ -1,5 +1,4 @@
-﻿using GroupAllocator.Database;
-using GroupAllocator.Database.Model;
+﻿using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,51 +15,26 @@ public class ProjectsController : ControllerBase
 		_projectService = projectService;
 	}
 
+	[HttpPost("upload")]
+	public async Task<IActionResult> UploadProjects([FromForm] IFormFile file)
+	{
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("No file uploaded.");
+        }
+
+		using var reader = new StreamReader(file.OpenReadStream());
+		await _projectService.AddFromCsv(reader);
+
+		return await GetProjects();
+    }
+
 	[HttpGet]
 	[Route("get")]
 	public async Task<IActionResult> GetProjects()
 	{
 		var projects = await _projectService.GetProjects();
 		return Ok(projects.Select(x => x.ToDto()));
-	}
-
-	[HttpGet]
-	[Route("get/{id}")]
-	public async Task<IActionResult> GetProject(int id)
-	{
-		var project = await _projectService.GetProject(id);
-		if (project == null)
-		{
-			return NotFound();
-		}
-
-		return Ok(project.ToDto());
-	}
-
-	[HttpPost]
-	[Route("add")]
-	public async Task<ActionResult> AddProject([FromBody] ProjectDto projectDto)
-	{
-		var project = new ProjectModel
-		{
-			Name = projectDto.Name,
-			RequiresNda = projectDto.RequiresNda,
-			MinStudents = projectDto.MinStudents,
-			MaxStudents = projectDto.MaxStudents,
-			RequiresContract = projectDto.RequiresContract,
-			Client = null
-		};
-
-		await _projectService.AddProject(project);
-
-		return CreatedAtAction(nameof(GetProject), new { id = project.Id }, new ProjectDto {
-			Id = project.Id,
-			Name = project.Name,
-			RequiresNda = project.RequiresNda,
-			MinStudents = project.MinStudents,
-			MaxStudents = project.MaxStudents,
-			RequiresContract = project.RequiresContract
-		});
 	}
 
 	[HttpPut]
@@ -84,6 +58,6 @@ public class ProjectsController : ControllerBase
 	public async Task<IActionResult> DeleteProject(int id)
 	{
 		await _projectService.DeleteProject(id);
-		return Ok();
+		return await GetProjects();
 	}
 }

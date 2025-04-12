@@ -6,7 +6,7 @@ export default class ProjectService {
         return ApiService.get<ProjectDto[]>("/projects/get");
     }
 
-    static getProjectById(projectId: string) : Promise<ProjectDto> {
-        return ApiService.get<ProjectDto>(`/projects/get/${projectId}`);
+    static deleteProject(projectId: string) : Promise<ProjectDto[]> {
+        return ApiService.delete<ProjectDto[]>(`/projects/delete/${projectId}`);
     }
 }
