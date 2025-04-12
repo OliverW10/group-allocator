@@ -7,10 +7,9 @@ public class ProjectModel
 	public int Id { get; set; }
 	public required string Name { get; set; }
 	public required bool RequiresNda { get; set; }
-	public required ClientModel? Client { get; set; }
+	public required ClientModel Client { get; set; }
 	public required int MinStudents { get; set; }
 	public required int MaxStudents { get; set; }
-	public bool RequiresContract { get; set; }
 }
 
 public static class ProjectModelExtensions
@@ -21,7 +20,8 @@ public static class ProjectModelExtensions
 		{
 			Id = model.Id,
 			Name = model.Name,
-			RequiresContract = model.RequiresContract,
+			Client = model.Client.Name,
+			RequiresContract = model.RequiresNda,
 			RequiresNda = model.RequiresNda,
 			MinStudents = model.MinStudents,
 			MaxStudents = model.MaxStudents,

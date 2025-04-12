@@ -33,6 +33,7 @@ public class ProjectsController : ControllerBase
 
 	[HttpGet]
 	[Route("get")]
+	[AllowAnonymous]
 	public async Task<IActionResult> GetProjects()
 	{
 		var projects = await _projectService.GetProjects();

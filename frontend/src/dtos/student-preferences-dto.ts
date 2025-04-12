@@ -4,9 +4,8 @@
  */
 
 export class StudentPreferencesDto {
-    preferences: number[];
+    preferences: string[];
     willingToSignContract: boolean;
     fileNames: string[];
     fileBlobs: number[][];
-    id: number;
 }

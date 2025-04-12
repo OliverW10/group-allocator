@@ -10,9 +10,9 @@ namespace GroupAllocator.Controllers;
 public class StudentFormSubmitController : ControllerBase
 {
     [HttpGet]
-    public IActionResult GetStudents()
+    public IActionResult GetPreferences()
     {
-        return Ok();
+        return Ok(new StudentPreferencesDto);
     }
 
     [HttpPost]
