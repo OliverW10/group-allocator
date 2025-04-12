@@ -1,9 +1,10 @@
 <template>
     <div>
+        <AdminNavBar />
         <h1 class="heading">Projects</h1>
         <Divider />
 
-        <button @click="showModal = true">Upload Project</button>
+        <FileUploader></FileUploader>
 
         <ProjectUploadForm
             v-if="showModal"
@@ -35,16 +36,14 @@ import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import Column from 'primevue/column';
 import ProjectService from '../../services/ProjectService';
-import ProjectUploadForm from '../../components/UploadProjectsComponent.vue';
-import { useRouter } from 'vue-router';
+import AdminNavBar from '../../components/AdminNavBar.vue';
+import FileUploader from '../../components/FileUploader.vue';
 
 const projects = ref([] as ProjectDto[]);
 
 const loading = ref(false);
 
 const showModal = ref(false);
-
-const router = useRouter();
 
 onMounted(() => {
     getProjects();
@@ -63,13 +62,8 @@ const getProjects = async () => {
 };
 
 const handleProjectUpload = (formData: File) => {
-      console.log("Project uploaded:", formData);
-      // You can send the data to your API or perform other actions here
-    };
-
-const openProjectDetails = (projectId: string) => {
-    const route = `/projects/${projectId}`;
-    router.push(route);
+    console.log("Project uploaded:", formData);
+    // You can send the data to your API or perform other actions here
 };
 
 </script>

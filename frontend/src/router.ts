@@ -20,7 +20,6 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/admin/students',
         component: () => import('./views/admin/StudentsView.vue'),
-        props: true,
     }
 ]
 
