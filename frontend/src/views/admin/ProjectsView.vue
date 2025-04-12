@@ -6,7 +6,7 @@
 
         <FileUploader @projects-changed="setProjects"></FileUploader>
 
-        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20]">
+        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
             <Column field="name" header="Name"></Column>
             <Column field="requiresContract" header="Requires Contract"></Column>
             <Column field="requiresNda" header="Requires Nda"></Column>
