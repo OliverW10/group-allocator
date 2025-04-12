@@ -12,7 +12,7 @@ const devEmail = defineModel<string>("email");
 const devIsAdmin = defineModel<boolean>("isAdmin")
 
 devName.value = "Dummy User"
-devEmail.value = "email@domain.com"
+devEmail.value = `email${crypto.randomUUID().slice(0, 6)}@domain.com`
 
 const is_dev = import.meta.env.DEV;
 

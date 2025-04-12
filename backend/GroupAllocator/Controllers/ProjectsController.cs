@@ -1,12 +1,14 @@
 ﻿using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using GroupAllocator.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Policy = "AdminOnly")]
 public class ProjectsController : ControllerBase
 {
 	private readonly IProjectService _projectService;

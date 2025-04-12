@@ -1,6 +1,6 @@
 ﻿using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
-using GroupAllocator.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +8,8 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Policy = "AdminOnly")]
+// admin controller to view all students, not controller for students to use
 public class StudentsController(ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet]

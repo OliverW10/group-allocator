@@ -44,10 +44,11 @@
                         </Card>
                     </div>
 
-                    <Button type="submit" variant="text" label="Next" />
+                    <Button type="submit" variant="text" label="Submit" />
                 </form>
             </template>
         </Card>
+        <LogoutButton />
     </div>
 </template>
 
@@ -63,6 +64,7 @@ import { OrderList } from "primevue";
 import { useAuthStore } from "../store/auth";
 import type { StudentPreferencesDto } from "../dtos/student-preferences-dto";
 import type { ProjectDto } from "../dtos/project-dto";
+import LogoutButton from "../components/LogoutButton.vue";
 
 const authStore = useAuthStore();
 

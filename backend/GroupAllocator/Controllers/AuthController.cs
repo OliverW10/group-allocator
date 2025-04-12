@@ -34,6 +34,13 @@ public class AuthController(IUserService userService, IAutheticationService toke
         return UserDto(user);
     }
 
+    [HttpGet("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync();
+        return Ok();
+    }
+
     static IActionResult UserDto(UserModel user)
     {
         return new JsonResult(new UserInfoDto()

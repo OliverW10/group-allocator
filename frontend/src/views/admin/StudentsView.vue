@@ -1,29 +1,54 @@
 <template>
     <AdminNavBar />
-    <DataTable :value="projects" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
-            <Column field="name" header="Name"></Column>
-            <Column field="requiresContract" header="Requires Contract"></Column>
-            <Column field="requiresNda" header="Requires Nda"></Column>
-            <Column field="minStudents" header="Min Students"></Column>
-            <Column field="maxStudents" header="maxStudents"></Column>
-            <Column field="id" header="Actions">
-                <template #body="slotProps">
-                    <Button label="X" class="p-button-text" @click="remove(slotProps.data.id)" />
-                </template> 
-            </Column>
-        </DataTable>
+    <h1 class="heading">Students</h1>
+    <Divider />
+    <DataTable :value="students" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
+        <Column field="email" header="Email"></Column>
+        <Column field="willSignContract" header="Contract?"></Column>
+        <Column field="orderedPreferences" header="Preferences"></Column>
+        <Column field="id" header="Actions">
+            <template #body="slotProps">
+                <Button label="X" class="p-button-text" @click="remove(slotProps.data.id)" />
+            </template> 
+        </Column>
+    </DataTable>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import AdminNavBar from '../../components/AdminNavBar.vue';
-import type { ProjectDto } from '../../dtos/project-dto';
 import ApiService from '../../services/ApiService';
+import { StudentDto } from '../../dtos/student-dto';
+import DataTable from 'primevue/datatable';
+import Button from 'primevue/button';
+import Column from 'primevue/column';
+import Divider from 'primevue/divider';
 
-const projects = ref([] as Student[]);
+// TODO: refactor 3 table views into generic component
+
+const students = ref([] as StudentDto[]);
 const loading = ref(false);
 
-const remove = (id: string) => {
-    ApiService.delete<StudentDto>
+onMounted(() => {
+    getStudents();
+});
+
+const getStudents = async () => {
+    try {
+        loading.value = true;
+        setStudents(await ApiService.get<StudentDto[]>("/students"))
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+const setStudents = (data: StudentDto[]) => {
+    students.value = data;
 }
 
+const remove = async (id: string) => {
+    const newProjects = await ApiService.delete<StudentDto[]>(`/students/${id}`);
+    setStudents(newProjects);
+}
 </script>
