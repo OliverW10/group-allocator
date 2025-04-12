@@ -62,11 +62,11 @@ List<ClientModel> clients = [
 
 List<ProjectModel> projects = [
 
-    new ProjectModel { Id = 1, Name = "AI Tutor", RequiresContract = false, RequiresNda = false, Client = clients[0], MinStudents = 3, MaxStudents = 4 },
-    new ProjectModel { Id = 2, Name = "Fitness App", RequiresContract = false, RequiresNda = false, Client = clients[1], MinStudents = 3, MaxStudents = 4 },
-    new ProjectModel { Id = 3, Name = "Crypto Wallet", RequiresContract = true, RequiresNda = true, Client = clients[0], MinStudents = 3, MaxStudents = 4 },
-    new ProjectModel { Id = 4, Name = "Online Exam Tool", RequiresContract = false, RequiresNda = false, Client = clients[2], MinStudents = 2, MaxStudents = 3 },
-    new ProjectModel { Id = 5, Name = "Nutrition Tracker", RequiresContract = false, RequiresNda = false, Client = clients[1], MinStudents = 2, MaxStudents = 3 }
+    new ProjectModel { Id = 1, Name = "AI Tutor", RequiresNda = false, Client = clients[0], MinStudents = 3, MaxStudents = 4 },
+    new ProjectModel { Id = 2, Name = "Fitness App", RequiresNda = false, Client = clients[1], MinStudents = 3, MaxStudents = 4 },
+    new ProjectModel { Id = 3, Name = "Crypto Wallet", RequiresNda = true, Client = clients[0], MinStudents = 3, MaxStudents = 4 },
+    new ProjectModel { Id = 4, Name = "Online Exam Tool", RequiresNda = false, Client = clients[2], MinStudents = 2, MaxStudents = 3 },
+    new ProjectModel { Id = 5, Name = "Nutrition Tracker", RequiresNda = false, Client = clients[1], MinStudents = 2, MaxStudents = 3 }
 ];
 
 List<PreferenceModel> preferences = [

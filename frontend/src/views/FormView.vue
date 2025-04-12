@@ -22,7 +22,7 @@
                 <label for="switch1">Are you willing to sign a contract to work on a project</label>
                 <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
 
-                <FileUpload name="demo[]" url="/api/upload" @upload="onUpload($event)" :multiple="true" accept="image/*" :maxFileSize="10000000">
+                <FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000" @upload="onUpload($event)">
                     <template #empty>
                         <span>Drag and drop files to here to upload.</span>
                     </template>
