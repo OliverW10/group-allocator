@@ -1,35 +1,31 @@
 <template>
-    <div class="flex flex-col gap-4 p-4 h-screen justify-center">
+    <div class="flex flex-col gap-4 p-4 h-screen justify-center items-center">
         <h1 class="heading text-center mb-4">Submit Preferences</h1>
-        <Card class="min-w-5xl mx-auto">
+        <Card class="min-w-5xl">
             <template #content>
-            <div class="p-4">
-                <h2 class="text-xl mb-3">Select Your Project Preferences</h2>
+                <div class="p-4">
+                    <h2 class="text-xl mb-3">Select Your Project Preferences</h2>
 
-                <PickList
-                    v-model:model-value="projects"
-                    list-style="min-height: 500px"
-                    data-key="id"
-                    dragdrop
-                >
-                    <template #sourceheader><b class="text-lg">Available Projects</b></template>
-                    <template #targetheader><b class="text-lg">Ordered Preferences</b></template>
+                    <PickList v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
+                        <template #sourceheader><b class="text-lg">Available Projects</b></template>
+                        <template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
-                    <template #option="{ option  }">
-                        {{ option.name }}
-                    </template>
-                </PickList>
-                <label for="switch1">Are you willing to sign a contract to work on a project</label>
-                <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
+                        <template #option="{ option }">
+                            {{ option.name }}
+                        </template>
+                    </PickList>
+                    <label for="switch1">Are you willing to sign a contract to work on a project</label>
+                    <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
 
-                <FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000" @upload="onUpload($event)">
-                    <template #empty>
-                        <span>Drag and drop files to here to upload.</span>
-                    </template>
-                </FileUpload>
+                    <FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000"
+                        @upload="onUpload($event)">
+                        <template #empty>
+                            <span>Drag and drop files to here to upload.</span>
+                        </template>
+                    </FileUpload>
 
-                <Button label="Save Preferences" class="mt-4" icon="pi pi-check" @click="submitForm" />
-            </div>
+                    <Button label="Save Preferences" class="mt-4" icon="pi pi-check" @click="submitForm" />
+                </div>
             </template>
         </Card>
         <LogoutButton />
@@ -66,18 +62,18 @@ const projects = ref([[], []] as ProjectDto[][]);
 
 onMounted(async () => {
     const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
-    if (maybeStudent){
+    if (maybeStudent) {
         student.value = maybeStudent
         toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
     }
     const allProjects = await ApiService.get<ProjectDto[]>("/projects")
-    if (allProjects.length == 0){
+    if (allProjects.length == 0) {
         console.warn("no projects")
-        toast.add({ severity: 'warn', detail: 'No projects found in system'})
+        toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
         return
     }
     projects.value = [allProjects, []]
-    for (const selectedProj of student.value.orderedPreferences){
+    for (const selectedProj of student.value.orderedPreferences) {
         const relevant = projects.value[0].filter(x => x.id == selectedProj)[0]
         projects.value[1].push(relevant)
         projects.value[0] = projects.value[0].filter(x => x.id != relevant.id)

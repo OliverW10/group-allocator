@@ -14,16 +14,9 @@ public interface IProjectService
 	Task AddFromCsv(StreamReader csvStream);
 }
 
-public class ProjectService : IProjectService
+public class ProjectService(ApplicationDbContext db) : IProjectService
 {
-	public ProjectService(ApplicationDbContext db)
-	{
-		this.db = db;
-	}
-
-	private readonly ApplicationDbContext db;
-
-	public async Task<ProjectModel?> GetProject(int id)
+    public async Task<ProjectModel?> GetProject(int id)
 	{
 		return await db.Projects
 			.Include(p => p.Client)
@@ -66,7 +59,7 @@ public class ProjectService : IProjectService
         while ((line = await csvStream.ReadLineAsync()) != null)
         {
 			var fields = line.Split(',').Select(x => x.Trim()).ToArray();
-			if (fields.Length != 5)
+			if (fields.Length != 1)
 			{
 				throw new InvalidOperationException("Invalid csv");
 			}

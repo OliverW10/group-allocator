@@ -1,16 +1,18 @@
 <template>
     <AdminNavBar />
     <Divider />
-    <Button label="Run Solver" @click="solve"></Button>
-    <Listbox v-model="selectedRun" :options="solveRuns" option-label="ranAt" class="w-full md:w-56" />
-    <h3 v-if="selectedRun == undefined">Select a run to view allocations</h3>
-    <DataTable :value="selectedRun?.projects ?? []" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
-        <Column field="projectId" header="Project"></Column>
-        <Column field="studentIds" header="Students"></Column>
-    </DataTable>
-    <a :href="ApiService.makeUrl(`/solver/export/${selectedRun?.id}`).toString()" download :disabled="selectedRun == undefined">
-        <Button label="Download File" icon="pi pi-download" />
-    </a>
+    <div class="px-4 py-2 flex flex-col gap-2">
+        <Button label="Run Solver" @click="solve"></Button>
+        <Listbox v-model="selectedRun" :options="solveRuns" option-label="ranAt" class="w-full md:w-56" />
+        <h3 v-if="selectedRun == undefined">Select a run to view allocations</h3>
+        <DataTable :value="selectedRun?.projects ?? []" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
+            <Column field="projectId" header="Project"></Column>
+            <Column field="studentIds" header="Students"></Column>
+        </DataTable>
+        <a :href="ApiService.makeUrl(`/solver/export/${selectedRun?.id}`).toString()" download :disabled="selectedRun == undefined">
+            <Button label="Download File" icon="pi pi-download" />
+        </a>
+    </div>
 </template>
 <script setup lang="ts">
 import AdminNavBar from '../../components/AdminNavBar.vue';

@@ -6,16 +6,16 @@ namespace GroupAllocator.Services;
 
 public interface IUserService
 {
-    Task<UserModel> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null);
+    Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null);
 }
 
 public class UserService(ApplicationDbContext db) : IUserService
 {
-    public async Task<UserModel> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
+    public async Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
     {
         var knownIsAdmin = isAdmin ?? ShouldBeAdmin(email);
         var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
-        if (existingUser is null)
+        if (existingUser is null && knownIsAdmin)
         {
             return await CreateNewUser(name, email, knownIsAdmin);
         } else
@@ -36,7 +36,7 @@ public class UserService(ApplicationDbContext db) : IUserService
     {
         // TODO: should maybe just seed which users are admin
         string[] adminEmails = [
-            "marc.carmicheal@uts.edu.au",
+            "marc.carmicheal@uts.edu.au"
         ];
         return adminEmails.Contains(email);
     }

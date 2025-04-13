@@ -10,7 +10,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IUserService userService, IAutheticationService tokenService) : ControllerBase
+public class AuthController(IUserService userService, IGaAuthenticationService tokenService) : ControllerBase
 {
     [HttpGet("login-google")]
     public async Task<IActionResult> LoginGoogle(string idToken)
@@ -18,6 +18,11 @@ public class AuthController(IUserService userService, IAutheticationService toke
         var googleToken = await ValidateGoogleToken(idToken);
 
         var user = await userService.GetOrCreateUserAsync(googleToken.Name, googleToken.Email);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
 
         await SignIn(user);
 
@@ -28,6 +33,11 @@ public class AuthController(IUserService userService, IAutheticationService toke
     public async Task<IActionResult> LoginDev(string name, string email, bool? isAdmin)
     {
         var user = await userService.GetOrCreateUserAsync(name, email, isAdmin);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
 
         await SignIn(user);
 
