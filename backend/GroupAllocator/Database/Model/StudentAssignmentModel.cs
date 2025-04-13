@@ -2,7 +2,7 @@
 
 public class StudentAssignmentModel
 {
-	public required int Id { get; set; }
+	public int Id { get; set; }
 	public required StudentModel Student { get; set; }
 	public required ProjectModel Project { get; set; }
 	public required SolveRunModel Run { get; set; }

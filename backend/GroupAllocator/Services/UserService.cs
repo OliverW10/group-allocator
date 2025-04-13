@@ -14,12 +14,19 @@ public class UserService(ApplicationDbContext db) : IUserService
     public async Task<UserModel> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
     {
         var knownIsAdmin = isAdmin ?? ShouldBeAdmin(email);
-        return await db.Users.FirstOrDefaultAsync(x => x.Email == email) ?? await CreateNewUser(name, email, knownIsAdmin);
+        var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
+        if (existingUser is null)
+        {
+            return await CreateNewUser(name, email, knownIsAdmin);
+        } else
+        {
+            return existingUser;
+        }
     }
 
     async Task<UserModel> CreateNewUser(string name, string email, bool isAdmin)
     {
-        var newUser = new UserModel { Email = email, Name = name, IsAdmin = ShouldBeAdmin(email) };
+        var newUser = new UserModel { Email = email, Name = name, IsAdmin = isAdmin };
         db.Users.Add(newUser);
         await db.SaveChangesAsync();
         return newUser;

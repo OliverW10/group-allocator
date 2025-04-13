@@ -1,6 +1,5 @@
 ﻿using Google.OrTools.LinearSolver;
 using GroupAllocator.Database.Model;
-using GroupAllocator.DTOs;
 
 namespace GroupAllocator.Services;
 
@@ -12,12 +11,12 @@ namespace GroupAllocator.Services;
 
 public interface IAllocationSolver
 {
-    IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences);
+    IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun, IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences);
 }
 
 public class AllocationSolver : IAllocationSolver
 {
-    public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences)
+    public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun, IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences)
     {
         // Create "SCIP" Solver
         Solver solver = Solver.CreateSolver("SCIP");
@@ -175,8 +174,6 @@ public class AllocationSolver : IAllocationSolver
 
         var assignments = new List<StudentAssignmentModel>();
 
-        int idCounter = 1;
-
         //loops through dictionary of variables
         foreach (var((studentId, projectId), variable) in variables) 
         {
@@ -190,17 +187,14 @@ public class AllocationSolver : IAllocationSolver
 
                 assignments.Add(new StudentAssignmentModel
                 {
-                    Id = idCounter++,
                     Student = student,
                     Project = project,
-                    Run = null! 
+                    Run = solveRun 
                 });
 
             }
 
         }
-
-        
 
         return assignments;
     }

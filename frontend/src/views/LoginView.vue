@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { getOidcUrl } from "../helpers/oauth";
 import { onMounted } from 'vue';
 import type { UserInfoDto } from '../dtos/user-info-dto';
+import ApiService from '../services/ApiService';
 
 const authStore = useAuthStore();
 const devName = defineModel<string>("name");
@@ -11,7 +12,7 @@ const devEmail = defineModel<string>("email");
 const devIsAdmin = defineModel<boolean>("isAdmin")
 
 devName.value = "Dummy User"
-devEmail.value = "email@domain.com"
+devEmail.value = `email${crypto.randomUUID().slice(0, 6)}@domain.com`
 
 const is_dev = import.meta.env.DEV;
 
@@ -25,25 +26,21 @@ onMounted(async () => {
   }
 });
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 async function loginWithGoogle() {
   const id_token = new URLSearchParams(window.location.hash).get("id_token");
-  login(`${backendUrl}/auth/login-google?idToken=${id_token}`);
+  login(`/auth/login-google?idToken=${id_token}`);
 }
 
 async function loginForDev() {
-  login(`${backendUrl}/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
+  login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
 }
 
 async function login(url: string) {
-  const result = await fetch(url, {
-    credentials: "include"
-  });
-  authStore.userInfo = (await result.json()) as UserInfoDto;
+  authStore.userInfo = await ApiService.get<UserInfoDto>(url);
   const isAdmin = authStore.userInfo?.isAdmin ?? false;
   if (isAdmin) {
-    router.push('/dashboard');
+    router.push('/admin/projects');
   } else {
     router.push('/form');
   }

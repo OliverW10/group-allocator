@@ -14,14 +14,13 @@ public class AuthenticationService : IAutheticationService
 {
     public ClaimsPrincipal GetPrincipal(UserModel user)
     {
-        var claims = new[]
+        var claims = new List<Claim>()
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Name, user.Name),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("admin", user.IsAdmin.ToString()),
-
         };
 
         var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

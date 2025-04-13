@@ -3,12 +3,11 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-export class ProjectDto {
+export class StudentSubmissionDto {
     id: number;
+    email: string;
     name: string;
-    client: string;
-    requiresContract: boolean;
-    requiresNda: boolean;
-    minStudents: number;
-    maxStudents: number;
+    orderedPreferences: number[];
+    willSignContract: boolean;
+    fileNames: string[];
 }

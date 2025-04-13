@@ -11,6 +11,8 @@ public static class ServicesRegistration
             .AddScoped<IUserService, UserService>()
             .AddScoped<IAutheticationService, AuthenticationService>()
 			.AddScoped<IProjectService, ProjectService>()
+            .AddScoped<IStudentService, StudentService>()
+            .AddScoped<IAllocationSolver, AllocationSolver>()
             ;
     }
 }
