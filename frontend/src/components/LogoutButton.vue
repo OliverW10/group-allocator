@@ -3,7 +3,7 @@
         <span>
             Logged in as: {{ authStore.userInfo?.email }}
         </span>
-        <Button severity="danger" label="Logout" icon="i-mdi-logout" class="p-button-text" @click="logout" />
+        <Button severity="danger" label="Logout" icon="i-mdi-logout" class="p-button-text" :loading="loading" @click="logout" />
     </div>
 </template>
 
@@ -13,11 +13,23 @@ import Button from 'primevue/button'
 import ApiService from '../services/ApiService';
 import { useAuthStore } from '../store/auth'
 import { useRouter } from 'vue-router'
+import { onBeforeMount, ref } from 'vue';
+import { UserInfoDto } from '../dtos/user-info-dto';
 const authStore = useAuthStore();
 const router = useRouter()
 
-const logout = () => {
-    ApiService.get("/auth/logout");
+const loading = ref(false)
+
+onBeforeMount(async () => {
+    const userInfo = await ApiService.get<UserInfoDto>("/auth/me");
+    if (userInfo) {
+        authStore.userInfo = userInfo;
+    }
+})
+
+const logout = async () => {
+    loading.value = true
+    await ApiService.get("/auth/logout");
     authStore.userInfo = null;
     router.push('/')
 }

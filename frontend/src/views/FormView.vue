@@ -82,7 +82,7 @@ onMounted(async () => {
     }
 })
 
-const submitForm = () => {
+const submitForm = async () => {
     const submitModel: StudentSubmissionDto = {
         name: student.value.name,
         id: student.value.id,
@@ -91,7 +91,7 @@ const submitForm = () => {
         orderedPreferences: projects.value[1].map(p => p.id), // should this be id's or names?
         willSignContract: student.value.willSignContract
     }
-    ApiService.post("/students/me", submitModel);
+    await ApiService.post("/students/me", submitModel);
     toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 3000 });
 };
 

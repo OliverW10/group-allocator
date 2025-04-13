@@ -4,7 +4,9 @@ using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace GroupAllocator.Controllers;
 
@@ -12,6 +14,24 @@ namespace GroupAllocator.Controllers;
 [Route("[controller]")]
 public class AuthController(IUserService userService, IGaAuthenticationService tokenService) : ControllerBase
 {
+    [HttpGet("me")]
+    [Authorize]
+    public IActionResult GetCurrentUser()
+    {
+        var claims = HttpContext.User.Claims.ToList();
+        if ((HttpContext.User.Identity is null || !claims.Any()))
+        {
+            return Unauthorized();
+        }
+
+        return new JsonResult(new UserInfoDto()
+        {
+            Name = claims.First(c => c.Type == JwtRegisteredClaimNames.Name).Value,
+            Email = claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value,
+            IsAdmin = bool.Parse(claims.First(c => c.Type == "admin").Value)
+        });
+    }
+
     [HttpGet("login-google")]
     public async Task<IActionResult> LoginGoogle(string idToken)
     {

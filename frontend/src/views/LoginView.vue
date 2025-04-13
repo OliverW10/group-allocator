@@ -29,11 +29,11 @@ onMounted(async () => {
 
 async function loginWithGoogle() {
   const id_token = new URLSearchParams(window.location.hash).get("id_token");
-  login(`/auth/login-google?idToken=${id_token}`);
+  await login(`/auth/login-google?idToken=${id_token}`);
 }
 
 async function loginForDev() {
-  login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
+  await login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
 }
 
 async function login(url: string) {

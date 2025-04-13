@@ -43,6 +43,10 @@ export default class ApiService {
             }
             return null;
         }
-        return response.json()
+        if (response.headers.get("Content-Type")?.includes("json")) {
+            return response.json()
+        } else {
+            return response.text()
+        }
     }
 }
