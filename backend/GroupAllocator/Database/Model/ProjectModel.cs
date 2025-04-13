@@ -1,4 +1,4 @@
-﻿using GroupAllocator.DTOs;
+using GroupAllocator.DTOs;
 
 namespace GroupAllocator.Database.Model;
 

@@ -1,4 +1,4 @@
-﻿using GroupAllocator.Database;
+using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using GroupAllocator.Services;
@@ -16,16 +16,16 @@ public class ProjectsController(IProjectService projectService, ApplicationDbCon
 	[Authorize(Policy = "AdminOnly")]
 	public async Task<IActionResult> UploadProjects([FromForm] IFormFile file)
 	{
-        if (file == null || file.Length == 0)
-        {
-            return BadRequest("No file uploaded.");
-        }
+		if (file == null || file.Length == 0)
+		{
+			return BadRequest("No file uploaded.");
+		}
 
 		using var reader = new StreamReader(file.OpenReadStream());
 		await projectService.AddFromCsv(reader);
 
 		return await GetProjects();
-    }
+	}
 
 	[HttpGet]
 	[Authorize]

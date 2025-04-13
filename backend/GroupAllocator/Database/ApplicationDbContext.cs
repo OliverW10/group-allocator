@@ -1,4 +1,4 @@
-﻿using GroupAllocator.Database.Model;
+using GroupAllocator.Database.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace GroupAllocator.Database

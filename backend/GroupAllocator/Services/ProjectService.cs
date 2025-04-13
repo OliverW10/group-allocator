@@ -1,4 +1,4 @@
-﻿using GroupAllocator.Database;
+using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +16,7 @@ public interface IProjectService
 
 public class ProjectService(ApplicationDbContext db) : IProjectService
 {
-    public async Task<ProjectModel?> GetProject(int id)
+	public async Task<ProjectModel?> GetProject(int id)
 	{
 		return await db.Projects
 			.Include(p => p.Client)
@@ -52,19 +52,19 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 		}
 	}
 
-    public async Task AddFromCsv(StreamReader csvStream)
-    {
+	public async Task AddFromCsv(StreamReader csvStream)
+	{
 		var allClients = db.Clients.ToList();
-        string? line;
-        while ((line = await csvStream.ReadLineAsync()) != null)
-        {
+		string? line;
+		while ((line = await csvStream.ReadLineAsync()) != null)
+		{
 			var fields = line.Split(',').Select(x => x.Trim()).ToArray();
 			if (fields.Length != 5)
 			{
 				throw new InvalidOperationException("Invalid csv");
 			}
 
-            // project name, client, min_students, max_students, requires_nda
+			// project name, client, min_students, max_students, requires_nda
 			var projectName = fields[0];
 			var clientName = fields[1];
 			var minStudents = int.Parse(fields[2]);
@@ -81,7 +81,7 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 				RequiresNda = requiredContract,
 				Client = client
 			});
-        }
+		}
 
 		await db.SaveChangesAsync();
 
@@ -100,9 +100,9 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 				Name = name
 			};
 
-            db.Clients.Add(newClient);
+			db.Clients.Add(newClient);
 			allClients.Add(newClient);
 			return newClient;
-        }
-    }
+		}
+	}
 }
