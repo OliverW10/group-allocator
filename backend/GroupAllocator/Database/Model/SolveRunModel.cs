@@ -1,4 +1,4 @@
-﻿namespace GroupAllocator.Database.Model;
+namespace GroupAllocator.Database.Model;
 
 public class SolveRunModel
 {
@@ -6,5 +6,5 @@ public class SolveRunModel
 	public required DateTime Timestamp { get; set; }
 	public required double Evaluation { get; set; }
 
-	public ICollection<StudentAssignmentModel> StudentAssignments { get; set; }	= new List<StudentAssignmentModel>();
+	public ICollection<StudentAssignmentModel> StudentAssignments { get; set; } = new List<StudentAssignmentModel>();
 }

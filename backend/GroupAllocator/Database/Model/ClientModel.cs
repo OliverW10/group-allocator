@@ -1,4 +1,4 @@
-﻿namespace GroupAllocator.Database.Model;
+namespace GroupAllocator.Database.Model;
 
 public class ClientModel
 {
