@@ -8,8 +8,5 @@ export const useAuthStore = defineStore(
         return {
             userInfo: ref<UserInfoDto | null>(null),
         }
-    },
-    {
-        persist: true,
     }
 )

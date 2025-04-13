@@ -48,7 +48,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
         var student = await studentService.GetStudents().Where(s => s.User.Email == userEmail).FirstOrDefaultAsync();
         if (student == null)
         {
-            return NotFound();
+            return NoContent();
         }
 
         return Ok(student.ToDto());

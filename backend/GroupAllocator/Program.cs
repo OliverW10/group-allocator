@@ -3,6 +3,7 @@ using GroupAllocator.Database;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,11 +24,23 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader();
         });
 });
+
+Func<RedirectContext<CookieAuthenticationOptions>, Task> unauthorizedHandler = ctx =>
+{
+    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+    return Task.CompletedTask;
+};
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = SameSiteMode.None;
+    options.Events = new CookieAuthenticationEvents()
+    {
+        OnRedirectToLogin = unauthorizedHandler,
+        OnRedirectToAccessDenied = unauthorizedHandler
+    };
 });
 
 builder.Services.AddOpenApi();
