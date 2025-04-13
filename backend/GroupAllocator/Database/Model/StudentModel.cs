@@ -19,9 +19,9 @@ public class StudentModel
 
 public static class StudentModelExtensions
 {
-    public static StudentDto ToDto(this StudentModel model)
+    public static StudentSubmissionDto ToDto(this StudentModel model)
     {
-        return new StudentDto
+        return new StudentSubmissionDto
         {
             Id = model.Id,
             Email = model.User.Email,

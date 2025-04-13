@@ -24,7 +24,7 @@
 import { onMounted, ref } from 'vue';
 import AdminNavBar from '../../components/AdminNavBar.vue';
 import ApiService from '../../services/ApiService';
-import { StudentDto } from '../../dtos/student-dto';
+import { StudentSubmissionDto } from '../../dtos/student-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
@@ -35,7 +35,7 @@ import { ProjectDto } from '../../dtos/project-dto';
 
 // TODO: refactor 3 table views into generic component
 
-const students = ref([] as StudentDto[]);
+const students = ref([] as StudentSubmissionDto[]);
 const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const filterList = ref(undefined as string[] | undefined)
@@ -43,7 +43,7 @@ const filterList = ref(undefined as string[] | undefined)
 onMounted(async () => {
     try{
         loading.value = true;
-        students.value = await ApiService.get<StudentDto[]>("/students")
+        students.value = await ApiService.get<StudentSubmissionDto[]>("/students")
         projects.value = await ApiService.get<ProjectDto[]>("/projects")
     } catch (error) {
         console.error(error);
@@ -52,12 +52,12 @@ onMounted(async () => {
     }
 });
 
-const setStudents = (data: StudentDto[]) => {
+const setStudents = (data: StudentSubmissionDto[]) => {
     students.value = data;
 }
 
 const remove = async (id: string) => {
-    const newProjects = await ApiService.delete<StudentDto[]>(`/students/${id}`);
+    const newProjects = await ApiService.delete<StudentSubmissionDto[]>(`/students/${id}`);
     setStudents(newProjects);
 }
 

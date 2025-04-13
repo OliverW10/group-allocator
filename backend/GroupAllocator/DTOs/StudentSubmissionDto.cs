@@ -3,7 +3,7 @@
 namespace GroupAllocator.DTOs;
 
 [ExportTsClass]
-public class StudentDto
+public class StudentSubmissionDto
 {
     public required int Id { get; set; }
     public required string Email { get; set; }

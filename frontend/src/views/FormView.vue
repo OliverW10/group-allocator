@@ -46,14 +46,14 @@ import LogoutButton from "../components/LogoutButton.vue";
 import { onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
 import ApiService from "../services/ApiService";
-import { StudentDto } from "../dtos/student-dto";
+import { StudentSubmissionDto } from "../dtos/student-dto";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from '../store/auth'
 
 const authStore = useAuthStore();
 const toast = useToast();
 
-const DEFAULT_STUDENT: StudentDto = {
+const DEFAULT_STUDENT: StudentSubmissionDto = {
     name: "",
     email: "",
     id: -1,
@@ -65,7 +65,7 @@ const student = ref(DEFAULT_STUDENT)
 const projects = ref([[], []] as ProjectDto[][]);
 
 onMounted(async () => {
-    const maybeStudent = await ApiService.get<StudentDto | undefined>("/students/me")
+    const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
     if (maybeStudent){
         student.value = maybeStudent
         toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
@@ -85,7 +85,7 @@ onMounted(async () => {
 })
 
 const submitForm = () => {
-    const submitModel: StudentDto = {
+    const submitModel: StudentSubmissionDto = {
         name: student.value.name,
         id: student.value.id,
         email: authStore.userInfo?.email ?? student.value.email,

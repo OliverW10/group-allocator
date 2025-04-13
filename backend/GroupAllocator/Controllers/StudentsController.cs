@@ -43,7 +43,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 
     [HttpPost("me")]
     [Authorize]
-    public async Task<IActionResult> Post([FromBody] StudentDto preferences)
+    public async Task<IActionResult> Post([FromBody] StudentSubmissionDto preferences)
     {
         var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
         if (userEmail == null)
