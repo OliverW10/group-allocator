@@ -89,7 +89,12 @@ List<PreferenceModel> preferences = [
 
 
 var solver = new AllocationSolver();
-var assignments = solver.AssignStudentsToGroups(students, projects, clients, preferences);
+var run = new SolveRunModel
+{
+    Evaluation = -1,
+    Timestamp = DateTime.UtcNow,
+};
+var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences);
 
 
 if (!assignments.Any())
