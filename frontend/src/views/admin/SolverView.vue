@@ -38,8 +38,8 @@ import type { SolveRunDto } from '../../dtos/solve-run-dto';
 import { useToast } from "primevue/usetoast";
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import { SplitButton } from 'primevue';
-import { type MenuItem } from 'primevue/menuitem';
 import SolverReportService from '../../services/SolverReportService';
+import type { MenuItem } from 'primevue/menuitem';
 
 const toast = useToast();
 
