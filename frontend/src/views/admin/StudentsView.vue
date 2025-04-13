@@ -1,31 +1,36 @@
 <template>
     <AdminNavBar />
-    <h1 class="heading">Students</h1>
-    <Divider />
-    <FileUploader @projects-changed="uploadStudents">
-        <p>
-            Please upload a text(/csv) file with emails on each line.
-            <br />
-            Note that students will not appear on this page until they have submitted their preferences.
-        </p>
-    </FileUploader>
-    <DataTable :value="students" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
-        <Column field="name" header="Name"></Column>
-        <Column field="email" header="Email"></Column>
-        <Column field="willSignContract" header="Contract?"></Column>
-        <Column field="orderedPreferences" header="Preferences">
-            <template #body="slotProps">
-                {{slotProps.data.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) => projId
-                    == proj.id)?.name)}}
-            </template>
-        </Column>
-        <Column field="id" header="Actions">
-            <template #body="slotProps">
-                <Button label="X" class="p-button-text" @click="remove(slotProps.data.id)" />
-            </template>
-        </Column>
-    </DataTable>
-
+    <div class="px-4 py-2 mt-4 flex flex-col gap-4">
+        <h1 class="heading">Students</h1>
+        <Divider style="margin: 0;" />
+        <FileUploader @projects-changed="uploadStudents">
+            <p>
+                Please upload a text (/csv) file with emails on each line.
+                <br />
+                Note that students will not appear on this page until they have submitted their preferences.
+            </p>
+        </FileUploader>
+        <DataTable :value="students" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
+            <Column field="name" header="Name"></Column>
+            <Column field="email" header="Email"></Column>
+            <Column field="willSignContract" header="NDA?">
+                <template #body="slotProps">
+                    {{ slotProps.data.willSignContract ? '✔️' : '❌' }}
+                </template>
+            </Column>
+            <Column field="orderedPreferences" header="Preferences">
+                <template #body="slotProps">
+                    {{slotProps.data.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
+                        projId == proj.id)?.name).join(', ')}}
+                </template>
+            </Column>
+            <Column field="id" header="Actions">
+                <template #body="slotProps">
+                    <Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.id)" />
+                </template>
+            </Column>
+        </DataTable>
+    </div>
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';

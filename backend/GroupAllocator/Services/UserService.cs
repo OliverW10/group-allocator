@@ -1,4 +1,5 @@
-﻿using GroupAllocator.Database;
+﻿using Google.OrTools.Sat;
+using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,15 +16,20 @@ public class UserService(ApplicationDbContext db) : IUserService
     {
         var knownIsAdmin = isAdmin ?? ShouldBeAdmin(email);
         var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
+        
         if (existingUser is null && knownIsAdmin)
         {
             return await CreateNewUser(name, email, knownIsAdmin);
-        } else
-        {
-            return existingUser;
         }
-    }
 
+        if (existingUser is not null)
+        {
+            existingUser.Name = name;
+            await db.SaveChangesAsync();
+        }
+
+        return existingUser;
+    }
     async Task<UserModel> CreateNewUser(string name, string email, bool isAdmin)
     {
         var newUser = new UserModel { Email = email, Name = name, IsAdmin = isAdmin };

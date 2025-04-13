@@ -14,8 +14,10 @@
                             {{ option.name }}
                         </template>
                     </PickList>
-                    <label for="switch1">Are you willing to sign a contract to work on a project</label>
-                    <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
+                    <div class="flex gap-2 my-4">
+                        <label for="switch1">I am willing to sign an NDA to work on a project</label>
+                        <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
+                    </div>
 
                     <FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000"
                         @upload="onUpload($event)">
@@ -24,7 +26,7 @@
                         </template>
                     </FileUpload>
 
-                    <Button label="Save Preferences" class="mt-4" icon="pi pi-check" @click="submitForm" />
+                    <Button label="Save Preferences" class="mt-4" icon="i-mdi-upload" @click="submitForm" />
                 </div>
             </template>
         </Card>

@@ -17,17 +17,17 @@ const router = useRouter()
 const items = ref([
 {
     label: 'Projects',
-    icon: 'pi pi-briefcase',
+    icon: 'i-mdi-briefcase',
     command: () => router.push('/admin/projects')
 },
 {
     label: 'Students',
-    icon: 'pi pi-users',
+    icon: 'i-mdi-users',
     command: () => router.push('/admin/students')
 },
 {
     label: 'Solver',
-    icon: 'pi pi-cog',
+    icon: 'i-mdi-cogs',
     command: () => router.push('/admin/solver')
 }
 ])
