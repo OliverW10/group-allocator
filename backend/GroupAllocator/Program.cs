@@ -1,9 +1,9 @@
 using GroupAllocator;
 using GroupAllocator.Database;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,14 +66,17 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-	app.MapOpenApi();
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
-using (var scope = app.Services.CreateScope())
+
+// TODO: Development can probably be removed from this
+if (app.Configuration.GetValue<bool>("DbReset") || app.Environment.IsDevelopment())
 {
-	var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-	db.Database.EnsureDeleted();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
 }
 
