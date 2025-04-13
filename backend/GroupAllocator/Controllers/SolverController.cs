@@ -24,7 +24,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
 			.ToListAsync();
-		var allProjects = db.Projects.ToList();
+		var allProjects = db.Projects.Include(p => p.Client).ToList();
 
 		var result = runs.Select(r =>
 			new SolveRunDto
@@ -32,10 +32,12 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 				Id = r.Id,
 				Evaluation = r.Evaluation,
 				RanAt = r.Timestamp,
-				Projects = allProjects.Select(p => new ProjectAllocationDto
+				Projects = allProjects.Select(p => new AllocationDto()
 				{
-					ProjectId = p.Id,
-					StudentNames = r.StudentAssignments.Where(a => a.Project == p).Select(a => a.Student.User.Name) // fuck you
+					Project = p.ToDto(),
+					Students = r.StudentAssignments
+						.Where(a => a.Project == p)
+						.Select(a => a.Student.ToInfoDto()) // fuck you
 				})
 			}
 		);

@@ -12,7 +12,7 @@
                 New projects will be added in addition to existing ones.
             </p>
         </FileUploader>
-        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
+        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
             <Column field="name" header="Name"></Column>
             <Column field="requiresNda" header="Requires NDA">
                 <template #body="slotProps">
@@ -22,8 +22,8 @@
             <Column field="minStudents" header="Min. Students"></Column>
             <Column field="maxStudents" header="Max. Students"></Column>
             <Column field="id" header="Actions">
-                <template #body="slotProps">
-                    <Button label="X" class="p-button-text" @click="deleteProject(slotProps.data.id)" />
+				<template #body="slotProps">
+                    <Button severity="danger" class="i-mdi-delete" @click="deleteProject(slotProps.data.id)" />
                 </template>
             </Column>
         </DataTable>

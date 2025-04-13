@@ -3,11 +3,11 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-import { ProjectAllocationDto } from "./project-allocation-dto";
+import { AllocationDto } from "./allocation-dto";
 
 export class SolveRunDto {
     id: number;
     ranAt: Date;
     evaluation: number;
-    projects: ProjectAllocationDto[];
+    projects: AllocationDto[];
 }

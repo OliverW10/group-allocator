@@ -10,7 +10,7 @@
                 Note that students will not appear on this page until they have submitted their preferences.
             </p>
         </FileUploader>
-        <DataTable :value="students" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
+        <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
             <Column field="name" header="Name"></Column>
             <Column field="email" header="Email"></Column>
             <Column field="willSignContract" header="NDA?">

@@ -31,4 +31,15 @@ public static class StudentModelExtensions
 			FileNames = model.Files.Select(f => f.Name).ToArray()
 		};
 	}
+
+	public static StudentInfoDto ToInfoDto(this StudentModel model)
+	{
+		return new StudentInfoDto
+		{
+			StudentId = model.Id,
+			UserId = model.User.Id,
+			Name = model.User.Name,
+			Email = model.User.Email
+		};
+	}
 }
