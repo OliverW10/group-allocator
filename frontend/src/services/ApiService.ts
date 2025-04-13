@@ -36,7 +36,12 @@ export default class ApiService {
         }
         const response = await fetch(this.makeUrl(path), options)
         if (!response.ok){
-            return undefined;
+            if (response.status === 401) {
+                // TODO: handle this better way
+                alert("You are unauthorized to perform that action. Your session may have expired and need to login again, or have not been granted access to this resource.")
+                window.location.href = "/"
+            }
+            return null;
         }
         return response.json()
     }
