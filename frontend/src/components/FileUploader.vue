@@ -1,10 +1,12 @@
 <template>
-    <div class="flex justify-center my-4">
-        <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" choose-label="Choose File" @select="onSelect" />
-        <Button icon="i-mdi-help-circle" label="Help" class="p-button-text ml-3" @click="showHelp = true" />
+    <div class="flex justify-center">
+        <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" choose-label="Choose File"
+            @select="onSelect" />
+        <Button icon="i-mdi-help-circle" label="Help" class="p-button-text ml-3" severity="info"
+            @click="showHelp = true" />
     </div>
 
-    <Dialog v-model:visible="showHelp" header="File Upload Help" modal>
+    <Dialog v-model:visible="showHelp" header="File Upload Help" modal :draggable="false">
         <slot></slot>
     </Dialog>
 </template>
@@ -26,7 +28,7 @@ const onSelect = async (event: FileUploadSelectEvent) => {
 </script>
 
 <style>
-.p-fileupload-basic > span {
+.p-fileupload-basic>span {
     display: none;
 }
 </style>

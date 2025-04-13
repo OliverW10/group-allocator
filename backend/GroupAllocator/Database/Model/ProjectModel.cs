@@ -21,7 +21,6 @@ public static class ProjectModelExtensions
 			Id = model.Id,
 			Name = model.Name,
 			Client = model.Client.Name,
-			RequiresContract = model.RequiresNda,
 			RequiresNda = model.RequiresNda,
 			MinStudents = model.MinStudents,
 			MaxStudents = model.MaxStudents,

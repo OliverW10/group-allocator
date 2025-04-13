@@ -59,7 +59,7 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
         while ((line = await csvStream.ReadLineAsync()) != null)
         {
 			var fields = line.Split(',').Select(x => x.Trim()).ToArray();
-			if (fields.Length != 1)
+			if (fields.Length != 5)
 			{
 				throw new InvalidOperationException("Invalid csv");
 			}

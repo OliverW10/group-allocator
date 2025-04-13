@@ -49,29 +49,37 @@ async function login(url: string) {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center">
-    <h1 class="heading py-4">My Account</h1>
-    <div>
-      <button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
-        Sign in with Google
-        <i class="i-logos-google-icon ml-2"></i>
-      </button>
-    </div>
-    <hr class="border">
-    <div v-if="is_dev">
-      <label for="devNameInput">Name:</label>
-      <input id="devNameInput" v-model="devName" type="text" class="border">
+  <div class="flex flex-col justify-center h-screen">
+    <div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
+      <h1 class="heading py-4">Group Allocator</h1>
+      <div>
+        <button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
+          Sign in with Google
+          <i class="i-logos-google-icon ml-2"></i>
+        </button>
+      </div>
+      <div v-if="is_dev" class="flex flex-col gap-4">
+        <hr class="my-4" />
+        <div class="flex gap-2">
+          <label for="devNameInput">Name:</label>
+          <input id="devNameInput" v-model="devName" type="text" class="border">
+        </div>
 
-      <label for="devEmailInput">Email:</label>
-      <input id="devEmailInput" v-model="devEmail" type="email" class="border">
+        <div class="flex gap-2">
+          <label for="devEmailInput">Email:</label>
+          <input id="devEmailInput" v-model="devEmail" type="email" class="border">
+        </div>
 
-      <label for="devAdminInput">Admin:</label>
-      <input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
+        <div class="flex gap-2">
+          <label for="devAdminInput">Admin:</label>
+          <input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
+        </div>
 
-      <button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
-        Development Test Login
-        <i class="i-mdi-robot ml-2"></i>
-      </button>
+        <button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
+          Development Test Login
+          <i class="i-mdi-robot ml-2"></i>
+        </button>
+      </div>
     </div>
   </div>
 </template>

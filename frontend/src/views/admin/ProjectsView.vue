@@ -1,9 +1,8 @@
 <template>
-    <div>
-        <AdminNavBar />
+    <AdminNavBar />
+    <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Projects</h1>
-        <Divider />
-
+        <Divider style="margin: 0;" />
         <FileUploader @projects-changed="uploadProjects">
             <p>
                 Please upload a csv file with the following format and no header
@@ -13,13 +12,15 @@
                 New projects will be added in addition to existing ones.
             </p>
         </FileUploader>
-
         <DataTable :value="projects" :loading="loading" :paginator="true" :rows="30" :rows-per-page-options="[30, 100]">
             <Column field="name" header="Name"></Column>
-            <Column field="requiresContract" header="Requires Contract"></Column>
-            <Column field="requiresNda" header="Requires Nda"></Column>
-            <Column field="minStudents" header="Min Students"></Column>
-            <Column field="maxStudents" header="maxStudents"></Column>
+            <Column field="requiresNda" header="Requires NDA">
+                <template #body="slotProps">
+                    {{slotProps.data.requiresNda ? '✔️' : '❌'}}
+                </template>
+            </Column>
+            <Column field="minStudents" header="Min. Students"></Column>
+            <Column field="maxStudents" header="Max. Students"></Column>
             <Column field="id" header="Actions">
                 <template #body="slotProps">
                     <Button label="X" class="p-button-text" @click="deleteProject(slotProps.data.id)" />
