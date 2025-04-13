@@ -20,8 +20,8 @@
 					</template>
 				</Column>
 			</DataTable>
-			<SplitButton severity="secondary" label="Download Summary (.csv)" icon="i-mdi-download" class="mt-4"
-				:model="downloadOptions" @click="SolverReportService.downloadTable(selectedRun)" />
+			<SplitButton severity="secondary" label="Full Report (.csv)" icon="i-mdi-download" class="mt-4"
+				:model="downloadOptions" @click="SolverReportService.downloadFullCsvReport(selectedRun)" />
 		</div>
 	</div>
 </template>
@@ -49,9 +49,9 @@ const loading = ref(true);
 
 const downloadOptions: MenuItem[] = [
 	{
-		label: "Full Report (.csv)",
+		label: "Download Summary (.csv)",
 		command: () => {
-			if (selectedRun.value != null) SolverReportService.downloadFullCsvReport(selectedRun.value)
+			if (selectedRun.value != null) SolverReportService.downloadTable(selectedRun.value)
 		}
 	},
 	{
