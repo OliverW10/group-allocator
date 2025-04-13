@@ -12,6 +12,9 @@
 
                         <template #option="{ option }">
                             {{ option.name }}
+							<Badge v-if="option?.requiresNda" severity="info" class="ml-2" icon="i-mdi-shield-account">
+								NDA
+							</Badge>
                         </template>
                     </PickList>
                     <div class="flex gap-2 my-4">
@@ -36,6 +39,7 @@
 
 <script setup lang="ts">
 import Button from "primevue/button";
+import Badge from "primevue/badge";
 import Card from "primevue/card";
 import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploadEvent } from "primevue/fileupload";

@@ -6,18 +6,18 @@ import router from './router.ts'
 import { createPinia } from 'pinia'
 import 'virtual:uno.css'
 import '@unocss/reset/tailwind-compat.css'
-import ToastService from 'primevue/toastservice';
+import ToastService from 'primevue/toastservice'
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(PrimeVue, {
-    theme: {
-        preset: Lara,
-    },
+	theme: {
+		preset: Lara,
+	},
 })
 app.use(pinia)
 app.use(router)
-app.use(ToastService);
+app.use(ToastService)
 
 app.mount('#app')
