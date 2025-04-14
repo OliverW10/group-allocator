@@ -135,7 +135,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		var fileBytes = new byte[file.Length];
 		await using (var stream = file.OpenReadStream())
 		{
-			await stream.ReadAsync(fileBytes, 0, (int)file.Length);
+			await stream.ReadExactlyAsync(fileBytes);
 		}
 
 		var fileModel = new FileModel
