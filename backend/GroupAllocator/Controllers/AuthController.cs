@@ -1,4 +1,5 @@
 using Google.Apis.Auth;
+using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using GroupAllocator.Services;
@@ -12,7 +13,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IUserService userService, IGaAuthenticationService tokenService) : ControllerBase
+public class AuthController(IUserService userService, IGaAuthenticationService tokenService, IConfiguration configuration, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet("me")]
 	[Authorize]
@@ -69,6 +70,38 @@ public class AuthController(IUserService userService, IGaAuthenticationService t
 	{
 		await HttpContext.SignOutAsync();
 		return Ok();
+	}
+
+	[HttpGet("role/claim-admin/{email}")]
+	public async Task<IActionResult> ClaimAdmin(string email)
+	{
+		if (!configuration.GetValue<bool>("AdminClaimable"))
+		{
+			return NotFound();
+		}
+
+		await userService.GetOrCreateUserAsync("Unknown", email, true);
+		return Ok($"Set {email} to admin.");
+	}
+
+	[HttpGet("role/drop-admin/{email}")]
+	public async Task<IActionResult> DropAdmin(string email)
+	{
+		if (!configuration.GetValue<bool>("AdminClaimable"))
+		{
+			return NotFound();
+		}
+
+		var user = await userService.GetOrCreateUserAsync("Unknown", email);
+		if (user is not null)
+		{
+			user.IsAdmin = false;
+			await db.SaveChangesAsync();
+			return Ok($"Set {email} to student.");
+		}
+
+		return Ok($"User not found, no action taken.");
+
 	}
 
 	static IActionResult UserDto(UserModel user)
