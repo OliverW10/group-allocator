@@ -42,16 +42,16 @@ using GroupAllocator.Services;
 
 //testing group constraint
 List<StudentModel> students = [
-	new StudentModel { Id = 1, WillSignContract = true, User = new UserModel { Email = "a@uts.com", Name = "Alice", IsAdmin = false } },
-	new StudentModel { Id = 2, WillSignContract = true, User = new UserModel { Email = "b@uts.com", Name = "Bob", IsAdmin = false } },
-	new StudentModel { Id = 3, WillSignContract = false, User = new UserModel { Email = "c@uts.com", Name = "Charlie", IsAdmin = false } },
-	new StudentModel { Id = 4, WillSignContract = true, User = new UserModel { Email = "d@uts.com", Name = "Diana", IsAdmin = false } },
-	new StudentModel { Id = 5, WillSignContract = true, User = new UserModel { Email = "e@uts.com", Name = "Ethan", IsAdmin = false } },
-	new StudentModel { Id = 6, WillSignContract = true, User = new UserModel { Email = "f@uts.com", Name = "Fay", IsAdmin = false } },
-	new StudentModel { Id = 7, WillSignContract = true, User = new UserModel { Email = "g@uts.com", Name = "Grace", IsAdmin = false } },
-	new StudentModel { Id = 8, WillSignContract = true, User = new UserModel { Email = "h@uts.com", Name = "Henry", IsAdmin = false } },
-	new StudentModel { Id = 9, WillSignContract = false, User = new UserModel { Email = "i@uts.com", Name = "Ivy", IsAdmin = false } },
-	new StudentModel { Id = 10, WillSignContract = true, User = new UserModel { Email = "j@uts.com", Name = "Jack", IsAdmin = false } }
+	new StudentModel { Id = 1, WillSignContract = true, User = new UserModel { Email = "a@uts.com", Name = "Alice", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 2, WillSignContract = true, User = new UserModel { Email = "b@uts.com", Name = "Bob", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 3, WillSignContract = false, User = new UserModel { Email = "c@uts.com", Name = "Charlie", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 4, WillSignContract = true, User = new UserModel { Email = "d@uts.com", Name = "Diana", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 5, WillSignContract = true, User = new UserModel { Email = "e@uts.com", Name = "Ethan", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 6, WillSignContract = true, User = new UserModel { Email = "f@uts.com", Name = "Fay", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 7, WillSignContract = true, User = new UserModel { Email = "g@uts.com", Name = "Grace", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 8, WillSignContract = true, User = new UserModel { Email = "h@uts.com", Name = "Henry", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 9, WillSignContract = false, User = new UserModel { Email = "i@uts.com", Name = "Ivy", IsAdmin = false , IsVerified = true}},
+	new StudentModel { Id = 10, WillSignContract = true, User = new UserModel { Email = "j@uts.com", Name = "Jack", IsAdmin = false, IsVerified = true} }
 ];
 
 List<ClientModel> clients = [

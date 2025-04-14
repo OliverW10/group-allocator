@@ -11,4 +11,5 @@ public class StudentSubmissionDto
 	public required IEnumerable<int> OrderedPreferences { get; set; }
 	public required bool WillSignContract { get; set; }
 	public required IEnumerable<FileDetailsDto> Files { get; set; }
+	public required bool IsVerified { get; set; }
 }

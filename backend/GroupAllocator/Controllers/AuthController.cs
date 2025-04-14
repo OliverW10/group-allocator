@@ -13,7 +13,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IUserService userService, IGaAuthenticationService tokenService, IConfiguration configuration, ApplicationDbContext db) : ControllerBase
+public class AuthController(IUserService userService, IGroupAllocatorAuthenticationService tokenService, IConfiguration configuration, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet("me")]
 	[Authorize]

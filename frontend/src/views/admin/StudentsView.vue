@@ -15,14 +15,14 @@
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Students</h1>
         <Divider style="margin: 0;" />
-        <FileUploader @projects-changed="uploadStudents">
+        <FileUploader label="Upload Allow List" @projects-changed="uploadStudents">
             <p>
                 Please upload a text (/csv) file with emails on each line.
                 <br />
                 Note that students will not appear on this page until they have submitted their preferences.
             </p>
         </FileUploader>
-        <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
+        <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
             <Column field="name" header="Name"></Column>
             <Column field="email" header="Email"></Column>
             <Column field="willSignContract" header="NDA?">
@@ -60,8 +60,6 @@ import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
 import type { StudentSubmissionDto } from '../../dtos/student-submission-dto';
 
-// TODO: refactor 3 table views into generic component
-
 const students = ref([] as StudentSubmissionDto[]);
 const projects = ref([] as ProjectDto[])
 const loading = ref(false);
@@ -71,6 +69,11 @@ const fileModal = ref(null as null | number);
 const showFiles = (id: number) => {
 	fileModal.value = id;
 }
+
+const rowClass = (data: StudentSubmissionDto) => {
+    return [{ '!bg-red500/20': data.isVerified }]
+    // return [{ '!bg-primary !text-primary-contrast': data.category === 'Fitness' }];
+};
 
 onMounted(async () => {
     try {
