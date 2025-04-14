@@ -71,8 +71,7 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
-// TODO: Development can probably be removed from this
-if (app.Configuration.GetValue<bool>("DbReset") || app.Environment.IsDevelopment())
+if (app.Configuration.GetValue<bool>("DbReset"))
 {
 	using var scope = app.Services.CreateScope();
 	var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
