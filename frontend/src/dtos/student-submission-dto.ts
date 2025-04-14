@@ -12,4 +12,5 @@ export class StudentSubmissionDto {
     orderedPreferences: number[];
     willSignContract: boolean;
     files: FileDetailsDto[];
+    isVerified: boolean;
 }

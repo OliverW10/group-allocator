@@ -1,6 +1,6 @@
 <template>
     <div class="flex justify-center">
-        <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" choose-label="Choose File"
+        <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" :choose-label=props.label
             @select="onSelect" />
         <Button icon="i-mdi-help-circle" label="Help" class="p-button-text ml-3" severity="info"
             @click="showHelp = true" />
@@ -18,6 +18,9 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 
 const emit = defineEmits(['projectsChanged'])
+const props = defineProps<{
+  label: string
+}>()
 
 const showHelp = ref(false)
 

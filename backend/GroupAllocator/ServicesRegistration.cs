@@ -9,7 +9,7 @@ public static class ServicesRegistration
 	{
 		collection
 			.AddScoped<IUserService, UserService>()
-			.AddScoped<IGaAuthenticationService, AuthenticationService>()
+			.AddScoped<IGroupAllocatorAuthenticationService, AuthenticationService>()
 			.AddScoped<IProjectService, ProjectService>()
 			.AddScoped<IStudentService, StudentService>()
 			.AddScoped<IAllocationSolver, AllocationSolver>()

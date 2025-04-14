@@ -7,7 +7,7 @@
 		<Listbox v-model="selectedRun" :options="solveRuns" option-label="ranAt" class="w-fit" :multiple="false" />
 		<h3 v-if="selectedRun == undefined">Select a run to view allocations</h3>
 		<div v-else>
-			<DataTable :value="selectedRun?.projects ?? []" :loading="loading" :paginator="true" :rows="10"
+			<DataTable edit-mode="cell" :value="selectedRun?.projects ?? []" :loading="loading" :paginator="true" :rows="10"
 				:rows-per-page-options="[5, 10, 20, 50]">
 				<Column field="project" header="Project">
 					<template #body="slotProps">

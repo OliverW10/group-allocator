@@ -3,7 +3,7 @@
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Projects</h1>
         <Divider style="margin: 0;" />
-        <FileUploader @projects-changed="uploadProjects">
+        <FileUploader label="Add Projects" @projects-changed="uploadProjects">
             <p>
                 Please upload a csv file with the following format and no header
                 <br />

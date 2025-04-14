@@ -11,7 +11,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class StudentsController(ApplicationDbContext db, IStudentService studentService, IGaAuthenticationService authService) : ControllerBase
+public class StudentsController(ApplicationDbContext db, IStudentService studentService, IUserService userService) : ControllerBase
 {
 	[HttpGet]
 	[Authorize(Policy = "AdminOnly")]
@@ -30,7 +30,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		}
 
 		using var reader = new StreamReader(file.OpenReadStream());
-		await authService.AddFromCsv(reader);
+		await userService.CreateStudentAllowlist(reader);
 
 		return Ok(await studentService.GetStudents().Select(s => s.ToDto()).ToListAsync());
 	}
