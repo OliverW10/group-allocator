@@ -1,40 +1,49 @@
 <template>
-    <div class="flex flex-col gap-4 p-4 h-screen justify-center items-center">
-        <h1 class="heading text-center mb-4">Submit Preferences</h1>
-        <Card class="min-w-5xl">
-            <template #content>
-                <div class="p-4">
-                    <h2 class="text-xl mb-3">Select Your Project Preferences</h2>
+	<div class="flex flex-col gap-4 p-4 h-screen justify-center items-center">
+		<h1 class="heading text-center mb-4">Submit Preferences</h1>
+		<Card class="min-w-5xl">
+			<template #content>
+				<div class="p-4">
+					<h2 class="text-xl mb-3">Select Your Project Preferences</h2>
 
-                    <PickList v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
-                        <template #sourceheader><b class="text-lg">Available Projects</b></template>
-                        <template #targetheader><b class="text-lg">Ordered Preferences</b></template>
+					<PickList v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
+						<template #sourceheader><b class="text-lg">Available Projects</b></template>
+						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
-                        <template #option="{ option }">
-                            {{ option.name }}
+						<template #option="{ option }">
+							{{ option.name }}
 							<Badge v-if="option?.requiresNda" severity="info" class="ml-2" icon="i-mdi-shield-account">
 								NDA
 							</Badge>
-                        </template>
-                    </PickList>
-                    <div class="flex gap-2 my-4">
-                        <label for="switch1">I am willing to sign an NDA to work on a project</label>
-                        <ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
-                    </div>
+						</template>
+					</PickList>
+					<div class="flex gap-2 my-4">
+						<label for="switch1">I am willing to sign an NDA to work on a project</label>
+						<ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
+					</div>
 
-                    <FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000"
-                        @upload="onUpload($event)">
-                        <template #empty>
-                            <span>Drag and drop files to here to upload.</span>
-                        </template>
-                    </FileUpload>
+					<FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000"
+						custom-upload @uploader="onUpload($event)">
+						<template #empty>
+							<span>Drag and drop files to here to upload.</span>
+						</template>
+					</FileUpload>
 
-                    <Button label="Save Preferences" class="mt-4" icon="i-mdi-upload" @click="submitForm" />
-                </div>
-            </template>
-        </Card>
-        <LogoutButton />
-    </div>
+					<DataTable :value="student.files" :paginator="true" :rows="10" class="my-4">
+						<Column field="name" header="Name"></Column>
+						<Column field="actions" header="Actions">
+							<template #body="slotProps">
+								<Button severity="danger" class="i-mdi-delete" @click="deleteFile(slotProps.data.id)" />
+							</template>
+						</Column>
+					</DataTable>
+
+					<Button label="Save Preferences" class="mt-4" icon="i-mdi-upload" @click="submitForm" />
+				</div>
+			</template>
+		</Card>
+		<LogoutButton />
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -42,67 +51,91 @@ import Button from "primevue/button";
 import Badge from "primevue/badge";
 import Card from "primevue/card";
 import ToggleSwitch from "primevue/toggleswitch";
-import FileUpload, { type FileUploadUploadEvent } from "primevue/fileupload";
+import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
 import { ProjectDto } from "../dtos/project-dto";
 import LogoutButton from "../components/LogoutButton.vue";
 import { onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
 import ApiService from "../services/ApiService";
-import { StudentSubmissionDto } from "../dtos/student-dto";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from '../store/auth'
+import type { FileDetailsDto } from "../dtos/file-details-dto";
+import type { StudentSubmissionDto } from "../dtos/student-submission-dto";
+import { Column, DataTable } from "primevue";
 
 const authStore = useAuthStore();
 const toast = useToast();
 
 const DEFAULT_STUDENT: StudentSubmissionDto = {
-    name: "",
-    email: "",
-    id: -1,
-    orderedPreferences: [],
-    fileNames: [],
-    willSignContract: false,
+	name: "",
+	email: "",
+	id: -1,
+	orderedPreferences: [],
+	files: [],
+	willSignContract: false,
 }
 const student = ref(DEFAULT_STUDENT)
 const projects = ref([[], []] as ProjectDto[][]);
 
 onMounted(async () => {
-    const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
-    if (maybeStudent) {
-        student.value = maybeStudent
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
-    }
-    const allProjects = await ApiService.get<ProjectDto[]>("/projects")
-    if (allProjects.length == 0) {
-        console.warn("no projects")
-        toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
-        return
-    }
-    projects.value = [allProjects, []]
-    for (const selectedProj of student.value.orderedPreferences) {
-        const relevant = projects.value[0].filter(x => x.id == selectedProj)[0]
-        projects.value[1].push(relevant)
-        projects.value[0] = projects.value[0].filter(x => x.id != relevant.id)
-    }
+	const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
+	if (maybeStudent) {
+		student.value = maybeStudent
+		toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
+	}
+	const allProjects = await ApiService.get<ProjectDto[]>("/projects")
+	if (allProjects.length == 0) {
+		console.warn("no projects")
+		toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
+		return
+	}
+	projects.value = [allProjects, []]
+	for (const selectedProj of student.value.orderedPreferences) {
+		const relevant = projects.value[0].filter(x => x.id == selectedProj)[0]
+		projects.value[1].push(relevant)
+		projects.value[0] = projects.value[0].filter(x => x.id != relevant.id)
+	}
 })
 
 const submitForm = async () => {
-    const submitModel: StudentSubmissionDto = {
-        name: student.value.name,
-        id: student.value.id,
-        email: authStore.userInfo?.email ?? student.value.email,
-        fileNames: student.value.fileNames,
-        orderedPreferences: projects.value[1].map(p => p.id), // should this be id's or names?
-        willSignContract: student.value.willSignContract
-    }
-    await ApiService.post("/students/me", submitModel);
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 3000 });
+	const submitModel: StudentSubmissionDto = {
+		name: student.value.name,
+		id: student.value.id,
+		email: authStore.userInfo?.email ?? student.value.email,
+		files: student.value.files,
+		orderedPreferences: projects.value[1].map(p => p.id), // should this be id's or names?
+		willSignContract: student.value.willSignContract
+	}
+	await ApiService.post("/students/me", submitModel);
+	toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 5000 });
 };
 
-const onUpload = (event: FileUploadUploadEvent) => {
-    // todo
-    // probably don't want a seperate upload button for the files
-    console.log(event)
+const onUpload = async (event: FileUploadUploaderEvent) => {
+	if (Array.isArray(event.files)) { // File[]
+		for (let i = 0; i < event.files.length; i++) {
+			const formData = new FormData()
+			formData.append('file', event.files[i])
+			await ApiService.postRaw('students/file', formData)
+		}
+	} else { // File
+		const formData = new FormData()
+		formData.append('file', event.files)
+		await ApiService.postRaw('students/file', formData)
+	}
+
+	student.value.files = await ApiService.get<FileDetailsDto[]>('/students/files')
+}
+
+const deleteFile = async (id: string) => {
+	await ApiService.delete(`/students/file/${id}`)
+	student.value.files = await ApiService.get<FileDetailsDto[]>('/students/files')
+	toast.add({ severity: 'success', summary: 'Success', detail: 'File deleted successfully', life: 5000 });
 }
 
 </script>
+
+<style>
+.p-fileupload-file-thumbnail {
+	display: none;
+}
+</style>
