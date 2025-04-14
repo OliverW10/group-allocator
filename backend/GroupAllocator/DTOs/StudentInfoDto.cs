@@ -1,4 +1,4 @@
-﻿using TypeGen.Core.TypeAnnotations;
+using TypeGen.Core.TypeAnnotations;
 
 namespace GroupAllocator.DTOs;
 

@@ -85,7 +85,6 @@ const uploadProjects = async (event: FileUploadSelectEvent) => {
     } catch {
         error();
     }
-
 }
 
 const deleteProject = async (id: string) => {

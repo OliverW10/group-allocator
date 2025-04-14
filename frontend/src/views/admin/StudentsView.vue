@@ -1,5 +1,17 @@
 <template>
     <AdminNavBar />
+	<Dialog :visible="fileModal != null" :modal="true" :closable="false" :draggable="false" :header="'Files for ' + students.find((student) => student.id == fileModal)?.name" :style="{ width: '50vw' }">
+		<DataTable :value="students.find((student) => student.id == fileModal)?.files" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
+			<Column field="name" header="Name"></Column>
+			<Column field="actions" header="Actions">
+				<template #body="slotProps">
+					<Button severity="info" class="i-mdi-download" @click="download(slotProps.data.id, slotProps.data.name)" />
+					<Button severity="danger" class="i-mdi-delete" @click="deleteFile(slotProps.data.id)" />
+				</template>
+			</Column>
+		</DataTable>
+		<Button label="Done" severity="secondary" class="mt-4" @click="fileModal = null" />
+	</Dialog>
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Students</h1>
         <Divider style="margin: 0;" />
@@ -24,9 +36,12 @@
                         projId == proj.id)?.name).join(', ')}}
                 </template>
             </Column>
-            <Column field="id" header="Actions">
+            <Column field="actions" header="Actions">
                 <template #body="slotProps">
-                    <Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.id)" />
+					<div class="flex">
+						<Button severity="info" class="i-mdi-files" @click="showFiles(slotProps.data.id)" />
+						<Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.id)" />
+					</div>
                 </template>
             </Column>
         </DataTable>
@@ -36,14 +51,14 @@
 import { onMounted, ref } from 'vue';
 import AdminNavBar from '../../components/AdminNavBar.vue';
 import ApiService from '../../services/ApiService';
-import { StudentSubmissionDto } from '../../dtos/student-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
-import { useToast, type FileUploadSelectEvent } from 'primevue';
+import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
+import type { StudentSubmissionDto } from '../../dtos/student-submission-dto';
 
 // TODO: refactor 3 table views into generic component
 
@@ -51,6 +66,11 @@ const students = ref([] as StudentSubmissionDto[]);
 const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const toast = useToast();
+const fileModal = ref(null as null | number);
+
+const showFiles = (id: number) => {
+	fileModal.value = id;
+}
 
 onMounted(async () => {
     try {
@@ -63,6 +83,21 @@ onMounted(async () => {
         loading.value = false;
     }
 });
+
+const deleteFile = async (id: string) => {
+	await ApiService.delete(`/students/file/${id}`)
+	students.value = await ApiService.get<StudentSubmissionDto[]>("/students")
+}
+
+const download = async (id: unknown, name: string) => {
+	const url = await ApiService.makeUrl(`/students/file/${id}`)
+	const a = document.createElement('a')
+	a.href = url.toString()
+	a.download = name
+	document.body.appendChild(a)
+	a.click()
+	document.body.removeChild(a)
+}
 
 const setStudents = (data: StudentSubmissionDto[]) => {
     students.value = data;

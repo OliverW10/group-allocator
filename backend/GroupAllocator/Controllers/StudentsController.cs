@@ -113,6 +113,119 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		return Ok();
 	}
 
+	[HttpPost("file")]
+	[Authorize]
+	public async Task<IActionResult> PostFile([FromForm] IFormFile file)
+	{
+		switch (file.Length)
+		{
+			case 0:
+				return BadRequest("No file uploaded.");
+			case > 10 * 1024 * 1024:
+				return BadRequest("File is too large (>10MB)");
+		}
+
+		var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+		if (userEmail == null)
+		{
+			return Unauthorized("Not logged in.");
+		}
+		var student = await db.Student.FirstOrDefaultAsync(s => s.User.Email == userEmail) ?? throw new BadHttpRequestException("Student not found");
+
+		var fileBytes = new byte[file.Length];
+		await using (var stream = file.OpenReadStream())
+		{
+			await stream.ReadAsync(fileBytes, 0, (int)file.Length);
+		}
+
+		var fileModel = new FileModel
+		{
+			Name = file.FileName,
+			Student = student,
+			Blob = fileBytes
+		};
+
+		await db.Files.AddAsync(fileModel);
+		await db.SaveChangesAsync();
+		return Ok(new FileDetailsDto
+		{
+			Id = fileModel.Id,
+			Name = fileModel.Name,
+			StudentId = fileModel.Student.Id,
+		});
+	}
+
+	[HttpDelete("file/{id:int}")]
+	[Authorize]
+	public async Task<IActionResult> DeleteFile(int id)
+	{
+		var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+		if (userEmail == null)
+		{
+			return Unauthorized("Not logged in.");
+		}
+
+		var student = await db.Student.FirstOrDefaultAsync(s => s.User.Email == userEmail);
+		var file = await db.Files.FirstOrDefaultAsync(f => f.Id == id);
+
+		if (file == null)
+		{
+			return NotFound("File not found");
+		}
+
+		if (User.HasClaim("admin", "true") && (student == null || file.Student.Id != student.Id))
+		{
+			return BadRequest("You are not the owner of this file.");
+		}
+		
+		await db.Files.Where(f => f.Id == id).ExecuteDeleteAsync();
+		await db.SaveChangesAsync();
+		return Ok();
+	}
+
+	[HttpGet("files")]
+	[Authorize]
+	public async Task<IActionResult> GetFiles()
+	{
+		var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+		if (userEmail == null)
+		{
+			return Unauthorized("Not logged in.");
+		}
+		var student = await db.Student.FirstOrDefaultAsync(s => s.User.Email == userEmail) ?? throw new BadHttpRequestException("Student not found");
+		var files = await db.Files.Where(f => f.Student.Id == student.Id).ToListAsync();
+		return Ok(files.Select(f => new FileDetailsDto
+		{
+			Id = f.Id,
+			Name = f.Name,
+			StudentId = f.Student.Id,
+		}));
+	}
+
+	[HttpGet("file/{id:int}")]
+	[Authorize]
+	public async Task<IActionResult> GetFile(int id)
+	{
+		var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+		if (userEmail == null)
+		{
+			return Unauthorized("Not logged in.");
+		}
+		
+		var file = await db.Files.Include(f => f.Student.User).FirstOrDefaultAsync(f => f.Id == id);
+		if (file == null)
+		{
+			return NotFound("File not found");
+		}
+
+		if (User.HasClaim("admin", "true") && file.Student.User.Email != userEmail)
+		{
+			return BadRequest("You do not have permissions to view this file.");
+		}
+
+		return File(file.Blob, "application/octet-stream", file.Name);
+	}
+
 	[HttpDelete("{id}")]
 	[Authorize(Policy = "AdminOnly")]
 	public async Task<IActionResult> Delete(int id)
