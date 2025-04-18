@@ -377,7 +377,8 @@ for (int i = 0; i < names.Count(); i++)
         Id = userIds++,
         IsAdmin = false, //is admin will be false for all students
         Name = names[i],
-        Email = $"{names[i]}@uts.edu.au" //emails don't really matter for testing
+        Email = $"{names[i]}@uts.edu.au", //emails don't really matter for testing
+		IsVerified = true //don't know what this is just made it true for everyone
     };
 
     StudentModel currentStudent = new StudentModel 
