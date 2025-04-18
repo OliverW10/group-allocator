@@ -128,6 +128,13 @@ public class AllocationSolver : IAllocationSolver
                 .Select(p => projectActivityMap[p.Id])
                 .ToList();
 
+            //had to add this because for some reason real data exanple has clients that don't have projects 
+            //this probably will be deleted because i think if a client exists they should be able to run a project
+            if (clientProjects.Count() == 0)
+            {
+                continue;
+            }
+
 
             LinearExpr projectCountExpr = clientProjects.First();
 
