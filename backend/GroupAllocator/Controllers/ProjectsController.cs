@@ -1,89 +1,62 @@
-﻿using GroupAllocator.Database;
+using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
 using GroupAllocator.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProjectsController : ControllerBase
+public class ProjectsController(IProjectService projectService, ApplicationDbContext db) : ControllerBase
 {
-	private readonly IProjectService _projectService;
-	public ProjectsController(IProjectService projectService)
+	[HttpPost("upload")]
+	[Authorize(Policy = "AdminOnly")]
+	public async Task<IActionResult> UploadProjects([FromForm] IFormFile file)
 	{
-		_projectService = projectService;
-	}
-
-	[HttpGet]
-	[Route("get")]
-	public async Task<IActionResult> GetProjects()
-	{
-		var projects = await _projectService.GetProjects();
-		return Ok(projects.Select(x => x.ToDto()));
-	}
-
-	[HttpGet]
-	[Route("get/{id}")]
-	public async Task<IActionResult> GetProject(int id)
-	{
-		var project = await _projectService.GetProject(id);
-		if (project == null)
+		if (file == null || file.Length == 0)
 		{
-			return NotFound();
+			return BadRequest("No file uploaded.");
 		}
 
-		return Ok(project.ToDto());
+		using var reader = new StreamReader(file.OpenReadStream());
+		await projectService.AddFromCsv(reader);
+
+		return await GetProjects();
 	}
 
-	[HttpPost]
-	[Route("add")]
-	public async Task<ActionResult> AddProject([FromBody] ProjectDto projectDto)
+	[HttpGet]
+	[Authorize]
+	public async Task<IActionResult> GetProjects()
 	{
-		var project = new ProjectModel
-		{
-			Name = projectDto.Name,
-			RequiresNda = projectDto.RequiresNda,
-			MinStudents = projectDto.MinStudents,
-			MaxStudents = projectDto.MaxStudents,
-			RequiresContract = projectDto.RequiresContract,
-			Client = null
-		};
-
-		await _projectService.AddProject(project);
-
-		return CreatedAtAction(nameof(GetProject), new { id = project.Id }, new ProjectDto {
-			Id = project.Id,
-			Name = project.Name,
-			RequiresNda = project.RequiresNda,
-			MinStudents = project.MinStudents,
-			MaxStudents = project.MaxStudents,
-			RequiresContract = project.RequiresContract
-		});
+		return Ok(await db.Projects.Include(p => p.Client).Select(x => x.ToDto()).ToListAsync());
 	}
 
 	[HttpPut]
 	[Route("update/{id}")]
+	[Authorize(Policy = "AdminOnly")]
 	public async Task<IActionResult> UpdateProject(int id, [FromBody] ProjectDto projectDto)
 	{
-		var project = await _projectService.GetProject(id);
+		var project = await projectService.GetProject(id);
 
 		if (project == null)
 		{
 			return NotFound();
 		}
 
-		var updated = await _projectService.UpdateProject(project);
+		var updated = await projectService.UpdateProject(project);
 
 		return Ok(updated.ToDto());
 	}
 
 	[HttpDelete]
 	[Route("delete/{id}")]
+	[Authorize(Policy = "AdminOnly")]
 	public async Task<IActionResult> DeleteProject(int id)
 	{
-		await _projectService.DeleteProject(id);
-		return Ok();
+		await projectService.DeleteProject(id);
+		return await GetProjects();
 	}
 }

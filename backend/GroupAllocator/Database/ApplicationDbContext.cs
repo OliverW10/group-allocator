@@ -1,4 +1,4 @@
-﻿using GroupAllocator.Database.Model;
+using GroupAllocator.Database.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace GroupAllocator.Database
@@ -12,5 +12,6 @@ namespace GroupAllocator.Database
 		public DbSet<PreferenceModel> Preferences { get; set; }
 		public DbSet<SolveRunModel> SolveRuns { get; set; }
 		public DbSet<StudentAssignmentModel> StudentAssignments { get; set; }
+		public DbSet<FileModel> Files { get; set; }
 	}
 }

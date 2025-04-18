@@ -1,16 +1,18 @@
-﻿using GroupAllocator.Database;
+using GroupAllocator.Database;
 using GroupAllocator.Services;
 
 namespace GroupAllocator;
 
 public static class ServicesRegistration
 {
-    public static void RegisterApplicationServices(this IServiceCollection collection)
-    {
-        collection
-            .AddScoped<IUserService, UserService>()
-            .AddScoped<IAutheticationService, AuthenticationService>()
+	public static void RegisterApplicationServices(this IServiceCollection collection)
+	{
+		collection
+			.AddScoped<IUserService, UserService>()
+			.AddScoped<IGroupAllocatorAuthenticationService, AuthenticationService>()
 			.AddScoped<IProjectService, ProjectService>()
-            ;
-    }
+			.AddScoped<IStudentService, StudentService>()
+			.AddScoped<IAllocationSolver, AllocationSolver>()
+			;
+	}
 }

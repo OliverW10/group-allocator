@@ -3,11 +3,8 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-export class ProjectDto {
+export class FileDetailsDto {
     id: number;
     name: string;
-    client: string;
-    requiresNda: boolean;
-    minStudents: number;
-    maxStudents: number;
+    studentId: number;
 }

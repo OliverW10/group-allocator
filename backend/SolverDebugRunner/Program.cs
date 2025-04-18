@@ -1,8 +1,3 @@
-﻿using Google.OrTools.ConstraintSolver;
-using Google.Protobuf.WellKnownTypes;
-using System.ComponentModel;
-using System.Drawing;
-using System.Runtime.Intrinsics.X86;
 using GroupAllocator.Database.Model;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.DataProtection;
@@ -49,6 +44,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 //    new PreferenceModel { Id = 11, Student = students[1], Project = projects[2], Strength = 0.4 },
 //    new PreferenceModel { Id = 12, Student = students[2], Project = projects[1], Strength = 0.9 }
 //];
+
 
 ////testing group constraint
 //List<StudentModel> students = [
@@ -120,6 +116,7 @@ List<ClientModel> clients = [
     new ClientModel { Id = 16, Name = "Steven Vasilescu", MinProjects = 0, MaxProjects = 1 },
     new ClientModel { Id = 17, Name = "Rodney Berry", MinProjects = 0, MaxProjects = 0 },
     new ClientModel { Id = 18, Name = "David Chambers", MinProjects = 0, MaxProjects = 4 }
+
 ];
 
 List<ProjectModel> projects = [
@@ -436,13 +433,10 @@ for (int i = 0; i < students.Count(); i++)
 
         preferences.Add(currentPreference);
 
-
         intialStrength -= 0.1f; // the preferences are ordered from best to worst so just decrement strength each time we go to the next one
-
-        
+ 
     }
 
-    
 }
 
 
@@ -457,7 +451,12 @@ for (int i = 0; i < students.Count(); i++)
 //Solve
 
 var solver = new AllocationSolver();
-var assignments = solver.AssignStudentsToGroups(students, projects, clients, preferences);
+var run = new SolveRunModel
+{
+	Evaluation = -1,
+	Timestamp = DateTime.UtcNow,
+};
+var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences);
 
 int studentCount = 1;
 int studentIndex = 0;
@@ -467,11 +466,12 @@ List<int> rankTracker = new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 if (!assignments.Any())
 {
-    Console.WriteLine("No assignments");
+	Console.WriteLine("No assignments");
 }
 
 else
 {
+
     foreach (var assignment in assignments)
     {
 
@@ -496,6 +496,7 @@ else
         studentIndex++;
 
     }
+
 }
 
 //prints out amount of ranks

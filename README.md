@@ -1,20 +1,20 @@
 # GroupAllocator
 
-# Fullstack Setup (Testing)
+## Fullstack Setup (Testing)
 
 1. Install Docker Desktop ([https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/))
 2. Run `docker compose up --build --force-recreate` (Ctrl+C to stop)
 
-# Frontend Setup (Development)
+## Frontend Setup (Development)
 
 1. Install Node.js ([https://volta.sh/](https://volta.sh/))
 2. Install PNPM (`npm i -g pnpm`)
 3. Install dependencies (`pnpm i`)
 4. Run `pnpm dev`
 
-# Backend Setup (Development)
+## Backend Setup (Development)
 
-## Database
+### Database
 
 1. Install docker & docker-compose
 1. Run `docker-compose -f database.yml up -d`

@@ -1,5 +1,6 @@
 using GroupAllocator;
 using GroupAllocator.Database;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -8,26 +9,38 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
-    options.ValidateScopes = true;
-    options.ValidateOnBuild = true;
+	options.ValidateScopes = true;
+	options.ValidateOnBuild = true;
 });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        policy =>
-        {
-            policy
-                .AllowCredentials()
-                .WithOrigins("http://localhost:5173", "https://localhost:5173", "https://group-allocator.pages.dev", "https://*.group-allocator.pages.dev")
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
+	options.AddPolicy("AllowAllOrigins",
+		policy =>
+		{
+			policy
+				.AllowCredentials()
+				.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://group-allocator.pages.dev", "https://*.group-allocator.pages.dev")
+				.AllowAnyMethod()
+				.AllowAnyHeader();
+		});
 });
+
+Func<RedirectContext<CookieAuthenticationOptions>, Task> unauthorizedHandler = ctx =>
+{
+	ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+	return Task.CompletedTask;
+};
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.Cookie.SameSite = SameSiteMode.None;
+	options.Cookie.HttpOnly = true;
+	options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+	options.Cookie.SameSite = SameSiteMode.None;
+	options.Events = new CookieAuthenticationEvents()
+	{
+		OnRedirectToLogin = unauthorizedHandler,
+		OnRedirectToAccessDenied = unauthorizedHandler
+	};
 });
 
 builder.Services.AddOpenApi();
@@ -35,9 +48,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+	options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
-// TODO: work out proper migrations setup for dev and prod
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("AdminOnly", policy => policy.RequireClaim("admin", "True"));
+});
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("MainDb")));
 builder.Services.AddControllers();
 builder.Services.RegisterApplicationServices();
@@ -53,11 +69,13 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-using (var scope = app.Services.CreateScope())
+
+if (app.Configuration.GetValue<bool>("DbReset"))
 {
+	using var scope = app.Services.CreateScope();
 	var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 	db.Database.EnsureDeleted();
-    db.Database.EnsureCreated();
+	db.Database.EnsureCreated();
 }
 
 app.MapControllers();
