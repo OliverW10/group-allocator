@@ -75,33 +75,27 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 	[HttpGet("role/claim-admin/{email}")]
 	public async Task<IActionResult> ClaimAdmin(string email)
 	{
-		if (!configuration.GetValue<bool>("AdminClaimable"))
-		{
-			return NotFound();
-		}
-
-		await userService.GetOrCreateUserAsync("Unknown", email, true);
-		return Ok($"Set {email} to admin.");
+		return await SetAdminIfAllowed(email, true);
 	}
+
 
 	[HttpGet("role/drop-admin/{email}")]
 	public async Task<IActionResult> DropAdmin(string email)
 	{
-		if (!configuration.GetValue<bool>("AdminClaimable"))
+		return await SetAdminIfAllowed(email, false);
+	}
+
+	private async Task<IActionResult> SetAdminIfAllowed(string email, bool value)
+	{
+		var claims = HttpContext.User.Claims;
+		var loggedInAsAdmin = HttpContext.User.Identity is not null && claims.FirstOrDefault(x => x.Type == GroupAllocatorClaims.Admin)?.Value == "True";
+		if (!configuration.GetValue<bool>("AdminClaimable") && !loggedInAsAdmin)
 		{
 			return NotFound();
 		}
 
-		var user = await userService.GetOrCreateUserAsync("Unknown", email);
-		if (user is not null)
-		{
-			user.IsAdmin = false;
-			await db.SaveChangesAsync();
-			return Ok($"Set {email} to student.");
-		}
-
-		return Ok($"User not found, no action taken.");
-
+		await userService.SetAdmin(email, true);
+		return Ok($"Set {email} to admin={value.ToString()}");
 	}
 
 	static IActionResult UserDto(UserModel user)

@@ -1,5 +1,6 @@
 using GroupAllocator;
 using GroupAllocator.Database;
+using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("AdminOnly", policy => policy.RequireClaim("admin", "True"));
+	options.AddPolicy("AdminOnly", policy => policy.RequireClaim(GroupAllocatorClaims.Admin, "True"));
 });
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("MainDb")));
 builder.Services.AddControllers();

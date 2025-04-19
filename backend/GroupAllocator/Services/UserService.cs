@@ -6,15 +6,16 @@ namespace GroupAllocator.Services;
 
 public interface IUserService
 {
-	Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null);
+	Task<UserModel?> GetOrCreateUserAsync(string name, string email);
+	Task SetAdmin(string email, bool admin);
 	Task CreateStudentAllowlist(StreamReader reader);
 }
 
 public class UserService(ApplicationDbContext db) : IUserService
 {
-	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
+	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email)
 	{
-		var knownIsAdmin = isAdmin ?? ShouldBeAdmin(email);
+		var knownIsAdmin = ShouldBeAdmin(email);
 		var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
 
 		if (existingUser is null)
@@ -73,5 +74,23 @@ public class UserService(ApplicationDbContext db) : IUserService
 		}
 
 		await db.SaveChangesAsync();
+	}
+
+	public async Task SetAdmin(string email, bool admin)
+	{
+		var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+		if (existingUser is not null)
+		{
+			var initialValue = existingUser.IsAdmin;
+			existingUser.IsAdmin = admin;
+			await db.SaveChangesAsync();
+		}
+
+		// New users will be non admin by default so don't need to create one
+		if (admin)
+		{
+			await CreateNewUser(email.Split("@").FirstOrDefault() ?? string.Empty, email, admin);
+		}
 	}
 }

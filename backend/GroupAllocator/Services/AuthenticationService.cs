@@ -1,4 +1,3 @@
-using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
@@ -11,6 +10,11 @@ public interface IGroupAllocatorAuthenticationService
 	ClaimsPrincipal GetPrincipal(UserModel user);
 }
 
+public class GroupAllocatorClaims
+{
+	public const string Admin = "admin";
+}
+
 public class AuthenticationService : IGroupAllocatorAuthenticationService
 {
 	public ClaimsPrincipal GetPrincipal(UserModel user)
@@ -21,7 +25,7 @@ public class AuthenticationService : IGroupAllocatorAuthenticationService
 			new Claim(JwtRegisteredClaimNames.Name, user.Name),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-			new Claim("admin", user.IsAdmin.ToString()),
+			new Claim(GroupAllocatorClaims.Admin, user.IsAdmin.ToString()),
 		};
 
 		var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
