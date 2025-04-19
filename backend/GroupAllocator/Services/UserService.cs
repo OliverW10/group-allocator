@@ -25,6 +25,7 @@ public class UserService(ApplicationDbContext db) : IUserService
 		if (existingUser is not null)
 		{
 			existingUser.Name = name;
+			existingUser.IsAdmin = knownIsAdmin;
 			await db.SaveChangesAsync();
 		}
 
