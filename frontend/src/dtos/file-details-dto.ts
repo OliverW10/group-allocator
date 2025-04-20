@@ -6,5 +6,5 @@
 export class FileDetailsDto {
     id: number;
     name: string;
-    studentId: number;
+    userId: number;
 }

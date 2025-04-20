@@ -72,7 +72,6 @@ const showFiles = (id: number) => {
 
 const rowClass = (data: StudentSubmissionDto) => {
     return [{ '!bg-red500/20': data.isVerified }]
-    // return [{ '!bg-primary !text-primary-contrast': data.category === 'Fitness' }];
 };
 
 onMounted(async () => {

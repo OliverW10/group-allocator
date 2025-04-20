@@ -130,7 +130,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		{
 			return Unauthorized("Not logged in.");
 		}
-		var student = await db.Student.FirstOrDefaultAsync(s => s.User.Email == userEmail) ?? throw new BadHttpRequestException("Student not found");
+		var user = await UserFromEmail(userEmail);
 
 		var fileBytes = new byte[file.Length];
 		await using (var stream = file.OpenReadStream())
@@ -141,7 +141,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		var fileModel = new FileModel
 		{
 			Name = file.FileName,
-			Student = student,
+			User = user,
 			Blob = fileBytes
 		};
 
@@ -151,8 +151,13 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		{
 			Id = fileModel.Id,
 			Name = fileModel.Name,
-			StudentId = fileModel.Student.Id,
+			UserId = fileModel.User.Id,
 		});
+	}
+
+	private async Task<UserModel> UserFromEmail(string userEmail)
+	{
+		return await db.Users.FirstOrDefaultAsync(s => s.Email == userEmail) ?? throw new BadHttpRequestException("Student not found");
 	}
 
 	[HttpDelete("file/{id:int}")]
@@ -165,7 +170,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return Unauthorized("Not logged in.");
 		}
 
-		var student = await db.Student.FirstOrDefaultAsync(s => s.User.Email == userEmail);
+		var user = await UserFromEmail(userEmail);
 		var file = await db.Files.FirstOrDefaultAsync(f => f.Id == id);
 
 		if (file == null)
@@ -173,7 +178,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return NotFound("File not found");
 		}
 
-		if (User.HasClaim("admin", "true") && (student == null || file.Student.Id != student.Id))
+		if (!User.HasClaim("admin", "true") && (user == null || file.User.Id != user.Id))
 		{
 			return BadRequest("You are not the owner of this file.");
 		}
@@ -192,13 +197,13 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		{
 			return Unauthorized("Not logged in.");
 		}
-		var student = await db.Student.FirstOrDefaultAsync(s => s.User.Email == userEmail) ?? throw new BadHttpRequestException("Student not found");
-		var files = await db.Files.Where(f => f.Student.Id == student.Id).ToListAsync();
+		var user = await UserFromEmail(userEmail);
+		var files = await db.Files.Include(f => f.User).Where(f => f.User.Id == user.Id).ToListAsync();
 		return Ok(files.Select(f => new FileDetailsDto
 		{
 			Id = f.Id,
 			Name = f.Name,
-			StudentId = f.Student.Id,
+			UserId = f.User.Id,
 		}));
 	}
 
@@ -212,13 +217,13 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return Unauthorized("Not logged in.");
 		}
 		
-		var file = await db.Files.Include(f => f.Student.User).FirstOrDefaultAsync(f => f.Id == id);
+		var file = await db.Files.Include(f => f.User).FirstOrDefaultAsync(f => f.Id == id);
 		if (file == null)
 		{
 			return NotFound("File not found");
 		}
 
-		if (User.HasClaim("admin", "true") && file.Student.User.Email != userEmail)
+		if (User.HasClaim("admin", "true") && file.User.Email != userEmail)
 		{
 			return BadRequest("You do not have permissions to view this file.");
 		}
