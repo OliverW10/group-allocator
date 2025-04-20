@@ -15,8 +15,9 @@ public class StudentService(ApplicationDbContext db) : IStudentService
 	{
 		return db.Student
 			.Include(s => s.User)
+				.ThenInclude(s => s.Files)
 			.Include(s => s.Preferences)
 				.ThenInclude(p => p.Project)
-			.Include(s => s.Files);
+			;
 	}
 }

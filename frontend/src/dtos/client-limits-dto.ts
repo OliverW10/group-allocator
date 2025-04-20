@@ -3,8 +3,7 @@
  * Any changes made to this file can be lost when this file is regenerated.
  */
 
-export class FileDetailsDto {
-    id: number;
-    name: string;
-    userId: number;
+export class ClientLimitsDto {
+    minProjects: number;
+    maxProjects: number;
 }

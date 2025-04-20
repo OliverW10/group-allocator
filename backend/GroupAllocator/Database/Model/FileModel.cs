@@ -7,7 +7,7 @@ namespace GroupAllocator.Database.Model
 		public int Id { get; set; }
 		public required byte[] Blob { get; set; }
 		public required string Name { get; set; }
-		public required StudentModel Student { get; set; }
+		public required UserModel User { get; set; }
 	}
 
 	public static class FileModelExtensions
@@ -18,7 +18,7 @@ namespace GroupAllocator.Database.Model
 			{
 				Id = fileModel.Id,
 				Name = fileModel.Name,
-				StudentId = fileModel.Student.Id
+				UserId = fileModel.User.Id
 			};
 		}
 	}

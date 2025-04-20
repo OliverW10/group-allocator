@@ -8,13 +8,11 @@ namespace GroupAllocator.Database.Model;
 [PrimaryKey(nameof(Id))]
 public class StudentModel
 {
-	[ForeignKey(nameof(UserModel.Id))]
 	public int Id { get; set; }
 	public required bool WillSignContract { get; set; }
+	[ForeignKey(nameof(StudentModel.Id))]
 	public required UserModel User { get; set; }
-
 	public ICollection<PreferenceModel> Preferences { get; } = new List<PreferenceModel>();
-	public ICollection<FileModel> Files { get; } = new List<FileModel>();
 }
 
 public static class StudentModelExtensions
@@ -28,7 +26,7 @@ public static class StudentModelExtensions
 			Name = model.User.Name,
 			WillSignContract = model.WillSignContract,
 			OrderedPreferences = model.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList(),
-			Files = model.Files.Select(f => f.ToDto()),
+			Files = model.User.Files.Select(f => f.ToDto()),
 			IsVerified = model.User.IsVerified
 		};
 	}
