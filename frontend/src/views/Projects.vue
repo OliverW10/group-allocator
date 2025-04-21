@@ -63,53 +63,9 @@ const getProjects = async () => {
 };
 
 const handleProjectUpload = (formData: File) => {
-
-    if (formData && formData.type === 'text/csv') {
-        //parseCSV(formData);
-    } else {
-        alert('Please upload a CSV file');
-    }
-    console.log("Project uploaded:", formData);
-};
-
-// const parseCSV = (file: File) => {
-//       const reader = new FileReader();
-
-//       reader.onload = (e) => {
-//         const csv = e.target?.result;
-
-//         if (!csv) {
-//             console.error("No CSV content found.");
-//             return;
-//         }
-
-//         const rows = csv.split('\n');
-//         const headers = rows[0].split(',');
-
-//         // Split CSV content by lines
-//         const rows = csv.split('\n');
-
-//         // Assuming the first row contains headers
-//         const headers = rows[0].split(',');
-
-//         // Process each row and convert it into a DTO
-//         const data = rows.slice(1).map((row) => {
-//           const values = row.split(',');
-
-//           // Map each row into a DTO using headers as the keys
-//           let dto = {};
-//           headers.forEach((header, index) => {
-//             dto[header.trim()] = values[index]?.trim();  // Map header to value
-//           });
-
-//           return dto;
-//         });
-
-//         this.data = data;
-//       };
-
-//       reader.readAsText(file);  // Read the CSV file as text
-//     }
+      console.log("Project uploaded:", formData);
+      // You can send the data to your API or perform other actions here
+    };
 
 const openProjectDetails = (projectId: string) => {
     const route = `/projects/${projectId}`;
