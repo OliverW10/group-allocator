@@ -34,7 +34,7 @@ Func<RedirectContext<CookieAuthenticationOptions>, Task> unauthorizedHandler = c
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
 	options.Cookie.HttpOnly = true;
-	options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+	options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 	options.Cookie.SameSite = SameSiteMode.None;
 	options.Events = new CookieAuthenticationEvents()
 	{
