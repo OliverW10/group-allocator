@@ -22,15 +22,13 @@ public class UserService(ApplicationDbContext db) : IUserService
 			return await CreateNewUser(name, email, knownIsAdmin);
 		}
 
-		if (existingUser is not null)
+		existingUser.Name = name;
+		if (knownIsAdmin && !existingUser.IsAdmin)
 		{
-			existingUser.Name = name;
-			if (isAdmin is not null)
-			{
-				existingUser.IsAdmin = knownIsAdmin;
-			}
-			await db.SaveChangesAsync();
+			existingUser.IsAdmin = knownIsAdmin;
 		}
+		await db.SaveChangesAsync();
+		
 
 		return existingUser;
 	}
