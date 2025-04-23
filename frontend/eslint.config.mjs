@@ -7,11 +7,7 @@ import typescriptEslint from 'typescript-eslint'
 export default typescriptEslint.config(
     { ignores: ['*.d.ts', '**/coverage', '**/dist'] },
     {
-        extends: [
-            eslint.configs.recommended,
-            ...typescriptEslint.configs.recommended,
-            ...eslintPluginVue.configs['flat/recommended'],
-        ],
+        extends: [eslint.configs.recommended, ...typescriptEslint.configs.recommended, ...eslintPluginVue.configs['flat/recommended']],
         files: ['**/*.{ts,vue}'],
         languageOptions: {
             ecmaVersion: 'latest',
@@ -22,8 +18,8 @@ export default typescriptEslint.config(
             },
         },
         rules: {
-          "vue/first-attribute-linebreak": "off",
-          "vue/multi-word-component-names": "off"
+            'vue/first-attribute-linebreak': 'off',
+            'vue/multi-word-component-names': 'off',
         },
     },
     eslintConfigPrettier
