@@ -5,13 +5,15 @@ namespace GroupAllocator.Database
 {
 	public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 	{
-		public DbSet<UserModel> Users { get; set; }
-		public DbSet<StudentModel> Student { get; set; }
-		public DbSet<ClientModel> Clients { get; set; }
-		public DbSet<ProjectModel> Projects { get; set; }
-		public DbSet<PreferenceModel> Preferences { get; set; }
-		public DbSet<SolveRunModel> SolveRuns { get; set; }
-		public DbSet<StudentAssignmentModel> StudentAssignments { get; set; }
-		public DbSet<FileModel> Files { get; set; }
+		public DbSet<UserModel> Users { get; set; } = null!;
+		public DbSet<StudentModel> Student { get; set; } = null!;
+		public DbSet<ClientModel> Clients { get; set; } = null!;
+		public DbSet<ProjectModel> Projects { get; set; } = null!;
+		public DbSet<PreferenceModel> Preferences { get; set; } = null!;
+		public DbSet<SolveRunModel> SolveRuns { get; set; } = null!;
+		public DbSet<StudentAssignmentModel> StudentAssignments { get; set; } = null!;
+		public DbSet<FileModel> Files { get; set; } = null!;
+		public DbSet<ProjectPreAssignmentModel> ProjectPreAssignments { get; set; } = null!;
+		public DbSet<StudentPreAssignmentModel> StudentPreAssignments { get; set; } = null!;
 	}
 }

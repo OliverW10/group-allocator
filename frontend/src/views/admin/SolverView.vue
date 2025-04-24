@@ -1,10 +1,11 @@
 <template>
 	<AdminNavBar />
 	<div class="px-4 py-2 mt-4 flex flex-col gap-4">
-		<h1 class="heading">Solver</h1>
 		<Divider style="margin: 0;" />
-		<Button label="Run Solver" icon="i-mdi-cogs" class="w-fit" @click="solve"></Button>
-		<Listbox v-model="selectedRun" :options="solveRuns" option-label="ranAt" class="w-fit" :multiple="false" />
+		<div class="flex flex-row gap-4 items-center">
+			<Listbox v-model="selectedRun" :options="solveRuns" option-label="ranAt" class="w-fit" :multiple="false" />
+			<Button label="New Allocation Solution" icon="i-mdi-cogs" class="w-fit" @click="solve"></Button>
+		</div>
 		<h3 v-if="selectedRun == undefined">Select a run to view allocations</h3>
 		<div v-else>
 			<DataTable edit-mode="cell" :value="selectedRun?.projects ?? []" :loading="loading" :paginator="true" :rows="10"
@@ -67,6 +68,10 @@ onMounted(async () => {
 	solveRuns.value = runs.slice(0, 10)
 	loading.value = false;
 });
+
+const newRun = async () => {
+	
+}
 
 const solve = async () => {
 	loading.value = true;
