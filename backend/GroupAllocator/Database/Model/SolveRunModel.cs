@@ -6,6 +6,5 @@ public class SolveRunModel
 	public required DateTime Timestamp { get; set; }
 	public required double PreferenceExponent { get; set; }
 
-	public ICollection<ProjectPreAssignmentModel> ProjectPreAssignments { get; set; } = new List<ProjectPreAssignmentModel>();
 	public ICollection<StudentAssignmentModel> StudentAssignments { get; set; } = new List<StudentAssignmentModel>();
 }

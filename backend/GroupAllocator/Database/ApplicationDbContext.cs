@@ -13,7 +13,5 @@ namespace GroupAllocator.Database
 		public DbSet<SolveRunModel> SolveRuns { get; set; } = null!;
 		public DbSet<StudentAssignmentModel> StudentAssignments { get; set; } = null!;
 		public DbSet<FileModel> Files { get; set; } = null!;
-		public DbSet<ProjectPreAssignmentModel> ProjectPreAssignments { get; set; } = null!;
-		public DbSet<StudentPreAssignmentModel> StudentPreAssignments { get; set; } = null!;
 	}
 }

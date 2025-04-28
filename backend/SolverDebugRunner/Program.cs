@@ -454,7 +454,7 @@ for (int i = 0; i < students.Count(); i++)
 var solver = new AllocationSolver();
 var run = new SolveRunModel
 {
-	Evaluation = -1,
+	PreferenceExponent = 1,
 	Timestamp = DateTime.UtcNow,
 };
 var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences);
