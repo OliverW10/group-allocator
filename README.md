@@ -27,7 +27,13 @@ erDiagram
         int MinProjects
         int MaxProjects
     }
-    
+
+    FileModel {
+        int Id
+        byte[] Blob
+        string Name
+    }
+
     PreferenceModel {
         int Id
         double Strength
@@ -36,33 +42,34 @@ erDiagram
     ProjectModel {
         int Id
         string Name
-        bool RequiresContract
+        bool RequiresNda
         int MinStudents
         int MaxStudents
     }
-    
+
     SolveRunModel {
         int Id
         DateTime Timestamp
         double Evaluation
     }
-    
+
     StudentAssignmentModel {
         int Id
     }
-    
+
     StudentModel {
         int Id
         bool WillSignContract
     }
-    
+
     UserModel {
         int Id
         bool IsAdmin
         string Name
         string Email
+        bool IsVerified
     }
-    
+
     ProjectModel ||--|| ClientModel : belongs_to
     PreferenceModel ||--|| StudentModel : references
     PreferenceModel ||--|| ProjectModel : references
@@ -70,6 +77,10 @@ erDiagram
     StudentAssignmentModel ||--|| ProjectModel : references
     StudentAssignmentModel ||--|| SolveRunModel : references
     StudentModel ||--|| UserModel : has_one
+    FileModel ||--|| UserModel : belongs_to
+    SolveRunModel ||--o{ StudentAssignmentModel : has_many
+    StudentModel ||--o{ PreferenceModel : has_many
+    UserModel ||--o{ FileModel : has_many
 ```
 
 ### Application - Windows
