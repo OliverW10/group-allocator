@@ -67,6 +67,7 @@ import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
 import type { StudentSubmissionDto } from '../../dtos/student-submission-dto';
+import StudentsService from '../../services/StudentsService';
 
 const students = ref([] as StudentSubmissionDto[]);
 const projects = ref([] as ProjectDto[])
@@ -91,7 +92,7 @@ const projectsWithoutStudents = computed<ProjectDto[]>(() => {
 onMounted(async () => {
     try {
         loading.value = true;
-        students.value = await ApiService.get<StudentSubmissionDto[]>("/students")
+        students.value = await StudentsService.getStudents();
         projects.value = await ApiService.get<ProjectDto[]>("/projects")
     } catch (error) {
         console.error(error);

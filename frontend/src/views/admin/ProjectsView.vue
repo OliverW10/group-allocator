@@ -12,7 +12,7 @@
                 New projects will be added in addition to existing ones.
             </p>
         </FileUploader>
-        <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
+        <DataTable :value="projectAndTheirAllocatedStudents" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
             <Column field="name" header="Name"></Column>
             <Column field="requiresNda" header="Requires NDA">
                 <template #body="slotProps">
@@ -21,6 +21,14 @@
             </Column>
             <Column field="minStudents" header="Min. Students"></Column>
             <Column field="maxStudents" header="Max. Students"></Column>
+            <Column header="Allocated Students">
+                <template #body="slotProps">
+                    <p v-if="slotProps.data.allocatedStudents.length > 0">
+                        {{slotProps.data.allocatedStudents.map((student: StudentSubmissionDto) => student.name).join(', ')}}
+                    </p>
+                    <Badge v-else severity="info" label="No students allocated" class="w-full" />
+                </template>
+            </Column>
             <Column field="id" header="Actions">
 				<template #body="slotProps">
                     <Button severity="danger" class="i-mdi-delete" @click="deleteProject(slotProps.data.id)" />
@@ -31,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
@@ -43,18 +51,34 @@ import FileUploader from '../../components/FileUploader.vue';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
 import ApiService from '../../services/ApiService';
 import { useToast } from 'primevue/usetoast';
+import type { StudentSubmissionDto } from '../../dtos/student-submission-dto';
+import StudentsService from '../../services/StudentsService';
 
 const projects = ref([] as ProjectDto[]);
+const students = ref([] as StudentSubmissionDto[])
+
+interface ProjectAndAllocatedStudents extends ProjectDto {
+    allocatedStudents: StudentSubmissionDto[]
+}
+
+const projectAndTheirAllocatedStudents = computed<ProjectAndAllocatedStudents[]>(() => {
+    return projects.value.map((project: ProjectDto) => {
+        const allocatedStudents = students.value.filter(student => student.orderedPreferences.includes(project.id))
+        return { ...project, allocatedStudents }
+    })
+})
+
 const loading = ref(false);
 const toast = useToast();
 
 onMounted(() => {
-    getProjects();
+    getData();
 });
 
-const getProjects = async () => {
+const getData = async () => {
     try {
         loading.value = true;
+        setStudents(await StudentsService.getStudents())
         setProjects(await ProjectService.getProjects())
     } catch (error) {
         console.error(error);
@@ -62,6 +86,10 @@ const getProjects = async () => {
         loading.value = false;
     }
 };
+
+const setStudents = (data: StudentSubmissionDto[]) => {
+    students.value = data;
+}
 
 const setProjects = (data: ProjectDto[]) => {
     projects.value = data;
