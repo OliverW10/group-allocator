@@ -32,8 +32,11 @@
             </Column>
             <Column field="orderedPreferences" header="Preferences">
                 <template #body="slotProps">
-                    {{slotProps.data.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
-                        projId == proj.id)?.name).join(', ')}}
+                    <p v-if="slotProps.data.orderedPreferences.length > 0">
+                        {{slotProps.data.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
+                            projId == proj.id)?.name).join(', ')}}
+                    </p>
+                    <Badge v-else severity="info" label="No preferences" class="w-full" />
                 </template>
             </Column>
             <Column field="actions" header="Actions">
@@ -45,10 +48,15 @@
                 </template>
             </Column>
         </DataTable>
+        <Divider style="margin: 0;" />
+        <DataTable :value="projectsWithoutStudents" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
+            <Column field="name" header="Name"></Column>
+            <Column field="description" header="Description"></Column>
+        </DataTable>
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import AdminNavBar from '../../components/AdminNavBar.vue';
 import ApiService from '../../services/ApiService';
 import DataTable from 'primevue/datatable';
@@ -73,6 +81,12 @@ const showFiles = (id: number) => {
 const rowClass = (data: StudentSubmissionDto) => {
     return [{ '!bg-red500/20': data.isVerified }]
 };
+
+const projectsWithoutStudents = computed<ProjectDto[]>(() => {
+    return projects.value.filter((project) => {
+        return !students.value.some((student) => student.orderedPreferences.includes(project.id));
+    });
+});
 
 onMounted(async () => {
     try {
