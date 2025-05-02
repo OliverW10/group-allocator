@@ -8,7 +8,7 @@
 
 					<ProgressBar mode="indeterminate" style="height: 6px" v-if="loading" />
 
-					<PickList v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop v-if="!loading">
+					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -19,7 +19,7 @@
 							</Badge>
 						</template>
 					</PickList>
-					<div class="flex gap-2 my-4" v-if="student.willSignContract && projectsWhereRequiresNDAAndNotSelected.length > 0">
+					<div v-if="student.willSignContract && projectsWhereRequiresNDAAndNotSelected.length > 0" class="flex gap-2 my-4">
 						<Alert severity="info" icon="i-mdi-shield-account" class="w-full">
 							These projects were filtered out because they require an NDA and you are have not selected to sign one.
 						</Alert>
