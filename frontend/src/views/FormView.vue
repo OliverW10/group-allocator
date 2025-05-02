@@ -6,7 +6,7 @@
 				<div class="p-4">
 					<h2 class="text-xl mb-3">Select Your Project Preferences</h2>
 
-					<PickList v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
+					<PickList v-model:model-value="projectsWhereNotNDAIfNDANotSelected" list-style="min-height: 500px" data-key="id" dragdrop>
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -17,6 +17,17 @@
 							</Badge>
 						</template>
 					</PickList>
+					<div class="flex gap-2 my-4" v-if="student.willSignContract">
+						<Alert severity="info" icon="i-mdi-shield-account" class="w-full">
+							These projects were filtered out because they require an NDA and you are have not selected to sign one.
+						</Alert>
+						<ul>
+							<li v-for="project in projectsWhereRequiresNDAAndNotSelected " :key="project.id">
+								{{ project.name }}
+							</li>
+						</ul>
+					</div>
+
 					<div class="flex gap-2 my-4">
 						<label for="switch1">I am willing to sign an NDA to work on a project</label>
 						<ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
@@ -54,7 +65,7 @@ import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
 import { ProjectDto } from "../dtos/project-dto";
 import LogoutButton from "../components/LogoutButton.vue";
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
 import ApiService from "../services/ApiService";
 import { useToast } from "primevue/usetoast";
@@ -72,11 +83,23 @@ const DEFAULT_STUDENT: StudentSubmissionDto = {
 	id: -1,
 	orderedPreferences: [],
 	files: [],
-	willSignContract: false,
+	willSignContract: true,
 	isVerified: false,
 }
 const student = ref(DEFAULT_STUDENT)
 const projects = ref([[], []] as ProjectDto[][]);
+
+const projectsWhereNotNDAIfNDANotSelected = computed<ProjectDto[][]>(
+	() => {
+		return projects.value.map(x => x.filter(y => y.requiresNda == false || student.value.willSignContract == true))
+	}
+)
+
+const projectsWhereRequiresNDAAndNotSelected = computed<ProjectDto[]>(
+	() => {
+		return projects.value[0].filter(x => x.requiresNda == true && student.value.willSignContract == false)
+	}
+)
 
 onMounted(async () => {
 	const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
