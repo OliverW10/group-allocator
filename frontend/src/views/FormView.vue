@@ -6,7 +6,9 @@
 				<div class="p-4">
 					<h2 class="text-xl mb-3">Select Your Project Preferences</h2>
 
-					<PickList v-model:model-value="projectsWhereNotNDAIfNDANotSelected" list-style="min-height: 500px" data-key="id" dragdrop>
+					<ProgressBar mode="indeterminate" style="height: 6px" v-if="loading" />
+
+					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -17,7 +19,7 @@
 							</Badge>
 						</template>
 					</PickList>
-					<div class="flex gap-2 my-4" v-if="student.willSignContract">
+					<div v-if="student.willSignContract && projectsWhereRequiresNDAAndNotSelected.length > 0" class="flex gap-2 my-4">
 						<Alert severity="info" icon="i-mdi-shield-account" class="w-full">
 							These projects were filtered out because they require an NDA and you are have not selected to sign one.
 						</Alert>
@@ -30,7 +32,7 @@
 
 					<div class="flex gap-2 my-4">
 						<label for="switch1">I am willing to sign an NDA to work on a project</label>
-						<ToggleSwitch v-model="student.willSignContract" input-id="switch1" />
+						<ToggleSwitch v-model="student.willSignContract" @update:model-value="updateFilteredProjects" input-id="switch1" />
 					</div>
 
 					<FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000"
@@ -67,6 +69,7 @@ import { ProjectDto } from "../dtos/project-dto";
 import LogoutButton from "../components/LogoutButton.vue";
 import { computed, onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
+import ProgressBar from 'primevue/progressbar'
 import ApiService from "../services/ApiService";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from '../store/auth'
@@ -86,14 +89,12 @@ const DEFAULT_STUDENT: StudentSubmissionDto = {
 	willSignContract: true,
 	isVerified: false,
 }
-const student = ref(DEFAULT_STUDENT)
-const projects = ref([[], []] as ProjectDto[][]);
 
-const projectsWhereNotNDAIfNDANotSelected = computed<ProjectDto[][]>(
-	() => {
-		return projects.value.map(x => x.filter(y => y.requiresNda == false || student.value.willSignContract == true))
-	}
-)
+const loading = ref(false)
+const student = ref(DEFAULT_STUDENT)
+
+const projectsRaw = ref([] as ProjectDto[]);
+const projects = ref([[], []] as ProjectDto[][]);
 
 const projectsWhereRequiresNDAAndNotSelected = computed<ProjectDto[]>(
 	() => {
@@ -102,24 +103,46 @@ const projectsWhereRequiresNDAAndNotSelected = computed<ProjectDto[]>(
 )
 
 onMounted(async () => {
+	loading.value = true
 	const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
 	if (maybeStudent) {
 		student.value = maybeStudent
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
 	}
-	const allProjects = await ApiService.get<ProjectDto[]>("/projects")
-	if (allProjects.length == 0) {
-		console.warn("no projects")
-		toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
-		return
+	await loadProjects()
+	loading.value = false
+})
+
+const loadProjects = async () => {
+	try {
+		loading.value = true
+
+		const allProjects = await ApiService.get<ProjectDto[]>("/projects")
+		if (allProjects.length == 0) {
+			console.warn("no projects")
+			toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
+			return
+		}
+
+		projectsRaw.value = allProjects;
+		updateFilteredProjects()
+	} catch (error) {
+		console.error(error)
+	} finally {
+		loading.value = false
 	}
-	projects.value = [allProjects, []]
+}
+
+const updateFilteredProjects = () => {
+	const projectsWhereNotNDAIfNDANotSelected = projectsRaw.value.filter(x => x.requiresNda == false || student.value.willSignContract == true);
+	projects.value = [projectsWhereNotNDAIfNDANotSelected, []]
+
 	for (const selectedProj of student.value.orderedPreferences) {
 		const relevant = projects.value[0].filter(x => x.id == selectedProj)[0]
 		projects.value[1].push(relevant)
 		projects.value[0] = projects.value[0].filter(x => x.id != relevant.id)
 	}
-})
+}
 
 const submitForm = async () => {
 	const submitModel: StudentSubmissionDto = {
