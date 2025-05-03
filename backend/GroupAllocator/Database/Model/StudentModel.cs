@@ -17,17 +17,22 @@ public class StudentModel
 
 public static class StudentModelExtensions
 {
-	public static StudentSubmissionDto ToDto(this StudentModel model)
+	public static StudentInfoAndSubmission ToDto(this StudentModel model)
+	{
+		return new StudentInfoAndSubmission
+		{
+			StudentInfo = model.ToInfoDto(),
+			StudentSubmission = model.ToSubmissionDto(),
+		};
+	}
+
+	public static StudentSubmissionDto ToSubmissionDto(this StudentModel model)
 	{
 		return new StudentSubmissionDto
 		{
-			Id = model.Id,
-			Email = model.User.Email,
-			Name = model.User.Name,
 			WillSignContract = model.WillSignContract,
 			OrderedPreferences = model.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList(),
 			Files = model.User.Files.Select(f => f.ToDto()),
-			IsVerified = model.User.IsVerified
 		};
 	}
 
@@ -38,7 +43,8 @@ public static class StudentModelExtensions
 			StudentId = model.Id,
 			UserId = model.User.Id,
 			Name = model.User.Name,
-			Email = model.User.Email
+			Email = model.User.Email,
+			IsVerified = model.User.IsVerified,
 		};
 	}
 }
