@@ -14,7 +14,7 @@ namespace GroupAllocator.Controllers;
 public class SolverController(IAllocationSolver solver, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet]
-	public async Task<IActionResult> GetAll()
+	public async Task<IActionResult> GetLatest()
 	{
 		// this logic should really be in a service
 		var runs = await db.SolveRuns
@@ -26,43 +26,40 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			.ToListAsync();
 		var allProjects = db.Projects.Include(p => p.Client).ToList();
 
-		var result = runs.Select(r =>
-			new SolveRunDto
+		var lastRun = runs.OrderBy(x => x.Timestamp).FirstOrDefault();
+		if (lastRun == null)
+		{
+			return NotFound();
+		}
+
+		var result = new SolveRunDto
+		{
+			Id = lastRun.Id,
+			RanAt = lastRun.Timestamp,
+			Projects = allProjects.Select(p => new AllocationDto()
 			{
-				Id = r.Id,
-				Evaluation = r.Evaluation,
-				RanAt = r.Timestamp,
-				Projects = allProjects.Select(p => new AllocationDto()
-				{
-					Project = p.ToDto(),
-					Students = r.StudentAssignments
-						.Where(a => a.Project == p)
-						.Select(a => a.Student.ToInfoDto()) // fuck you
-				})
-			}
-		);
+				Project = p.ToDto(),
+				Students = lastRun.StudentAssignments
+					.Where(a => a.Project == p)
+					.Select(a => a.Student.ToInfoDto())
+			})
+		};
 		return Ok(result);
 	}
 
-	[HttpGet("/export/{runId}")]
-	public Task<IActionResult> Export(int runId)
-	{
-		return Task.FromResult<IActionResult>(Ok("TODO: work out export format"));
-	}
-
 	[HttpPost]
-	public async Task<IActionResult> Solve()
+	public async Task<IActionResult> Solve(SolveRequestDto solveConfig)
 	{
 		var solveRun = new SolveRunModel
 		{
-			Evaluation = -1, // todo: get some metric for how good the result is
 			Timestamp = DateTime.UtcNow,
+			PreferenceExponent = solveConfig.PreferenceExponent,
 		};
 		var assignments = solver.AssignStudentsToGroups(solveRun, db.Student.ToList(), db.Projects.ToList(), db.Clients.ToList(), db.Preferences.ToList());
 
 		db.SolveRuns.Add(solveRun);
 		db.StudentAssignments.AddRange(assignments);
 		await db.SaveChangesAsync();
-		return await GetAll();
+		return await GetLatest();
 	}
 }

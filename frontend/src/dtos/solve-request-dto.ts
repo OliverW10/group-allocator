@@ -9,4 +9,5 @@ import { ClientLimitsDto } from "./client-limits-dto";
 export class SolveRequestDto {
     preAllocations: AllocationDto[];
     clientLimits: ClientLimitsDto[];
+    preferenceExponent: number;
 }
