@@ -17,6 +17,8 @@
 							<Badge v-if="option?.requiresNda" severity="info" class="ml-2" icon="i-mdi-shield-account">
 								NDA
 							</Badge>
+							<Badge v-tooltip="'Client: ' + option.client + '\nMin Students: ' + option.minStudents + '\nMax Students: ' + option.maxStudents" 
+								class="ml-auto" size="small" value="?" />
 						</template>
 					</PickList>
 					<div v-if="!student.willSignContract && someProjectsRequireAnNda" class="flex gap-2 my-4">
