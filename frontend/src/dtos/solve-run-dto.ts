@@ -8,6 +8,5 @@ import { AllocationDto } from "./allocation-dto";
 export class SolveRunDto {
     id: number;
     ranAt: Date;
-    evaluation: number;
     projects: AllocationDto[];
 }
