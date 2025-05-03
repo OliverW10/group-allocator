@@ -71,7 +71,9 @@ const showFiles = (id: number) => {
 }
 
 const rowClass = (data: StudentSubmissionDto) => {
-    return [{ '!bg-red500/20': data.isVerified }]
+    return [{ '!bg-green500/20': data.isVerified && data.orderedPreferences.length > 0,
+    '!bg-yellow500/20': data.isVerified && data.orderedPreferences.length == 0,
+    '!bg-red500/20': !data.isVerified }]
 };
 
 onMounted(async () => {
