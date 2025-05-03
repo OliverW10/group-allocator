@@ -7,14 +7,14 @@
         </Column>
         <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="idx.toString()">
             <template #body="slotProps">
-                <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :options="props.students" option-label="name" filter show-clear placeholder="Select Student"></Select>
+                <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :options="props.students" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
                 <!-- {{slotProps.data}} -->
             </template>
         </Column>
     </DataTable>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { ProjectDto } from '../dtos/project-dto';
 import { StudentInfoDto } from '../dtos/student-info-dto';
 import Select from 'primevue/select';
@@ -31,12 +31,20 @@ const props = defineProps<{
     projects: ProjectDto[],
 }>();
 
-const numStudents = ref(3);
 const allocations = defineModel<PartialAllocation[]>();
+const numStudents = computed(() => {
+    const lengths = allocations.value?.map(x => x.students.length) ?? [0]
+    const maxLength = lengths.length != 0 ? Math.max(...lengths) : 0
+    // TODO: constrain based on actual limit
+    return Math.min(maxLength + 1, 6)
+})
+// TODO: fix page shift when selecting project
 
 const emptyAllocation: PartialAllocation = {project: null, students: []}
 const newEmptyAllocation = () => JSON.parse(JSON.stringify(emptyAllocation))
-const deepCompare = (a: PartialAllocation, b: PartialAllocation) => JSON.stringify(a) === JSON.stringify(b)
+const isEmptyAllocaton = (allocation: PartialAllocation) => {
+    return allocation.project == null && (allocation.students == null || allocation.students?.every(x => x == null))
+}
 
 const maintainAllocationsList = () => {
     if (allocations.value == undefined) {
@@ -44,16 +52,13 @@ const maintainAllocationsList = () => {
     }
     
     const l = allocations.value.length
-    if (allocations.value.slice(0, l - 1).some(x => deepCompare(x, emptyAllocation))) {
+    if (allocations.value.slice(0, l - 1).some(x => isEmptyAllocaton(x))) {
         console.log('filtering')
-        allocations.value = [...(allocations.value?.filter(x => !deepCompare(x, emptyAllocation)) ?? []), newEmptyAllocation()]
+        allocations.value = [...(allocations.value?.filter(x => !isEmptyAllocaton(x)) ?? []), newEmptyAllocation()]
         return
     }
 
-    console.log(allocations.value)
-    console.log(emptyAllocation)
-    if (deepCompare(allocations.value[l - 1], emptyAllocation) == false){
-        console.log("pushing")
+    if (allocations.value.length == 0 || !isEmptyAllocaton(allocations.value[l - 1])){
         allocations.value = [...allocations.value ?? [], newEmptyAllocation()]
     }
 }
