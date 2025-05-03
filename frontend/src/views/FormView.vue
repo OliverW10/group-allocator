@@ -162,12 +162,13 @@ const submitForm = async () => {
 		id: student.value.id,
 		email: authStore.userInfo?.email ?? student.value.email,
 		files: student.value.files,
-		orderedPreferences: projects.value[1].map(p => p.id), // should this be id's or names?
+		orderedPreferences: projects.value[1].map(p => p.id).splice(0, maxNumberOfPreferences), // should this be id's or names?
 		willSignContract: student.value.willSignContract,
 		isVerified: false, // redundant here, should split this to two dto's
 	}
 	await ApiService.post("/students/me", submitModel);
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 5000 });
+	window.location.reload()
 };
 
 const onUpload = async (event: FileUploadUploaderEvent) => {
