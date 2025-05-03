@@ -8,7 +8,7 @@
 
 					<ProgressBar v-if="loading" mode="indeterminate" style="height: 6px" />
 
-					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :meta-key-selection="true" :show-source-controls="false">
+					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :meta-key-selection="true" :show-source-controls="false" v-on:update:model-value="warnIfExceededPreferenceLimit">
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -86,6 +86,10 @@ const DEFAULT_STUDENT: StudentSubmissionDto = {
 	isVerified: false,
 }
 
+// TODO: connect this to the backend/database
+const maxNumberOfPreferences = 10;
+const warningMessage = "A maximum of " + maxNumberOfPreferences + " preferences has been selected. Anything more than the top " + maxNumberOfPreferences + " preferences will not be saved";
+let exceededPreferenceLimit = false
 const loading = ref(false)
 // The orderedPreferences is not used to model chosen prefernces, only used to hydrate from backend
 // maybe shouldn't use the dto for this :)
@@ -137,6 +141,18 @@ const updateFilteredProjects = () => {
 				projects.value[0].push(proj)
 			}
 		}
+	}
+}
+
+const warnIfExceededPreferenceLimit = () => {
+	if (projects.value[1].length > maxNumberOfPreferences) {
+		if (!exceededPreferenceLimit) {
+			toast.add({ severity: 'warn', summary: 'Max preferences reached', detail: warningMessage, life: 30000 });
+			exceededPreferenceLimit = true;
+		}
+	}
+	else {
+		exceededPreferenceLimit = false;
 	}
 }
 
