@@ -9,4 +9,5 @@ public class StudentInfoDto
 	public required int UserId { get; set; }
 	public required string Name { get; set; }
 	public required string Email { get; set; }
+	public required bool IsVerified { get; set; }
 }

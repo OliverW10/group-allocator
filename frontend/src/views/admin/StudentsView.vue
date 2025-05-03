@@ -1,12 +1,12 @@
 <template>
     <AdminNavBar />
-	<Dialog :visible="fileModal != null" :modal="true" :closable="false" :draggable="false" :header="'Files for ' + students.find((student) => student.id == fileModal)?.name" :style="{ width: '50vw' }">
-		<DataTable :value="students.find((student) => student.id == fileModal)?.files" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
+	<Dialog :visible="fileModal != null" :modal="true" :closable="false" :draggable="false" :header="'Files for ' + students.find((student) => student.studentInfo.studentId == fileModal)?.studentInfo.name" :style="{ width: '50vw' }">
+		<DataTable :value="students.find((student) => student.studentInfo.studentId == fileModal)?.studentSubmission.files" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
 			<Column field="name" header="Name"></Column>
 			<Column field="actions" header="Actions">
 				<template #body="slotProps">
-					<Button severity="info" class="i-mdi-download" @click="download(slotProps.data.id, slotProps.data.name)" />
-					<Button severity="danger" class="i-mdi-delete" @click="deleteFile(slotProps.data.id)" />
+					<Button severity="info" class="i-mdi-download" @click="download(slotProps.data.studentInfo.studentId, slotProps.data.studentInfo.name)" />
+					<Button severity="danger" class="i-mdi-delete" @click="deleteFile(slotProps.data.studentInfo.studentId)" />
 				</template>
 			</Column>
 		</DataTable>
@@ -27,20 +27,20 @@
             <Column field="email" header="Email"></Column>
             <Column field="willSignContract" header="NDA?">
                 <template #body="slotProps">
-                    {{ slotProps.data.willSignContract ? '✔️' : '❌' }}
+                    {{ slotProps.data.studentSubmission.willSignContract ? '✔️' : '❌' }}
                 </template>
             </Column>
             <Column field="orderedPreferences" header="Preferences">
                 <template #body="slotProps">
-                    {{slotProps.data.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
+                    {{slotProps.data.studentSubmission.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
                         projId == proj.id)?.name).join(', ')}}
                 </template>
             </Column>
             <Column field="actions" header="Actions">
                 <template #body="slotProps">
 					<div class="flex">
-						<Button severity="info" class="i-mdi-files" @click="showFiles(slotProps.data.id)" />
-						<Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.id)" />
+						<Button severity="info" class="i-mdi-files" @click="showFiles(slotProps.data.studentInfo.studentId)" />
+						<Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.studentInfo.studentId)" />
 					</div>
                 </template>
             </Column>
@@ -58,9 +58,9 @@ import Divider from 'primevue/divider';
 import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
-import type { StudentSubmissionDto } from '../../dtos/student-submission-dto';
+import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
 
-const students = ref([] as StudentSubmissionDto[]);
+const students = ref([] as StudentInfoAndSubmission[]);
 const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const toast = useToast();
@@ -70,16 +70,16 @@ const showFiles = (id: number) => {
 	fileModal.value = id;
 }
 
-const rowClass = (data: StudentSubmissionDto) => {
-    return [{ '!bg-green500/20': data.isVerified && data.orderedPreferences.length > 0,
-    '!bg-yellow500/20': data.isVerified && data.orderedPreferences.length == 0,
-    '!bg-red500/20': !data.isVerified }]
+const rowClass = (data: StudentInfoAndSubmission) => {
+    return [{ '!bg-green500/20': data.studentInfo.isVerified && data.studentSubmission.orderedPreferences.length > 0,
+    '!bg-yellow500/20': data.studentInfo.isVerified && data.studentSubmission.orderedPreferences.length == 0,
+    '!bg-red500/20': !data.studentInfo.isVerified }]
 };
 
 onMounted(async () => {
     try {
         loading.value = true;
-        students.value = await ApiService.get<StudentSubmissionDto[]>("/students")
+        students.value = await ApiService.get<StudentInfoAndSubmission[]>("/students")
         projects.value = await ApiService.get<ProjectDto[]>("/projects")
     } catch (error) {
         console.error(error);
@@ -90,7 +90,7 @@ onMounted(async () => {
 
 const deleteFile = async (id: string) => {
 	await ApiService.delete(`/students/file/${id}`)
-	students.value = await ApiService.get<StudentSubmissionDto[]>("/students")
+	students.value = await ApiService.get<StudentInfoAndSubmission[]>("/students")
 }
 
 const download = async (id: unknown, name: string) => {
@@ -103,12 +103,12 @@ const download = async (id: unknown, name: string) => {
 	document.body.removeChild(a)
 }
 
-const setStudents = (data: StudentSubmissionDto[]) => {
+const setStudents = (data: StudentInfoAndSubmission[]) => {
     students.value = data;
 }
 
 const remove = async (id: string) => {
-    const newProjects = await ApiService.delete<StudentSubmissionDto[]>(`/students/${id}`);
+    const newProjects = await ApiService.delete<StudentInfoAndSubmission[]>(`/students/${id}`);
     setStudents(newProjects);
 }
 
@@ -120,8 +120,8 @@ const uploadStudents = async (event: FileUploadSelectEvent) => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     try {
-        const result = await ApiService.postRaw('students/whitelist', formData) // , 'multipart/form-data'
-        setStudents(result as StudentSubmissionDto[])
+        const result = await ApiService.postRaw<StudentInfoAndSubmission[]>('students/whitelist', formData) // , 'multipart/form-data'
+        setStudents(result)
         if (result != undefined) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Students added to whitelist', life: 5000 });
         } else {

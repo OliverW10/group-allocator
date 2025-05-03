@@ -8,4 +8,5 @@ export class StudentInfoDto {
     userId: number;
     name: string;
     email: string;
+    isVerified: boolean;
 }
