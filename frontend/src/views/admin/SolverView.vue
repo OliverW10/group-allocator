@@ -1,8 +1,12 @@
 <template>
 	<AdminNavBar />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
-		<div>
-			<SolverConfiguration v-model="solverConfig" :/>
+		<div v-if="!loading">
+			<AllocationsTable v-model="solverConfig.preAllocations" :projects="allProjects ?? []" :students="allStudents ?? []"/>
+			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
+		</div>
+		<div v-else>
+			<ProgressSpinner />
 		</div>
 		<div class="p-8">
 			<Divider layout="vertical" />
@@ -22,8 +26,12 @@ import ApiService from '../../services/ApiService';
 import type { SolveRunDto } from '../../dtos/solve-run-dto';
 import { useToast } from "primevue/usetoast";
 import type { SolveRequestDto } from '../../dtos/solve-request-dto';
-import SolverConfiguration from '../../components/SolverConfiguration.vue';
+import SolverConfiguration from '../../components/AllocationsTable.vue';
 import SolveResultDisplay from '../../components/SolveResultDisplay.vue';
+import AllocationsTable from '../../components/AllocationsTable.vue';
+import type { StudentInfoDto } from '../../dtos/student-info-dto';
+import type { ProjectDto } from '../../dtos/project-dto';
+import ProgressSpinner from 'primevue/progressspinner';
 
 const defaultSolveRequest: SolveRequestDto = {
 	clientLimits: [],
@@ -36,11 +44,16 @@ const solverConfig = ref(defaultSolveRequest as SolveRequestDto);
 const solveResult = ref(undefined as SolveRunDto | undefined)
 const loading = ref(true)
 
+const allStudents = ref(undefined as StudentInfoDto[] | undefined)
+const allProjects = ref(undefined as ProjectDto[] | undefined)
+
 onMounted(async () => {
 	solveResult.value = await ApiService.get<SolveRunDto>("/solver")
 	if (solveResult.value) {
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	}
+	allStudents.value = await ApiService.get<StudentInfoDto[]>("/students");
+	allProjects.value = await ApiService.get<ProjectDto[]>("/projects");
 	loading.value = false
 })
 
