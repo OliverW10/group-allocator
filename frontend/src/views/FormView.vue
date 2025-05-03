@@ -1,14 +1,14 @@
 <template>
-	<div class="flex flex-col gap-4 p-4 h-screen justify-center items-center">
+	<div class="flex flex-col gap-4 p-4 justify-center items-center">
 		<h1 class="heading text-center mb-4">Submit Preferences</h1>
 		<Card class="min-w-5xl">
 			<template #content>
 				<div class="p-4">
 					<h2 class="text-xl mb-3">Select Your Project Preferences</h2>
 
-					<ProgressBar mode="indeterminate" style="height: 6px" v-if="loading" />
+					<ProgressBar v-if="loading" mode="indeterminate" style="height: 6px" />
 
-					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop>
+					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :meta-key-selection="true" :show-source-controls="false">
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -19,20 +19,15 @@
 							</Badge>
 						</template>
 					</PickList>
-					<div v-if="student.willSignContract && projectsWhereRequiresNDAAndNotSelected.length > 0" class="flex gap-2 my-4">
-						<Alert severity="info" icon="i-mdi-shield-account" class="w-full">
-							These projects were filtered out because they require an NDA and you are have not selected to sign one.
-						</Alert>
-						<ul>
-							<li v-for="project in projectsWhereRequiresNDAAndNotSelected " :key="project.id">
-								{{ project.name }}
-							</li>
-						</ul>
+					<div v-if="!student.willSignContract && someProjectsRequireAnNda" class="flex gap-2 my-4">
+						<Message severity="info" icon="i-mdi-shield-account" class="w-full">
+							Some projects were filtered out because they require an NDA and you are have not selected to sign one.
+						</Message>
 					</div>
 
 					<div class="flex gap-2 my-4">
 						<label for="switch1">I am willing to sign an NDA to work on a project</label>
-						<ToggleSwitch v-model="student.willSignContract" @update:model-value="updateFilteredProjects" input-id="switch1" />
+						<ToggleSwitch v-model="student.willSignContract" input-id="switch1" @update:model-value="updateFilteredProjects" />
 					</div>
 
 					<FileUpload name="demo[]" url="/api/upload" :multiple="true" :max-file-size="10000000"
@@ -63,6 +58,7 @@
 import Button from "primevue/button";
 import Badge from "primevue/badge";
 import Card from "primevue/card";
+import Message from "primevue/message"
 import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
 import { ProjectDto } from "../dtos/project-dto";
@@ -91,16 +87,13 @@ const DEFAULT_STUDENT: StudentSubmissionDto = {
 }
 
 const loading = ref(false)
+// The orderedPreferences is not used to model chosen prefernces, only used to hydrate from backend
+// maybe shouldn't use the dto for this :)
 const student = ref(DEFAULT_STUDENT)
 
 const projectsRaw = ref([] as ProjectDto[]);
 const projects = ref([[], []] as ProjectDto[][]);
-
-const projectsWhereRequiresNDAAndNotSelected = computed<ProjectDto[]>(
-	() => {
-		return projects.value[0].filter(x => x.requiresNda == true && student.value.willSignContract == false)
-	}
-)
+const someProjectsRequireAnNda = computed(() => projectsRaw.value.some(x => x.requiresNda))
 
 onMounted(async () => {
 	loading.value = true
@@ -134,13 +127,16 @@ const loadProjects = async () => {
 }
 
 const updateFilteredProjects = () => {
-	const projectsWhereNotNDAIfNDANotSelected = projectsRaw.value.filter(x => x.requiresNda == false || student.value.willSignContract == true);
-	projects.value = [projectsWhereNotNDAIfNDANotSelected, []]
+	const filterToAllowed = (l: ProjectDto[]) => l.filter(x => !x.requiresNda || student.value.willSignContract)
+	projects.value = projects.value.map(filterToAllowed);
 
-	for (const selectedProj of student.value.orderedPreferences) {
-		const relevant = projects.value[0].filter(x => x.id == selectedProj)[0]
-		projects.value[1].push(relevant)
-		projects.value[0] = projects.value[0].filter(x => x.id != relevant.id)
+	// Add back previously disallowed projects when re-ticking willSignContract
+	if (student.value.willSignContract) {
+		for (const proj of projectsRaw.value) {
+			if (!projects.value[0].includes(proj) && !projects.value[1].includes(proj)) {
+				projects.value[0].push(proj)
+			}
+		}
 	}
 }
 
