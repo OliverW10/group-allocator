@@ -8,7 +8,7 @@
 
 					<ProgressBar v-if="loading" mode="indeterminate" style="height: 6px" />
 
-					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :metaKeySelection="true">
+					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :meta-key-selection="true" :show-source-controls="false">
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -19,15 +19,10 @@
 							</Badge>
 						</template>
 					</PickList>
-					<div v-if="student.willSignContract && disallowedProjects.length > 0" class="flex gap-2 my-4">
-						<Alert severity="info" icon="i-mdi-shield-account" class="w-full">
-							These projects were filtered out because they require an NDA and you are have not selected to sign one.
-						</Alert>
-						<ul>
-							<li v-for="project in disallowedProjects " :key="project.id">
-								{{ project.name }}
-							</li>
-						</ul>
+					<div v-if="!student.willSignContract && someProjectsRequireAnNda" class="flex gap-2 my-4">
+						<Message severity="info" icon="i-mdi-shield-account" class="w-full">
+							Some projects were filtered out because they require an NDA and you are have not selected to sign one.
+						</Message>
 					</div>
 
 					<div class="flex gap-2 my-4">
@@ -63,6 +58,7 @@
 import Button from "primevue/button";
 import Badge from "primevue/badge";
 import Card from "primevue/card";
+import Message from "primevue/message"
 import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
 import { ProjectDto } from "../dtos/project-dto";
@@ -97,12 +93,7 @@ const student = ref(DEFAULT_STUDENT)
 
 const projectsRaw = ref([] as ProjectDto[]);
 const projects = ref([[], []] as ProjectDto[][]);
-
-const disallowedProjects = computed<ProjectDto[]>(
-	() => {
-		return projects.value[0].filter(x => x.requiresNda == true && student.value.willSignContract == false)
-	}
-)
+const someProjectsRequireAnNda = computed(() => projectsRaw.value.some(x => x.requiresNda))
 
 onMounted(async () => {
 	loading.value = true
