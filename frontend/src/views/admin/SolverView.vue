@@ -40,7 +40,7 @@ const defaultSolveRequest: SolveRequestDto = {
 }
 
 const toast = useToast();
-const solverConfig = ref(JSON.parse(JSON.stringify(defaultSolveRequest)) as SolveRequestDto);
+const solverConfig = ref(structuredClone(defaultSolveRequest) as SolveRequestDto);
 const solveResult = ref(undefined as SolveRunDto | undefined)
 const loading = ref(true)
 
@@ -58,7 +58,7 @@ onMounted(async () => {
 })
 
 const reset = async () => {
-	solverConfig.value = defaultSolveRequest;
+	solverConfig.value = structuredClone(defaultSolveRequest)
 }
 
 const solve = async () => {

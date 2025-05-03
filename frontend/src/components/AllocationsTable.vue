@@ -41,7 +41,7 @@ const numStudents = computed(() => {
 // TODO: fix page shift when selecting project
 
 const emptyAllocation: PartialAllocation = {project: null, students: []}
-const newEmptyAllocation = () => JSON.parse(JSON.stringify(emptyAllocation))
+const newEmptyAllocation = () => structuredClone(emptyAllocation)
 const isEmptyAllocaton = (allocation: PartialAllocation) => {
     return allocation.project == null && (allocation.students == null || allocation.students?.every(x => x == null))
 }
