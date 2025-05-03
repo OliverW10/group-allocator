@@ -2,6 +2,7 @@
 	<AdminNavBar />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
+			<Button label="Reset" @click="reset"></Button>
 			<AllocationsTable v-model="solverConfig.preAllocations" :projects="allProjects ?? []" :students="allStudents ?? []"/>
 			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
 		</div>
@@ -26,7 +27,6 @@ import ApiService from '../../services/ApiService';
 import type { SolveRunDto } from '../../dtos/solve-run-dto';
 import { useToast } from "primevue/usetoast";
 import type { SolveRequestDto } from '../../dtos/solve-request-dto';
-import SolverConfiguration from '../../components/AllocationsTable.vue';
 import SolveResultDisplay from '../../components/SolveResultDisplay.vue';
 import AllocationsTable from '../../components/AllocationsTable.vue';
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
@@ -40,7 +40,7 @@ const defaultSolveRequest: SolveRequestDto = {
 }
 
 const toast = useToast();
-const solverConfig = ref(defaultSolveRequest as SolveRequestDto);
+const solverConfig = ref(JSON.parse(JSON.stringify(defaultSolveRequest)) as SolveRequestDto);
 const solveResult = ref(undefined as SolveRunDto | undefined)
 const loading = ref(true)
 

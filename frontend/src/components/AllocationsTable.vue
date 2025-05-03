@@ -63,8 +63,6 @@ const maintainAllocationsList = () => {
     }
 }
 
-
-
 watch(allocations, maintainAllocationsList)
 onMounted(() => {
     maintainAllocationsList()
