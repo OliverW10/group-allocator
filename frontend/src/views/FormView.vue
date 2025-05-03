@@ -1,5 +1,5 @@
 <template>
-	<div class="flex flex-col gap-4 p-4 h-screen justify-center items-center">
+	<div class="flex flex-col gap-4 p-4 justify-center items-center">
 		<h1 class="heading text-center mb-4">Submit Preferences</h1>
 		<Card class="min-w-5xl">
 			<template #content>
