@@ -21,37 +21,14 @@ import Select, { type SelectChangeEvent } from 'primevue/select';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-
-export interface AllocatedStudentInfo extends StudentInfoDto {
-    manuallyAllocated: boolean,
-}
-
-export interface PartialAllocation {
-    project: ProjectDto | null,
-    manuallyAllocatedProject: boolean,
-    students: AllocatedStudentInfo[],
-}
+import type { AllocatedStudentInfo, PartialAllocation } from '../model/PartialAllocation';
 
 const props = defineProps<{
-    students: StudentInfoDto[],
+    students: AllocatedStudentInfo[],
     projects: ProjectDto[],
 }>();
 const allocations = defineModel<PartialAllocation[]>();
 
-const studentsWithAllocated: ComputedRef<AllocatedStudentInfo[]> = computed(() => props.students?.map(s => {
-    // const casted = s as AllocatedStudentInfo;
-    // casted.manuallyAllocated = true
-    // return casted
-    return {
-        studentId: s.studentId,
-        userId: s.userId,
-        name: s.name,
-        email: s.email,
-        isVerified: s.isVerified,
-
-        manuallyAllocated: true,
-    }
-}) ?? [])
 const remainingStudents = computed(() => {
     const usedStudents = allocations.value?.flatMap(aloc => aloc.students) ?? []
     return studentsWithAllocated.value.filter(stu => !usedStudents.includes(stu))
