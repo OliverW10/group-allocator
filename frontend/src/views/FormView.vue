@@ -164,7 +164,6 @@ const submitForm = async () => {
 		toast.add({ severity: 'error', summary: 'Failed', detail: 'Submission failed. If the issue persists contact developers', life: 5000 });
 	} else {
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 5000 });
-		window.location.reload()
 	}
 };
 
