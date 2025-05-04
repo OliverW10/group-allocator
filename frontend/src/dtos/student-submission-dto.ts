@@ -6,11 +6,7 @@
 import { FileDetailsDto } from "./file-details-dto";
 
 export class StudentSubmissionDto {
-    id: number;
-    email: string;
-    name: string;
     orderedPreferences: number[];
     willSignContract: boolean;
     files: FileDetailsDto[];
-    isVerified: boolean;
 }

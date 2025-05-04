@@ -6,6 +6,7 @@
 import { SolveRunDto } from '../dtos/solve-run-dto';
 import SolverReportService from '../services/SolverReportService';
 import type { MenuItem } from 'primevue/menuitem';
+import SplitButton from 'primevue/splitbutton'
 
 const solveResult = defineModel<SolveRunDto>();
 

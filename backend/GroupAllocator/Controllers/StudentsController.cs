@@ -51,7 +51,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return NoContent();
 		}
 
-		return Ok(student.ToDto());
+		return Ok(student.ToSubmissionDto());
 	}
 
 	[HttpPost("me")]
@@ -102,8 +102,6 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			preferenceModels.Add(newPreference);
 			strength -= 0.1;
 		}
-
-		// TODO: handle files
 
 		db.Student.Add(student);
 

@@ -3,7 +3,7 @@
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
 			<Button label="Reset" @click="reset"></Button>
-			<AllocationsTable v-model="solverConfig.preAllocations" :projects="allProjects ?? []" :students="allStudents ?? []"/>
+			<AllocationsTable v-model="solverConfig.preAllocations" :projects="allProjects ?? []" :students="allStudents?.map(x => x.studentInfo) ?? []"/>
 			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
 		</div>
 		<div v-else>
@@ -29,9 +29,9 @@ import { useToast } from "primevue/usetoast";
 import type { SolveRequestDto } from '../../dtos/solve-request-dto';
 import SolveResultDisplay from '../../components/SolveResultDisplay.vue';
 import AllocationsTable from '../../components/AllocationsTable.vue';
-import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import type { ProjectDto } from '../../dtos/project-dto';
 import ProgressSpinner from 'primevue/progressspinner';
+import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
 
 const defaultSolveRequest: SolveRequestDto = {
 	clientLimits: [],
@@ -44,7 +44,7 @@ const solverConfig = ref(structuredClone(defaultSolveRequest) as SolveRequestDto
 const solveResult = ref(undefined as SolveRunDto | undefined)
 const loading = ref(true)
 
-const allStudents = ref(undefined as StudentInfoDto[] | undefined)
+const allStudents = ref(undefined as StudentInfoAndSubmission[] | undefined)
 const allProjects = ref(undefined as ProjectDto[] | undefined)
 
 onMounted(async () => {
@@ -52,7 +52,7 @@ onMounted(async () => {
 	if (solveResult.value) {
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	}
-	allStudents.value = await ApiService.get<StudentInfoDto[]>("/students");
+	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>("/students");
 	allProjects.value = await ApiService.get<ProjectDto[]>("/projects");
 	loading.value = false
 })
