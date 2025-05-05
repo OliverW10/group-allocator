@@ -8,7 +8,7 @@
 
 					<ProgressBar v-if="loading" mode="indeterminate" style="height: 6px" />
 
-					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :meta-key-selection="true" :show-source-controls="false">
+					<PickList v-if="!loading" v-model:model-value="projects" list-style="min-height: 500px" data-key="id" dragdrop :meta-key-selection="true" :show-source-controls="false" v-on:update:model-value="warnIfExceededPreferenceLimit">
 						<template #sourceheader><b class="text-lg">Available Projects</b></template>
 						<template #targetheader><b class="text-lg">Ordered Preferences</b></template>
 
@@ -78,6 +78,9 @@ const toast = useToast();
 
 const files = ref([] as FileDetailsDto[])
 const willSignContract = ref(true)
+const maxNumberOfPreferences = 10;
+const warningMessage = "A maximum of " + maxNumberOfPreferences + " preferences has been selected. Anything more than the top " + maxNumberOfPreferences + " preferences will not be saved";
+let exceededPreferenceLimit = false
 const loading = ref(false)
 
 const projectsRaw = ref([] as ProjectDto[]);
@@ -138,10 +141,22 @@ const updateFilteredProjects = () => {
 	}
 }
 
+const warnIfExceededPreferenceLimit = () => {
+	if (projects.value[1].length > maxNumberOfPreferences) {
+		if (!exceededPreferenceLimit) {
+			toast.add({ severity: 'warn', summary: 'Max preferences reached', detail: warningMessage, life: 30000 });
+			exceededPreferenceLimit = true;
+		}
+	}
+	else {
+		exceededPreferenceLimit = false;
+	}
+}
+
 const submitForm = async () => {
 	const submitModel: StudentSubmissionDto = {
 		files: files.value,
-		orderedPreferences: projects.value[1].map(p => p.id),
+		orderedPreferences: projects.value[1].map(p => p.id).splice(0, maxNumberOfPreferences),
 		willSignContract: willSignContract.value,
 	}
 	const result = await ApiService.post("/students/me", submitModel)
