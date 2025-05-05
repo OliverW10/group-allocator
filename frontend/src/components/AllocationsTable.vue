@@ -1,12 +1,15 @@
 <template>
-    <Button label="Clear auto-allocated" @click="clearAutoAllocated"></Button>
+	<div>
+		<Button label="Clear all" class="mr-1" @click="clearAll"></Button>
+		<Button label="Clear auto-allocated" @click="clearAutoAllocated"></Button>
+	</div>
     <DataTable :value="allocations" :loading="false">
         <Column field="project" header="Project">
             <template #body="slotProps">
                 <Select v-model="slotProps.data.project" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
             </template>
         </Column>
-        <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="idx.toString()">
+        <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + idx.toString()">
             <template #body="slotProps">
                 <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
             </template>
@@ -77,6 +80,11 @@ const clearAutoAllocated = () => {
         allocation.students = allocation.students.filter(x => x.manuallyAllocated)
     }
     maintainAllocationsList()
+}
+
+const clearAll = () => {
+	allocations.value = []
+	maintainAllocationsList()
 }
 
 const onProjectChange = (event: SelectChangeEvent) => {

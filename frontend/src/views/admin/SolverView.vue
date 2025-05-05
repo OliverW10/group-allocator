@@ -2,7 +2,6 @@
 	<AdminNavBar />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
-			<Button label="Reset" @click="reset"></Button>
 			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos"/>
 			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
 		</div>
@@ -28,12 +27,13 @@ import type { SolveRunDto } from '../../dtos/solve-run-dto';
 import { useToast } from "primevue/usetoast";
 import { SolveRequestDto } from '../../dtos/solve-request-dto';
 import SolveResultDisplay from '../../components/SolveResultDisplay.vue';
-import AllocationsTable, { type AllocatedStudentInfo, type PartialAllocation } from '../../components/AllocationsTable.vue';
+import AllocationsTable from '../../components/AllocationsTable.vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import ProgressSpinner from 'primevue/progressspinner';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
 import type { AllocationDto } from '../../dtos/allocation-dto';
 import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
+import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -63,19 +63,11 @@ onMounted(async () => {
 	loading.value = false
 })
 
-const resetAll = async () => {
-	allocations.value = []
-}
-
-const resetAutomatic = async () => {
-	// 
-}
-
 const solve = async () => {
 	loading.value = true;
 	const solveRequest: SolveRequestDto = {
 		clientLimits: clientLimits.value,
-		preAllocations: allocations.value as AllocationDto[],
+		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
 		preferenceExponent: preferenceExponent.value
 	}
 	solveResult.value = await ApiService.post<SolveRunDto>("/solver", solveRequest)

@@ -55,6 +55,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			Timestamp = DateTime.UtcNow,
 			PreferenceExponent = solveConfig.PreferenceExponent,
 		};
+
 		var assignments = solver.AssignStudentsToGroups(solveRun, db.Student.ToList(), db.Projects.ToList(), db.Clients.ToList(), db.Preferences.ToList());
 
 		db.SolveRuns.Add(solveRun);
