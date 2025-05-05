@@ -1,4 +1,5 @@
 import type { ProjectDto } from "../dtos/project-dto";
+import type { StudentInfoDto } from "../dtos/student-info-dto";
 
 export interface AllocatedStudentInfo extends StudentInfoDto {
     manuallyAllocated: boolean,

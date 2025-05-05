@@ -3,20 +3,19 @@
     <DataTable :value="allocations" :loading="false">
         <Column field="project" header="Project">
             <template #body="slotProps">
-                <Select v-model="slotProps.data.project" :options="remainingProjects" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
+                <Select v-model="slotProps.data.project" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
             </template>
         </Column>
         <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="idx.toString()">
             <template #body="slotProps">
-                <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :options="remainingStudents" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
+                <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
             </template>
         </Column>
     </DataTable>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, watch, type ComputedRef } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { ProjectDto } from '../dtos/project-dto';
-import { StudentInfoDto } from '../dtos/student-info-dto';
 import Select, { type SelectChangeEvent } from 'primevue/select';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -31,8 +30,9 @@ const allocations = defineModel<PartialAllocation[]>();
 
 const remainingStudents = computed(() => {
     const usedStudents = allocations.value?.flatMap(aloc => aloc.students) ?? []
-    return studentsWithAllocated.value.filter(stu => !usedStudents.includes(stu))
+    return props.students.filter(stu => !usedStudents.includes(stu))
 })
+
 const remainingProjects = computed(() => {
     const usedProjects = allocations.value?.map(aloc => aloc.project).filter(x => x) ?? []
     return props.projects.filter(proj => !usedProjects.includes(proj))

@@ -43,8 +43,8 @@ const toast = useToast();
 const solveResult = ref(undefined as SolveRunDto | undefined)
 const loading = ref(true)
 
-const allStudents = ref(undefined as StudentInfoAndSubmission[] | undefined)
 const allProjects = ref(undefined as ProjectDto[] | undefined)
+const allStudents = ref(undefined as StudentInfoAndSubmission[] | undefined)
 const allStudentInfos = computed(() => {
 	return allStudents.value?.map(student => {
 		const casted = student.studentInfo as AllocatedStudentInfo;
@@ -63,8 +63,12 @@ onMounted(async () => {
 	loading.value = false
 })
 
-const reset = async () => {
+const resetAll = async () => {
 	allocations.value = []
+}
+
+const resetAutomatic = async () => {
+	// 
 }
 
 const solve = async () => {
