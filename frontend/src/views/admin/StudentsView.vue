@@ -23,8 +23,8 @@
             </p>
         </FileUploader>
         <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
-            <Column field="name" header="Name"></Column>
-            <Column field="email" header="Email"></Column>
+            <Column field="studentInfo.name" header="Name"></Column>
+            <Column field="studentInfo.email" header="Email"></Column>
             <Column field="willSignContract" header="NDA?">
                 <template #body="slotProps">
                     {{ slotProps.data.studentSubmission.willSignContract ? '✔️' : '❌' }}

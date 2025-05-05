@@ -1,4 +1,5 @@
 using GroupAllocator.Database.Model;
+using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -98,6 +99,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 //Real data test case
 
 List<ClientModel> clients = [
+
     new ClientModel { Id = 1, Name = "Chris Howell", MinProjects = 1, MaxProjects = 2 },
     new ClientModel { Id = 2, Name = "Henry Gilder", MinProjects = 1, MaxProjects = 1 },
     new ClientModel { Id = 3, Name = "Lindsay Lyon", MinProjects = 1, MaxProjects = 2 },
@@ -398,43 +400,26 @@ List<PreferenceModel> preferences = new List<PreferenceModel>();
 
 int preferenceIDs = 1;
 
-ProjectModel currentProject = null;
-
-
 for (int i = 0; i < students.Count(); i++)
 {
 
-    float intialStrength = 1.0f;
+    float initialStrength = 1.0f;
 
     foreach (int projectId in individualPreferences[i])
     {
-
-        foreach (ProjectModel project in projects)
-        {
-            if (project.Id == projectId)
-            {
-                currentProject = project;
-            }
-
-        }
-
-        if (currentProject == null)
-        {
-            Console.WriteLine("error couldn't find project");
-        }
-
+		var currentProject = projects.First(p => p.Id == projectId);
 
         PreferenceModel currentPreference = new PreferenceModel
         {
             Id = preferenceIDs++,
-            Strength = intialStrength,
+            Strength = initialStrength,
             Student = students[i],
             Project = currentProject
         };
 
         preferences.Add(currentPreference);
 
-        intialStrength -= 0.1f; // the preferences are ordered from best to worst so just decrement strength each time we go to the next one
+        initialStrength -= 0.1f; // the preferences are ordered from best to worst so just decrement strength each time we go to the next one
  
     }
 
@@ -457,7 +442,9 @@ var run = new SolveRunModel
 	PreferenceExponent = 1,
 	Timestamp = DateTime.UtcNow,
 };
-var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences);
+var manualAllocations = new List<AllocationDto>();
+var clientLimits = new List<ClientLimitsDto>();
+var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences, manualAllocations, clientLimits, 0.5);
 
 int studentCount = 1;
 int studentIndex = 0;

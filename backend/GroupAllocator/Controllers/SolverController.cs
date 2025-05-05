@@ -26,7 +26,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			.ToListAsync();
 		var allProjects = db.Projects.Include(p => p.Client).ToList();
 
-		var lastRun = runs.OrderBy(x => x.Timestamp).FirstOrDefault();
+		var lastRun = runs.OrderByDescending(x => x.Timestamp).FirstOrDefault();
 		if (lastRun == null)
 		{
 			return NotFound();
@@ -40,7 +40,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			{
 				Project = p.ToDto(),
 				Students = lastRun.StudentAssignments
-					.Where(a => a.Project == p)
+					.Where(a => a.Project.Id == p.Id)
 					.Select(a => a.Student.ToInfoDto())
 			})
 		};
@@ -55,8 +55,23 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			Timestamp = DateTime.UtcNow,
 			PreferenceExponent = solveConfig.PreferenceExponent,
 		};
-		var assignments = solver.AssignStudentsToGroups(solveRun, db.Student.ToList(), db.Projects.ToList(), db.Clients.ToList(), db.Preferences.ToList());
 
+		var assignments = solver.AssignStudentsToGroups(solveRun,
+			db.Student.ToList(),
+			db.Projects.ToList(),
+			db.Clients.ToList(),
+			db.Preferences.ToList(),
+			solveConfig.PreAllocations.ToList(),
+			solveConfig.ClientLimits.ToList(),
+			solveConfig.PreferenceExponent
+		).ToList();
+
+		if (!assignments.Any())
+		{
+			return BadRequest("Solver failed to find a solution");
+		}
+
+		solveRun.StudentAssignments = assignments;
 		db.SolveRuns.Add(solveRun);
 		db.StudentAssignments.AddRange(assignments);
 		await db.SaveChangesAsync();

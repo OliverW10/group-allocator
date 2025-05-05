@@ -4,6 +4,7 @@
  */
 
 export class ClientLimitsDto {
+    clientId: number;
     minProjects: number;
     maxProjects: number;
 }
