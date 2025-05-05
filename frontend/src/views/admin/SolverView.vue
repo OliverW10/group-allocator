@@ -13,7 +13,6 @@
 		</div>
 		<div>
 			<Button label="Run Solver" icon="i-mdi-cogs" class="w-fit" @click="solve"></Button>
-			<SolveResultDisplay v-model="solveResult" />
 		</div>
 	</div>
 </template>
@@ -26,7 +25,6 @@ import ApiService from '../../services/ApiService';
 import type { SolveRunDto } from '../../dtos/solve-run-dto';
 import { useToast } from "primevue/usetoast";
 import { SolveRequestDto } from '../../dtos/solve-request-dto';
-import SolveResultDisplay from '../../components/SolveResultDisplay.vue';
 import AllocationsTable from '../../components/AllocationsTable.vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import ProgressSpinner from 'primevue/progressspinner';
@@ -34,6 +32,7 @@ import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submi
 import type { AllocationDto } from '../../dtos/allocation-dto';
 import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
 import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
+import type { StudentInfoDto } from '../../dtos/student-info-dto';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -85,11 +84,45 @@ const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 	if (solveResult == undefined) {
 		return
 	}
-	allocations.value = solveResult.projects.map(allocation => {
-		const casted = allocation as PartialAllocation;
-		casted.manuallyAllocatedProject = false
-		return casted
-	})
+	for (const autoAllocation of solveResult.projects) {
+		const existingWithMatchingProjects = allocations.value.filter(x => x.project?.id == autoAllocation.project.id)
+		// There was a manual allocation with a matching project
+		if (existingWithMatchingProjects.length) {
+			const relevantExisting = existingWithMatchingProjects[0]
+			addMissingStudents(autoAllocation, relevantExisting);
+			continue
+		}
+		
+		const existingWithMatchingStudents = allocations.value.filter(a => a.students.every(s => autoAllocation.students.some(s2 => s2.studentId == s.studentId)))
+		// There was a manual allocation with matching students
+		if (existingWithMatchingStudents.length) {
+			const relevantExisting = existingWithMatchingStudents[0]
+			addMissingStudents(autoAllocation, relevantExisting)
+			relevantExisting.project = autoAllocation.project
+			relevantExisting.manuallyAllocatedProject = false
+			continue;
+		}
+
+		// No matching manual allocation, create entirely new one
+		allocations.value.push({
+			manuallyAllocatedProject: false,
+			project: autoAllocation.project,
+			students: autoAllocation.students.map(x => studentInfoToAllocated(x))
+		})
+	}
+
+}
+
+const addMissingStudents = (autoAllocation: AllocationDto, relevantExisting: PartialAllocation) => {
+	const newStudents = autoAllocation.students.filter(s => !relevantExisting.students.some(s2 => s2.studentId == s.studentId));
+	for (const newStudent of newStudents) {
+		relevantExisting.students.push(studentInfoToAllocated(newStudent));
+	}
+}
+const studentInfoToAllocated = (i: StudentInfoDto) => {
+	const casted = i as AllocatedStudentInfo
+	casted.manuallyAllocated = false
+	return casted
 }
 
 </script>
