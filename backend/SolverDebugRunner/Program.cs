@@ -1,4 +1,5 @@
 using GroupAllocator.Database.Model;
+using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -98,24 +99,24 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 //Real data test case
 
 List<ClientModel> clients = [
-    new ClientModel { Id = 1, Name = "Chris Howell", MinProjects = 1, MaxProjects = 2 },
-    new ClientModel { Id = 2, Name = "Henry Gilder", MinProjects = 1, MaxProjects = 1 },
-    new ClientModel { Id = 3, Name = "Lindsay Lyon", MinProjects = 1, MaxProjects = 2 },
-    new ClientModel { Id = 4, Name = "Mitra Gusheh", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 5, Name = "Peter McArdle", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 6, Name = "Gavin Kocsis", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 7, Name = "Louis Fernandez", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 8, Name = "Mick Kane", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 9, Name = "Ahmed Rafiq", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 10, Name = "Sheila Sutjipto", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 11, Name = "Marc Carmichael", MinProjects = 0, MaxProjects = 4 },
-    new ClientModel { Id = 12, Name = "Isira Wijegunawardana", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 13, Name = "Wade Marynowsky", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 14, Name = "Katrina Leung", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 15, Name = "Rafael Luna Zelaya", MinProjects = 0, MaxProjects = 2 },
-    new ClientModel { Id = 16, Name = "Steven Vasilescu", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 17, Name = "Rodney Berry", MinProjects = 0, MaxProjects = 0 },
-    new ClientModel { Id = 18, Name = "David Chambers", MinProjects = 0, MaxProjects = 4 }
+    new ClientModel { Id = 1, Name = "Chris Howell" },
+    new ClientModel { Id = 2, Name = "Henry Gilder" },
+    new ClientModel { Id = 3, Name = "Lindsay Lyon" },
+    new ClientModel { Id = 4, Name = "Mitra Gusheh" },
+    new ClientModel { Id = 5, Name = "Peter McArdle" },
+    new ClientModel { Id = 6, Name = "Gavin Kocsis" },
+    new ClientModel { Id = 7, Name = "Louis Fernandez" },
+    new ClientModel { Id = 8, Name = "Mick Kane" },
+    new ClientModel { Id = 9, Name = "Ahmed Rafiq" },
+    new ClientModel { Id = 10, Name = "Sheila Sutjipto" },
+    new ClientModel { Id = 11, Name = "Marc Carmichael" },
+    new ClientModel { Id = 12, Name = "Isira Wijegunawardana" },
+    new ClientModel { Id = 13, Name = "Wade Marynowsky" },
+    new ClientModel { Id = 14, Name = "Katrina Leung" },
+    new ClientModel { Id = 15, Name = "Rafael Luna " },
+    new ClientModel { Id = 16, Name = "Steven Vasilescu" },
+    new ClientModel { Id = 17, Name = "Rodney Berry" },
+    new ClientModel { Id = 18, Name = "David Chambers" },
 
 ];
 
@@ -398,43 +399,26 @@ List<PreferenceModel> preferences = new List<PreferenceModel>();
 
 int preferenceIDs = 1;
 
-ProjectModel currentProject = null;
-
-
 for (int i = 0; i < students.Count(); i++)
 {
 
-    float intialStrength = 1.0f;
+    float initialStrength = 1.0f;
 
     foreach (int projectId in individualPreferences[i])
     {
-
-        foreach (ProjectModel project in projects)
-        {
-            if (project.Id == projectId)
-            {
-                currentProject = project;
-            }
-
-        }
-
-        if (currentProject == null)
-        {
-            Console.WriteLine("error couldn't find project");
-        }
-
+		var currentProject = projects.First(p => p.Id == projectId);
 
         PreferenceModel currentPreference = new PreferenceModel
         {
             Id = preferenceIDs++,
-            Strength = intialStrength,
+            Strength = initialStrength,
             Student = students[i],
             Project = currentProject
         };
 
         preferences.Add(currentPreference);
 
-        intialStrength -= 0.1f; // the preferences are ordered from best to worst so just decrement strength each time we go to the next one
+        initialStrength -= 0.1f; // the preferences are ordered from best to worst so just decrement strength each time we go to the next one
  
     }
 
@@ -457,7 +441,9 @@ var run = new SolveRunModel
 	PreferenceExponent = 1,
 	Timestamp = DateTime.UtcNow,
 };
-var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences);
+var manualAllocations = new List<AllocationDto>();
+var clientLimits = new List<ClientLimitsDto>();
+var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences, manualAllocations, clientLimits, 0.5);
 
 int studentCount = 1;
 int studentIndex = 0;

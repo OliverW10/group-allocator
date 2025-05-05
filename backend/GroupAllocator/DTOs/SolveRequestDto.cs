@@ -6,6 +6,7 @@ namespace GroupAllocator.DTOs;
 [ExportTsClass]
 public class ClientLimitsDto
 {
+	public required int ClientId { get; set; }
 	public required int MinProjects { get; set; }
 	public required int MaxProjects { get; set; }
 }

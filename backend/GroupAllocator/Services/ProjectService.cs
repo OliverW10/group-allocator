@@ -95,8 +95,6 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 
 			var newClient = new ClientModel()
 			{
-				MaxProjects = 99,
-				MinProjects = 0,
 				Name = name
 			};
 

@@ -41,7 +41,6 @@ public static class StudentModelExtensions
 		return new StudentInfoDto
 		{
 			StudentId = model.Id,
-			UserId = model.User.Id,
 			Name = model.User.Name,
 			Email = model.User.Email,
 			IsVerified = model.User.IsVerified,
