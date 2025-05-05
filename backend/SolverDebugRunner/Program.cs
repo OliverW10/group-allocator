@@ -100,24 +100,24 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 List<ClientModel> clients = [
 
-    new ClientModel { Id = 1, Name = "Chris Howell", MinProjects = 1, MaxProjects = 2 },
-    new ClientModel { Id = 2, Name = "Henry Gilder", MinProjects = 1, MaxProjects = 1 },
-    new ClientModel { Id = 3, Name = "Lindsay Lyon", MinProjects = 1, MaxProjects = 2 },
-    new ClientModel { Id = 4, Name = "Mitra Gusheh", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 5, Name = "Peter McArdle", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 6, Name = "Gavin Kocsis", MinProjects = 0, MaxProjects = 1 },
-     new ClientModel { Id = 7, Name = "Louis Fernandez", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 8, Name = "Mick Kane", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 9, Name = "Ahmed Rafiq", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 10, Name = "Sheila Sutjipto", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 11, Name = "Marc Carmichael", MinProjects = 0, MaxProjects = 4 },
-    new ClientModel { Id = 12, Name = "Isira Wijegunawardana", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 13, Name = "Wade Marynowsky", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 14, Name = "Katrina Leung", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 15, Name = "Rafael Luna Zelaya", MinProjects = 0, MaxProjects = 2 },
-    new ClientModel { Id = 16, Name = "Steven Vasilescu", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 17, Name = "Rodney Berry", MinProjects = 0, MaxProjects = 0 },
-    new ClientModel { Id = 18, Name = "David Chambers", MinProjects = 0, MaxProjects = 4 }
+    new ClientModel { Id = 1, Name = "Chris Howell" },
+    new ClientModel { Id = 2, Name = "Henry Gilder" },
+    new ClientModel { Id = 3, Name = "Lindsay Lyon" },
+    new ClientModel { Id = 4, Name = "Mitra Gusheh" },
+    new ClientModel { Id = 5, Name = "Peter McArdle" },
+    new ClientModel { Id = 6, Name = "Gavin Kocsis" },
+    new ClientModel { Id = 7, Name = "Louis Fernandez" },
+    new ClientModel { Id = 8, Name = "Mick Kane" },
+    new ClientModel { Id = 9, Name = "Ahmed Rafiq" },
+    new ClientModel { Id = 10, Name = "Sheila Sutjipto" },
+    new ClientModel { Id = 11, Name = "Marc Carmichael" },
+    new ClientModel { Id = 12, Name = "Isira Wijegunawardana" },
+    new ClientModel { Id = 13, Name = "Wade Marynowsky" },
+    new ClientModel { Id = 14, Name = "Katrina Leung" },
+    new ClientModel { Id = 15, Name = "Rafael Luna Zelaya" },
+    new ClientModel { Id = 16, Name = "Steven Vasilescu" },
+    new ClientModel { Id = 17, Name = "Rodney Berry" },
+    new ClientModel { Id = 18, Name = "David Chambers" },
 
 ];
 
@@ -444,14 +444,7 @@ var run = new SolveRunModel
 };
 var manualAllocations = new List<AllocationDto>();
 var clientLimits = new List<ClientLimitsDto>();
-var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences, manualAllocations, clientLimits, 0.5);
-
-int studentCount = 1;
-int studentIndex = 0;
-
-List<int> rankTracker = new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-
+var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences, manualAllocations, clientLimits, 0.5).ToList();
 
 
 Dictionary<string, List<int>> groupsAndStudents = new Dictionary<string, List<int>>();
