@@ -23,7 +23,7 @@ import Select, { type SelectChangeEvent } from 'primevue/select';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import type { AllocatedStudentInfo, PartialAllocation } from '../model/PartialAllocation';
+import { removeAutoAllocated, type AllocatedStudentInfo, type PartialAllocation } from '../model/PartialAllocation';
 
 const props = defineProps<{
     students: AllocatedStudentInfo[],
@@ -82,13 +82,8 @@ const maintainAllocationsList = () => {
 }
 
 const clearAutoAllocated = () => {
-    for (const allocation of allocations.value ?? []) {
-        if (!allocation.manuallyAllocatedProject) {
-            allocation.project = null
-        }
-        allocation.students = allocation.students.filter(x => x.manuallyAllocated)
-    }
-    maintainAllocationsList()
+    removeAutoAllocated(allocations.value)
+	maintainAllocationsList()
 }
 
 const clearAll = () => {

@@ -31,7 +31,7 @@ import ProgressSpinner from 'primevue/progressspinner';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
 import type { AllocationDto } from '../../dtos/allocation-dto';
 import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
-import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
+import { removeAutoAllocated, type AllocatedStudentInfo, type PartialAllocation } from '../../model/PartialAllocation';
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
 
 const clientLimits = ref([] as ClientLimitsDto[])
@@ -64,6 +64,7 @@ onMounted(async () => {
 
 const solve = async () => {
 	loading.value = true;
+	removeAutoAllocated(allocations.value)
 	const solveRequest: SolveRequestDto = {
 		clientLimits: clientLimits.value,
 		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
