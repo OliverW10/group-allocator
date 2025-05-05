@@ -104,7 +104,7 @@ List<ClientModel> clients = [
     new ClientModel { Id = 4, Name = "Mitra Gusheh", MinProjects = 0, MaxProjects = 1 },
     new ClientModel { Id = 5, Name = "Peter McArdle", MinProjects = 0, MaxProjects = 1 },
     new ClientModel { Id = 6, Name = "Gavin Kocsis", MinProjects = 0, MaxProjects = 1 },
-    new ClientModel { Id = 7, Name = "Louis Fernandez", MinProjects = 0, MaxProjects = 1 },
+     new ClientModel { Id = 7, Name = "Louis Fernandez", MinProjects = 0, MaxProjects = 1 },
     new ClientModel { Id = 8, Name = "Mick Kane", MinProjects = 0, MaxProjects = 1 },
     new ClientModel { Id = 9, Name = "Ahmed Rafiq", MinProjects = 0, MaxProjects = 1 },
     new ClientModel { Id = 10, Name = "Sheila Sutjipto", MinProjects = 0, MaxProjects = 1 },
@@ -465,6 +465,11 @@ int studentIndex = 0;
 List<int> rankTracker = new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
+
+
+Dictionary<string, List<int>> groupsAndStudents = new Dictionary<string, List<int>>();
+
+
 if (!assignments.Any())
 {
 	Console.WriteLine("No assignments");
@@ -473,37 +478,67 @@ if (!assignments.Any())
 else
 {
 
-    foreach (var assignment in assignments)
-    {
+	foreach (ProjectModel project in projects)
+	{
+		List<int> testing = new List<int> { };
+		groupsAndStudents.Add(project.Name, testing);
+	}
 
-        int projectRank = 1;
+	foreach (var assignment in assignments)
+	{
+		groupsAndStudents[assignment.Project.Name].Add(assignment.Student.Id);
+	}
 
-        //this only works if the solver returns the students in order which i think it always does
-        foreach (int preference in individualPreferences[studentIndex])
-        {
-            if (assignment.Project.Id == preference)
-            {
-                break;
-            }
 
-            projectRank += 1;
+	foreach (ProjectModel project in projects)
+	{
+		String groupFormatted = $"{project.Name}";
+		
+		if (groupsAndStudents[project.Name].Count == 0)
+		{
+			continue;
+		}
 
-        }
+		
+		foreach (var studentID in groupsAndStudents[project.Name])
+		{
+			groupFormatted += $", {studentID}";
+		}
 
-        Console.WriteLine($"{studentCount++}: student:{assignment.Student.User.Name}_{assignment.Student.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id} project rank: {projectRank}");
+		Console.WriteLine(groupFormatted);
+	}
 
-        rankTracker[projectRank] += 1;
+	//foreach (var assignment in assignments)
+	//{
 
-        studentIndex++;
+	//	int projectRank = 1;
 
-    }
+	//	//this only works if the solver returns the students in order which i think it always does
+	//	foreach (int preference in individualPreferences[studentIndex])
+	//	{
+	//		if (assignment.Project.Id == preference)
+	//		{
+	//			break;
+	//		}
+
+	//		projectRank += 1;
+
+	//	}
+
+	//	Console.WriteLine($"{studentCount++}: student:{assignment.Student.User.Name}_{assignment.Student.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id} project rank: {projectRank}");
+
+	//	rankTracker[projectRank] += 1;
+
+	//	studentIndex++;
+
+	//}
 
 }
 
-//prints out amount of ranks
-int rankCount = 0;
-foreach (int rankamount in rankTracker)
-{
-    Console.WriteLine($"rank:{rankCount} amount:{rankamount}");
-    rankCount++;
-}
+////prints out amount of ranks
+//int rankCount = 0;
+//foreach (int rankamount in rankTracker)
+//{
+//	Console.WriteLine($"rank:{rankCount} amount:{rankamount}");
+//	rankCount++;
+//}
