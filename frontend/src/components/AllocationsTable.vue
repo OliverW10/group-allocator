@@ -60,6 +60,14 @@ const maintainAllocationsList = () => {
         return
     }
     
+	// if any students are null, remove them
+	for (const allocation of allocations.value) {
+		if (allocation.students.some(x=>x==null)){ // prevent updates when nothing to change
+			allocation.students = allocation.students.filter(x => x != null)
+		}
+	}
+
+	// if any allocation that isn't the last one is empty, filter them out
     const l = allocations.value.length
     if (allocations.value.slice(0, l - 1).some(x => isEmptyAllocaton(x))) {
         console.log('filtering')
@@ -67,6 +75,7 @@ const maintainAllocationsList = () => {
         return
     }
 
+	// if the last allocation is not empty, add a new one
     if (allocations.value.length == 0 || !isEmptyAllocaton(allocations.value[l - 1])){
         allocations.value = [...allocations.value ?? [], newEmptyAllocation()]
     }

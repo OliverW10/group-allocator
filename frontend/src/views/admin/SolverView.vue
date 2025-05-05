@@ -40,7 +40,6 @@ const allocations = ref([] as PartialAllocation[])
 const preferenceExponent = ref(0.5)
 
 const toast = useToast();
-const solveResult = ref(undefined as SolveRunDto | undefined)
 const loading = ref(true)
 
 const allProjects = ref(undefined as ProjectDto[] | undefined)
@@ -54,10 +53,11 @@ const allStudentInfos = computed(() => {
 })
 
 onMounted(async () => {
-	solveResult.value = await ApiService.get<SolveRunDto>("/solver")
-	if (solveResult.value) {
+	const solveResult = await ApiService.get<SolveRunDto>("/solver")
+	if (solveResult) {
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	}
+	integrateResultToAllocations(solveResult)
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>("/students");
 	allProjects.value = await ApiService.get<ProjectDto[]>("/projects");
 	loading.value = false
@@ -70,9 +70,26 @@ const solve = async () => {
 		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
 		preferenceExponent: preferenceExponent.value
 	}
-	solveResult.value = await ApiService.post<SolveRunDto>("/solver", solveRequest)
+	const solveResult = await ApiService.post<SolveRunDto>("/solver", solveRequest)
+	if (!solveResult) {
+		toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to find solution for student allocations', life: 3000 });
+		loading.value = false
+		return
+	}
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Solver completed', life: 1000 });
+	integrateResultToAllocations(solveResult)
 	loading.value = false
+}
+
+const integrateResultToAllocations = (solveResult: SolveRunDto) => {
+	if (solveResult == undefined) {
+		return
+	}
+	allocations.value = solveResult.projects.map(allocation => {
+		const casted = allocation as PartialAllocation;
+		casted.manuallyAllocatedProject = false
+		return casted
+	})
 }
 
 </script>

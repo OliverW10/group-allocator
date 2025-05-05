@@ -12,12 +12,26 @@ namespace GroupAllocator.Services;
 
 public interface IAllocationSolver
 {
-	IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun, IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences, IReadOnlyCollection<AllocationDto> manualAllocations, IReadOnlyCollection<ClientLimitsDto> clientLimits, double preferenceExponent);
+	IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
+		IEnumerable<StudentModel> students,
+		IEnumerable<ProjectModel> projects,
+		IEnumerable<ClientModel> clients,
+		IEnumerable<PreferenceModel> preferences,
+		IReadOnlyCollection<AllocationDto> manualAllocations,
+		IReadOnlyCollection<ClientLimitsDto> clientLimits,
+		double preferenceExponent);
 }
 
 public class AllocationSolver : IAllocationSolver
 {
-	public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun, IEnumerable<StudentModel> students, IEnumerable<ProjectModel> projects, IEnumerable<ClientModel> clients, IEnumerable<PreferenceModel> preferences, IReadOnlyCollection<AllocationDto> manualAllocations, IReadOnlyCollection<ClientLimitsDto> clientLimits, double preferenceExponent)
+	public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
+		IEnumerable<StudentModel> students,
+		IEnumerable<ProjectModel> projects,
+		IEnumerable<ClientModel> clients,
+		IEnumerable<PreferenceModel> preferences,
+		IReadOnlyCollection<AllocationDto> manualAllocations,
+		IReadOnlyCollection<ClientLimitsDto> clientLimits,
+		double preferenceExponent)
 	{
 		// Create "SCIP" Solver
 		Solver solver = Solver.CreateSolver("SCIP");
@@ -43,9 +57,6 @@ public class AllocationSolver : IAllocationSolver
 				variables[(student.Id, project.Id)] = solver.MakeIntVar(0, 1, $"x_{student.Id}_{project.Id}");
 			}
 		}
-		// Create constraint for manually allocated students and projects
-		// Create constraint for students who won't sign contract
-
 
 		// Create constraint for each student is only assigned to one project
 		foreach (var student in studentList)
@@ -99,10 +110,10 @@ public class AllocationSolver : IAllocationSolver
 			//on creation the max amount is all students but this will be narrowed down later
 			var countVar = solver.MakeIntVar(0, studentList.Count, $"count_proj_{project.Id}");
 
-			LinearExpr sumExpr = assignedVars.First();
+			LinearExpr sumExpr = new LinearExpr();
 
 			//this creates an equation of the variables added togther for a specific project
-			foreach (var v in assignedVars.Skip(1))
+			foreach (var v in assignedVars)
 			{
 				sumExpr += v;
 			}
