@@ -21,66 +21,71 @@
 
 ```mermaid
 erDiagram
-    ClientModel {
-        int Id
+    Client {
+        int Id PK
         string Name
         int MinProjects
         int MaxProjects
     }
 
-    FileModel {
-        int Id
+    File {
+        int Id PK
+        int UserId FK
         byte[] Blob
         string Name
     }
 
-    PreferenceModel {
-        int Id
+    Preference {
+        int Id PK
+        int StudentId FK
+        int ProjectId FK
         double Strength
     }
     
-    ProjectModel {
-        int Id
+    Project {
+        int Id PK
+        int ClientId FK
         string Name
         bool RequiresNda
         int MinStudents
         int MaxStudents
     }
 
-    SolveRunModel {
-        int Id
+    SolveRun {
+        int Id PK
         DateTime Timestamp
         double Evaluation
     }
 
-    StudentAssignmentModel {
-        int Id
+    StudentAssignment {
+        int Id PK
+        int StudentId FK
+        int ProjectId FK
+        int SolveRunId FK
     }
 
-    StudentModel {
-        int Id
+    Student {
+        int Id PK
+        int UserId FK
         bool WillSignContract
     }
 
-    UserModel {
-        int Id
+    User {
+        int Id PK
         bool IsAdmin
         string Name
         string Email
         bool IsVerified
     }
 
-    ProjectModel ||--|| ClientModel : belongs_to
-    PreferenceModel ||--|| StudentModel : references
-    PreferenceModel ||--|| ProjectModel : references
-    StudentAssignmentModel ||--|| StudentModel : references
-    StudentAssignmentModel ||--|| ProjectModel : references
-    StudentAssignmentModel ||--|| SolveRunModel : references
-    StudentModel ||--|| UserModel : has_one
-    FileModel ||--|| UserModel : belongs_to
-    SolveRunModel ||--o{ StudentAssignmentModel : has_many
-    StudentModel ||--o{ PreferenceModel : has_many
-    UserModel ||--o{ FileModel : has_many
+    Project }o--|| Client : has_many
+    Preference }o--|| Student : has_many
+    Preference }o--|| Project : has_many
+    StudentAssignment }o--|| Student : has_many
+    StudentAssignment }o--|| Project : has_many
+    StudentAssignment }|--|| SolveRun : references
+    Student |o--|| User : has_one
+    User ||--o{ File : has_many
 ```
 
 ### Application - Windows
@@ -94,5 +99,4 @@ erDiagram
 
 1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 1. In `backend/GroupAllocator.Backend` run `dotnet run`
-
-![Cool GIF](readme-images/help.gif)
+****
