@@ -75,7 +75,7 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 	[HttpGet("role/claim-admin/{email}")]
 	public async Task<IActionResult> ClaimAdmin(string email)
 	{
-		if (!configuration.GetValue<bool>("AdminClaimable"))
+		if (!configuration.GetValue<bool>("AdminClaimable") && !User.HasClaim("admin", "true"))
 		{
 			return NotFound();
 		}
@@ -87,7 +87,7 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 	[HttpGet("role/drop-admin/{email}")]
 	public async Task<IActionResult> DropAdmin(string email)
 	{
-		if (!configuration.GetValue<bool>("AdminClaimable"))
+		if (!configuration.GetValue<bool>("AdminClaimable") && !User.HasClaim("admin", "true"))
 		{
 			return NotFound();
 		}
