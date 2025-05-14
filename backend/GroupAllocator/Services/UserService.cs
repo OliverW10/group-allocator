@@ -10,7 +10,7 @@ public interface IUserService
 	Task CreateStudentAllowlist(StreamReader reader);
 }
 
-public class UserService(ApplicationDbContext db) : IUserService
+public class UserService(ApplicationDbContext db, IConfiguration configuration) : IUserService
 {
 	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
 	{
@@ -42,10 +42,7 @@ public class UserService(ApplicationDbContext db) : IUserService
 
 	bool ShouldBeAdmin(string email)
 	{
-		// TODO: should maybe just seed which users are admin
-		string[] adminEmails = [
-			"marc.carmicheal@uts.edu.au"
-		];
+		string[] adminEmails = configuration.GetSection("AdminEmails").Get<string[]>() ?? Array.Empty<string>();
 		return adminEmails.Contains(email);
 	}
 
