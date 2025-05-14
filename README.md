@@ -1,5 +1,45 @@
 # GroupAllocator
 
+## Production Setup
+
+### Prerequisites
+- Cloudflare Pages account
+  - Any static hosting provider should work (including just putting the `dist` folder in front of a web server like nginx), but we use Cloudflare Pages and it works well.
+- Docker / Container environment
+  - We use Docker Compose, however anything that can run a container should work.
+- PostgreSQL database
+  - We also use Docker for PostgreSQL, however any existing PostgreSQL database should also work.
+
+### Steps
+1. Setup the frontend
+   - Create a new Cloudflare Pages project [here](https://dash.cloudflare.com/?account=pages)
+   - Connect using GitHub (use the Git url `https://github.com/OliverW10/group-allocator.git`)
+   - Set the root directory to `frontend`
+   - Set the output directory to `dist`
+   - Set the environment variable `VITE_BACKEND_URL` to the URL of your backend API (e.g. `https://api.example.com`)
+   - Magic
+2. Deploy the database (keep the connection string handy)
+   - It is up to you how you want to deploy this. If you don't want to do this separately and would rather use Docker, simply uncomment the `db` service in the `docker-compose.yaml` file.
+3. Create your appsettings.json file
+   - Place the file somewhere that can be mounted by the container
+   - Ensure you swap out the connection string with your one
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "MainDb": "Server=db;Port=5432;Database=GroupAllocator;User Id=user;Password=password1234"
+  }
+}
+```
+4. Deploy the `docker-compose.yaml` file
+    - If you're not using Docker, just generally follow the structure of the file for your own deployment.
+    - Ensure you mount the correct appsettings.json file to the container, and uncomment the `db` lines if required.
+  
 ## Fullstack Setup (Testing)
 
 1. Install Docker Desktop ([https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/))
@@ -19,7 +59,7 @@
 1. Install docker & docker-compose
 1. Run `docker-compose -f database.yml up -d`
 
-```mermaid
+```**mermaid**
 erDiagram
     Client {
         int Id PK
