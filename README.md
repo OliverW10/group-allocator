@@ -33,7 +33,11 @@
   },
   "ConnectionStrings": {
     "MainDb": "Server=db;Port=5432;Database=GroupAllocator;User Id=user;Password=password1234"
-  }
+  },
+  "AdminEmails": [
+    "email@uts.edu.au",
+    "anotheremail@uts.edu.au"
+  ]
 }
 ```
 4. Deploy the `docker-compose.yaml` file
