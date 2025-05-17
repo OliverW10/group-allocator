@@ -264,7 +264,7 @@ namespace GroupAllocator.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GroupAllocator.Database.Model.StudentModel", "Student")
+                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)

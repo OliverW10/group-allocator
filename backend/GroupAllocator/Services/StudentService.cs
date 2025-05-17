@@ -13,12 +13,11 @@ public class StudentService(ApplicationDbContext db) : IStudentService
 {
 	public IQueryable<UserModel> GetStudents()
 	{
-		return new List<UserModel>().AsQueryable();
-		//return db.Student
-		//	.Include(s => s.User)
-		//		.ThenInclude(s => s.Files)
-		//	.Include(s => s.Preferences)
-		//		.ThenInclude(p => p.Project)
-		//	;
+		return db.Users
+			.Include(s => s.Files)
+			.Include(s => s.StudentModel)
+				.ThenInclude(s => s.Preferences)
+					.ThenInclude(p => p.Project)
+			;
 	}
 }

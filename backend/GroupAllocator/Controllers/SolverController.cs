@@ -20,7 +20,6 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		var runs = await db.SolveRuns
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Student)
-					.ThenInclude(s => s.User)
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
 			.ToListAsync();
@@ -41,7 +40,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 				Project = p.ToDto(),
 				Students = lastRun.StudentAssignments
 					.Where(a => a.Project.Id == p.Id)
-					.Select(a => a.Student.User.ToInfoDto())
+					.Select(a => a.Student.ToInfoDto())
 			})
 		};
 		return Ok(result);
@@ -57,7 +56,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		};
 
 		var assignments = solver.AssignStudentsToGroups(solveRun,
-			db.Student.ToList(),
+			db.Users.ToList(),
 			db.Projects.ToList(),
 			db.Clients.ToList(),
 			db.Preferences.ToList(),

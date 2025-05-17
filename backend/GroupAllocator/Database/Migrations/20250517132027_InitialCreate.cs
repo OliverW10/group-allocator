@@ -118,33 +118,6 @@ namespace GroupAllocator.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Preferences",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Strength = table.Column<double>(type: "double precision", nullable: false),
-                    StudentId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Preferences", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Preferences_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Preferences_Student_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Student",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "StudentAssignments",
                 columns: table => new
                 {
@@ -170,7 +143,34 @@ namespace GroupAllocator.Database.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StudentAssignments_Student_StudentId",
+                        name: "FK_StudentAssignments_Users_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Preferences",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Strength = table.Column<double>(type: "double precision", nullable: false),
+                    StudentId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Preferences", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Preferences_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Preferences_Student_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Student",
                         principalColumn: "Id",
@@ -226,19 +226,19 @@ namespace GroupAllocator.Database.Migrations
                 name: "StudentAssignments");
 
             migrationBuilder.DropTable(
+                name: "Student");
+
+            migrationBuilder.DropTable(
                 name: "Projects");
 
             migrationBuilder.DropTable(
                 name: "SolveRuns");
 
             migrationBuilder.DropTable(
-                name: "Student");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Clients");
-
-            migrationBuilder.DropTable(
-                name: "Users");
         }
     }
 }

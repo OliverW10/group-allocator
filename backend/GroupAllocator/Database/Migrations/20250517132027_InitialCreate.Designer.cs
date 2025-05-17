@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GroupAllocator.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250517131352_InitialCreate")]
+    [Migration("20250517132027_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -267,7 +267,7 @@ namespace GroupAllocator.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GroupAllocator.Database.Model.StudentModel", "Student")
+                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)

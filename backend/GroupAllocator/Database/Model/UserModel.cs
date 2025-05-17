@@ -29,8 +29,8 @@ public static class UserModelExtensions
 	{
 		return new StudentSubmissionDto
 		{
-			WillSignContract = false,//model.Student.WillSignContract,
-			OrderedPreferences = [],//model.Student.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList(),
+			WillSignContract = model.StudentModel?.WillSignContract ?? false,
+			OrderedPreferences = model.StudentModel?.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList() ?? [],
 			Files = model.Files.Select(f => f.ToDto()),
 		};
 	}

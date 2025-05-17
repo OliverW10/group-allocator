@@ -13,7 +13,7 @@ namespace GroupAllocator.Services;
 public interface IAllocationSolver
 {
 	IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
-		IEnumerable<StudentModel> students,
+		IEnumerable<UserModel> users,
 		IEnumerable<ProjectModel> projects,
 		IEnumerable<ClientModel> clients,
 		IEnumerable<PreferenceModel> preferences,
@@ -25,7 +25,7 @@ public interface IAllocationSolver
 public class AllocationSolver : IAllocationSolver
 {
 	public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
-		IEnumerable<StudentModel> students,
+		IEnumerable<UserModel> users,
 		IEnumerable<ProjectModel> projects,
 		IEnumerable<ClientModel> clients,
 		IEnumerable<PreferenceModel> preferences,
@@ -40,7 +40,7 @@ public class AllocationSolver : IAllocationSolver
 			throw new Exception("Could not create solver");
 		}
 
-		var studentList = students.ToList();
+		var studentList = users.Where(u => !u.IsAdmin).ToList();
 		var projectList = projects.ToList();
 		var variables = new Dictionary<(int studentId, int projectId), Variable>();
 		var projectActivityMap = new Dictionary<int, Variable>();
