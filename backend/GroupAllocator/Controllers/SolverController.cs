@@ -41,7 +41,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 				Project = p.ToDto(),
 				Students = lastRun.StudentAssignments
 					.Where(a => a.Project.Id == p.Id)
-					.Select(a => a.Student.ToInfoDto())
+					.Select(a => a.Student.User.ToInfoDto())
 			})
 		};
 		return Ok(result);

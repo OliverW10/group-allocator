@@ -45,7 +45,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return BadRequest("Not logged in");
 		}
 
-		var student = await studentService.GetStudents().Where(s => s.User.Email == userEmail).FirstOrDefaultAsync();
+		var student = await studentService.GetStudents().Where(s => s.Email == userEmail).FirstOrDefaultAsync();
 		if (student == null)
 		{
 			return NoContent();
