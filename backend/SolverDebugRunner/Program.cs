@@ -367,7 +367,7 @@ List<List<int>> individualPreferences = new List<List<int>>
 //Creates students for real data test
 
 List<StudentModel> students = new List<StudentModel>();
-
+List<UserModel> users = new();
 
 int userIds = 1; //don't know what these ids are for but they are needed
 
@@ -389,7 +389,7 @@ for (int i = 0; i < names.Count(); i++)
         WillSignContract = true, // all students in real life example were willing to sign contract
         User = currentUser
     };
-
+	users.Add(currentUser);
     students.Add(currentStudent);
 }
 
@@ -444,7 +444,7 @@ var run = new SolveRunModel
 };
 var manualAllocations = new List<AllocationDto>();
 var clientLimits = new List<ClientLimitsDto>();
-var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences, manualAllocations, clientLimits, 0.5).ToList();
+var assignments = solver.AssignStudentsToGroups(run, users, projects, clients, preferences, manualAllocations, clientLimits, 0.5).ToList();
 
 
 Dictionary<string, List<int>> groupsAndStudents = new Dictionary<string, List<int>>();

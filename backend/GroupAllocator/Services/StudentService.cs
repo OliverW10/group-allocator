@@ -16,7 +16,7 @@ public class StudentService(ApplicationDbContext db) : IStudentService
 		return db.Users.Where(u => !u.IsAdmin)
 			.Include(s => s.Files)
 			.Include(s => s.StudentModel)
-				.ThenInclude(s => s.Preferences)
+				.ThenInclude(s => s!.Preferences)
 					.ThenInclude(p => p.Project)
 			;
 	}
