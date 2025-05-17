@@ -6,18 +6,18 @@ namespace GroupAllocator.Services;
 
 public interface IStudentService
 {
-	IQueryable<StudentModel> GetStudents();
+	IQueryable<UserModel> GetStudents();
 }
 
 public class StudentService(ApplicationDbContext db) : IStudentService
 {
-	public IQueryable<StudentModel> GetStudents()
+	public IQueryable<UserModel> GetStudents()
 	{
-		return db.Student
-			.Include(s => s.User)
-				.ThenInclude(s => s.Files)
-			.Include(s => s.Preferences)
-				.ThenInclude(p => p.Project)
+		return db.Users.Where(u => !u.IsAdmin)
+			.Include(s => s.Files)
+			.Include(s => s.StudentModel)
+				.ThenInclude(s => s!.Preferences)
+					.ThenInclude(p => p.Project)
 			;
 	}
 }
