@@ -13,7 +13,7 @@ public class StudentService(ApplicationDbContext db) : IStudentService
 {
 	public IQueryable<UserModel> GetStudents()
 	{
-		return db.Users
+		return db.Users.Where(u => !u.IsAdmin)
 			.Include(s => s.Files)
 			.Include(s => s.StudentModel)
 				.ThenInclude(s => s.Preferences)
