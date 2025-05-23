@@ -22,6 +22,8 @@ public interface IAllocationSolver
 		double preferenceExponent);
 }
 
+record ProjectInstance(ProjectModel Project, int GroupInstanceId);
+
 public class AllocationSolver : IAllocationSolver
 {
 	public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
@@ -41,7 +43,17 @@ public class AllocationSolver : IAllocationSolver
 		}
 
 		var studentList = users.Where(u => !u.IsAdmin).ToList();
-		var projectList = projects.ToList();
+		var projectList = projects.Select(x => new ProjectInstance(x, 0)).ToList();
+		foreach (var proj in projects)
+		{
+			if (proj.MaxInstances > 1)
+			{
+				for (int i = 1; i < proj.MaxInstances; i++)
+				{
+					projectList.Add(new ProjectInstance(proj, i));
+				}
+			}
+		}
 		var variables = new Dictionary<(int studentId, int projectId), Variable>();
 		var projectActivityMap = new Dictionary<int, Variable>();
 
@@ -54,7 +66,7 @@ public class AllocationSolver : IAllocationSolver
 			foreach (var project in projectList)
 			{
 				//makes variable
-				variables[(student.Id, project.Id)] = solver.MakeIntVar(0, 1, $"x_{student.Id}_{project.Id}");
+				variables[(student.Id, project.Project.Id)] = solver.MakeIntVar(0, 1, $"x_{student.Id}_{project.Project.Id}");
 			}
 		}
 
@@ -64,8 +76,8 @@ public class AllocationSolver : IAllocationSolver
 
 			// list of variables for each project projects for this specific student
 			var terms = projectList
-				.Where(p => variables.ContainsKey((student.Id, p.Id)))
-				.Select(p => variables[(student.Id, p.Id)]);
+				.Where(p => variables.ContainsKey((student.Id, p.Project.Id)))
+				.Select(p => variables[(student.Id, p.Project.Id)]);
 
 			var manuallyAssignedAllocation = manualAllocations.FirstOrDefault(a => a.Students.Any(s => s.StudentId == student.Id));
 			// create constraints that the student does the assigned project
@@ -102,13 +114,13 @@ public class AllocationSolver : IAllocationSolver
 		{
 			//list of student variables for specific project
 			var assignedVars = studentList
-				.Where(s => variables.ContainsKey((s.Id, project.Id)))
-				.Select(s => variables[(s.Id, project.Id)])
+				.Where(s => variables.ContainsKey((s.Id, project.Project.Id)))
+				.Select(s => variables[(s.Id, project.Project.Id)])
 				.ToList();
 
 			//variable that will represent number of students assigned to projects
 			//on creation the max amount is all students but this will be narrowed down later
-			var countVar = solver.MakeIntVar(0, studentList.Count, $"count_proj_{project.Id}");
+			var countVar = solver.MakeIntVar(0, studentList.Count, $"count_proj_{project.Project.Id}");
 
 			LinearExpr sumExpr = new LinearExpr();
 
@@ -123,9 +135,9 @@ public class AllocationSolver : IAllocationSolver
 
 
 			//variable for whether or not project is running
-			var isActive = solver.MakeIntVar(0, 1, $"isActive_{project.Id}");
+			var isActive = solver.MakeIntVar(0, 1, $"isActive_{project.Project.Id}");
 
-			var isManuallyAssigned = manualAllocations.Any(a => a?.Project?.Id == project.Id);
+			var isManuallyAssigned = manualAllocations.Any(a => a?.Project?.Id == project.Project.Id);
 			if (isManuallyAssigned)
 			{
 				solver.Add(isActive == 1);
@@ -133,12 +145,12 @@ public class AllocationSolver : IAllocationSolver
 
 			//if the project isActive then the countVar must be between the min and max (inclusive)
 			//if isActive is 0 then the countVar will be 0 as this project isn't running so it has no students
-			solver.Add(countVar >= isActive * project.MinStudents);
-			solver.Add(countVar <= isActive * project.MaxStudents);
+			solver.Add(countVar >= isActive * project.Project.MinStudents);
+			solver.Add(countVar <= isActive * project.Project.MaxStudents);
 
 
 			//this will track what projects are active
-			projectActivityMap[project.Id] = isActive;
+			projectActivityMap[project.Project.Id] = isActive;
 		}
 
 
@@ -153,16 +165,16 @@ public class AllocationSolver : IAllocationSolver
 
 			//list of projects for specific client
 			var clientProjects = projectList
-				.Where(p => p.Client == client)
-				.Select(p => projectActivityMap[p.Id])
+				.Where(p => p.Project.Client == client)
+				.Select(p => projectActivityMap[p.Project.Id])
 				.ToList();
 
- 			//had to add this because for some reason real data exanple has clients that don't have projects 
-            //this probably will be deleted because i think if a client exists they should be able to run a project
-            if (clientProjects.Count() == 0)
-            {
-                continue;
-            }
+			//had to add this because for some reason real data exanple has clients that don't have projects 
+			//this probably will be deleted because i think if a client exists they should be able to run a project
+			if (clientProjects.Count() == 0)
+			{
+				continue;
+			}
 
 
 			LinearExpr projectCountExpr = clientProjects.First();
@@ -176,7 +188,12 @@ public class AllocationSolver : IAllocationSolver
 			//the sets the bounds for the amount of isActive variables in the projectCountExpr equation that can be 1
 			solver.Add(projectCountExpr >= clientLimit.MinProjects);
 			solver.Add(projectCountExpr <= clientLimit.MaxProjects);
+		}
 
+		// Project instance number constraint
+		foreach (var project in projects)
+		{
+			
 		}
 
 		//Preference-based objective function
@@ -220,13 +237,14 @@ public class AllocationSolver : IAllocationSolver
 			{
 				//assign student to first student in student list where the id matches with the studentId we are iterated to
 				var student = studentList.First(s => s.Id == studentId);
-				var project = projectList.First(p => p.Id == projectId);
+				var project = projectList.First(p => p.Project.Id == projectId);
 
 				assignments.Add(new StudentAssignmentModel
 				{
 					Student = student,
-					Project = project,
-					Run = solveRun
+					Project = project.Project,
+					Run = solveRun,
+					GroupInstanceId = project.GroupInstanceId,
 				});
 
 			}
