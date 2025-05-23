@@ -10,6 +10,8 @@ public class ProjectModel
 	public required ClientModel Client { get; set; }
 	public required int MinStudents { get; set; }
 	public required int MaxStudents { get; set; }
+	public required int MinInstances { get; set; }
+	public required int MaxInstances { get; set; }
 }
 
 public static class ProjectModelExtensions
