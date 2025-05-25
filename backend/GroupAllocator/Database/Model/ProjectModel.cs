@@ -26,6 +26,8 @@ public static class ProjectModelExtensions
 			RequiresNda = model.RequiresNda,
 			MinStudents = model.MinStudents,
 			MaxStudents = model.MaxStudents,
+			MaxInstances = model.MaxInstances,
+			MinInstances = model.MinInstances,
 		};
 	}
 }

@@ -2,7 +2,7 @@ project_name, client, min_students, max_students, requires_nda, min_instances, m
 AI-powered Chatbot,TechNova Inc.,2,4,True,0,2
 E-commerce Website Redesign,ShopEase,3,5,False,0,1
 IoT Home Automation System,SmartLiving Co.,2,3,True,0,1
-Social Media Analytics Dashboard,BuzzMetrics,1,2,False,0,1
+Social Media Analytics Dashboard,BuzzMetrics,1,2,False,1,1
 Mobile App for Fitness Tracking,FitTrack,2,4,False,0,1
 Blockchain-based Voting System,CivicTech,3,6,True,0,1
 Virtual Reality Training Module,SimuLearn,2,5,True,0,1

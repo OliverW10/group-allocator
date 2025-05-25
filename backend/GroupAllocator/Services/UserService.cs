@@ -62,9 +62,10 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 					Email = line,
 					IsAdmin = false,
 					IsVerified = true,
-					Name = "Unknown"
+					Name = line.Split("@").First(),
 				});
-			} else
+			}
+			else
 			{
 				existingUser.IsVerified = true;
 			}

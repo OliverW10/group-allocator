@@ -58,6 +58,7 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 		var allClients = db.Clients.ToList();
 		string? line;
 		var header = "project_name,client,min_students,max_students,requires_nda,min_instances,max_instances";
+		var expectedCols = header.Split(',').Length;
 		while ((line = await csvStream.ReadLineAsync()) != null)
 		{
 			if (RemoveWhitespace(line).Equals(header, StringComparison.InvariantCultureIgnoreCase))
@@ -66,7 +67,7 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 			}
 
 			var fields = line.Split(',').Select(x => x.Trim()).ToArray();
-			if (fields.Length != 5)
+			if (fields.Length != expectedCols)
 			{
 				throw new InvalidOperationException("Invalid csv");
 			}

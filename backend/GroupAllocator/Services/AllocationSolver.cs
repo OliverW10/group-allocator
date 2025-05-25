@@ -1,6 +1,7 @@
 using Google.OrTools.LinearSolver;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace GroupAllocator.Services;
 
@@ -54,8 +55,8 @@ public class AllocationSolver : IAllocationSolver
 				}
 			}
 		}
-		var variables = new Dictionary<(int studentId, int projectId), Variable>();
-		var projectActivityMap = new Dictionary<int, Variable>();
+		var variables = new Dictionary<(int studentId, int projectId, int instanceId), Variable>();
+		var projectActivityMap = new Dictionary<(int projectId, int instanceId), Variable>();
 
 
 		// Create a 2d array of boolean (0 or 1) 'Variable's
@@ -66,7 +67,7 @@ public class AllocationSolver : IAllocationSolver
 			foreach (var project in projectList)
 			{
 				//makes variable
-				variables[(student.Id, project.Project.Id)] = solver.MakeIntVar(0, 1, $"x_{student.Id}_{project.Project.Id}");
+				variables[(student.Id, project.Project.Id, project.GroupInstanceId)] = solver.MakeIntVar(0, 1, $"x_{student.Id}_{project.Project.Id}");
 			}
 		}
 
@@ -74,17 +75,16 @@ public class AllocationSolver : IAllocationSolver
 		foreach (var student in studentList)
 		{
 
-			// list of variables for each project projects for this specific student
+			// variable for each project for this specific student
 			var terms = projectList
-				.Where(p => variables.ContainsKey((student.Id, p.Project.Id)))
-				.Select(p => variables[(student.Id, p.Project.Id)]);
+				.Select(p => variables[(student.Id, p.Project.Id, p.GroupInstanceId)]);
 
 			var manuallyAssignedAllocation = manualAllocations.FirstOrDefault(a => a.Students.Any(s => s.StudentId == student.Id));
 			// create constraints that the student does the assigned project
 			if (manuallyAssignedAllocation?.Project is not null)
 			{
 				var manualAssignmentConstraint = solver.MakeConstraint(1, 1, $"student_{student.Id}_manual_assignment");
-				manualAssignmentConstraint.SetCoefficient(variables[(student.Id, manuallyAssignedAllocation.Project.Id)], 1);
+				manualAssignmentConstraint.SetCoefficient(variables[(student.Id, manuallyAssignedAllocation.Project.Id, manuallyAssignedAllocation.InstanceId)], 1);
 			}
 
 			//sum of variables must be equal to 1 (student can only do 1 project)
@@ -98,13 +98,28 @@ public class AllocationSolver : IAllocationSolver
 		// Constraint for students who are manually assigned together without a project
 		foreach (var allocation in manualAllocations)
 		{
-			if (allocation.Project is null)
+			if (allocation.Project is null && allocation.Students.Count() > 0)
 			{
-				var constraint = solver.MakeConstraint(allocation.Students.Count(), allocation.Students.Count(), $"manual_allocation_{allocation.Students.First().StudentId}");
-				foreach (var student in allocation.Students)
+				var firstStudentId = allocation.Students.First().StudentId;
+				// having students[0] == 1 implies that students[1..] should also be 1 for all projects
+				foreach (var project in projectList)
 				{
-					var variable = variables[(student.StudentId, allocation.Project?.Id ?? 0)];
-					constraint.SetCoefficient(variable, 1);
+					// count of the students allocated together that are on this project
+					LinearExpr sumExpr = new LinearExpr();
+					// the variables for all students in this project
+					var projectStudentVariables = variables
+						.Where(v => v.Key.projectId == project.Project.Id && v.Key.instanceId == project.GroupInstanceId)
+						.Select(v => v.Value);
+					foreach (var v in projectStudentVariables)
+					{
+						sumExpr += v;
+					}
+					var countVar = solver.MakeIntVar(0, studentList.Count, $"count_manual_{firstStudentId}_proj_{project.Project.Id}");
+					// TODO: do we even need this countVar?
+					solver.Add(countVar == sumExpr);
+
+					var firstStudentVariable = variables[(firstStudentId, project.Project.Id, project.GroupInstanceId)];
+					solver.Add(countVar == firstStudentVariable * allocation.Students.Count());
 				}
 			}
 		}
@@ -114,8 +129,8 @@ public class AllocationSolver : IAllocationSolver
 		{
 			//list of student variables for specific project
 			var assignedVars = studentList
-				.Where(s => variables.ContainsKey((s.Id, project.Project.Id)))
-				.Select(s => variables[(s.Id, project.Project.Id)])
+				// .Where(s => variables.ContainsKey((s.Id, project.Project.Id, project.GroupInstanceId)))
+				.Select(s => variables[(s.Id, project.Project.Id, project.GroupInstanceId)])
 				.ToList();
 
 			//variable that will represent number of students assigned to projects
@@ -150,7 +165,18 @@ public class AllocationSolver : IAllocationSolver
 
 
 			//this will track what projects are active
-			projectActivityMap[project.Project.Id] = isActive;
+			projectActivityMap[(project.Project.Id, project.GroupInstanceId)] = isActive;
+		}
+
+		// Project min instance number constraint
+		foreach (var project in projects)
+		{
+			// constrain count of project instances with isActive to be >= minInstaces
+			var instanceCountExr = new LinearExpr();
+			foreach (var projInstance in projectList.Where(p => p.Project.Id == project.Id))
+			{
+				var isActiveVariable = projectActivityMap.GetValueOrDefault((projInstance.Project.Id, projInstance.GroupInstanceId));
+			}
 		}
 
 
@@ -166,7 +192,7 @@ public class AllocationSolver : IAllocationSolver
 			//list of projects for specific client
 			var clientProjects = projectList
 				.Where(p => p.Project.Client == client)
-				.Select(p => projectActivityMap[p.Project.Id])
+				.Select(p => projectActivityMap[(p.Project.Id, p.GroupInstanceId)])
 				.ToList();
 
 			//had to add this because for some reason real data exanple has clients that don't have projects 

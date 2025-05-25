@@ -9,7 +9,7 @@
                 <Select v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
             </template>
         </Column>
-        <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + idx.toString()">
+        <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + (idx+1).toString()">
             <template #body="slotProps">
                 <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :class="{'font-extrabold' : slotProps.data?.students?.[idx]?.manuallyAllocated ?? false}" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
             </template>
@@ -28,6 +28,7 @@ import type { AllocatedStudentInfo, PartialAllocation } from '../model/PartialAl
 const props = defineProps<{
     students: AllocatedStudentInfo[],
     projects: ProjectDto[],
+    allowAdditions: boolean,
 }>();
 const allocations = defineModel<PartialAllocation[]>();
 
@@ -71,12 +72,17 @@ const maintainAllocationsList = () => {
     const l = allocations.value.length
     if (allocations.value.slice(0, l - 1).some(x => isEmptyAllocaton(x))) {
         console.log('filtering')
-        allocations.value = [...(allocations.value?.filter(x => !isEmptyAllocaton(x)) ?? []), newEmptyAllocation()]
+        const canAddNewAllocations = props.allowAdditions;
+        if (canAddNewAllocations) {
+            allocations.value = [...(allocations.value?.filter(x => !isEmptyAllocaton(x)) ?? []), newEmptyAllocation()]
+        } else {
+            allocations.value = allocations.value?.filter(x => !isEmptyAllocaton(x)) ?? []
+        }
         return
     }
 
-	// if the last allocation is not empty, add a new one
-    if (allocations.value.length == 0 || !isEmptyAllocaton(allocations.value[l - 1])){
+    const lastStudentIsNotEmpty = allocations.value.length == 0 || !isEmptyAllocaton(allocations.value[l - 1])
+    if (lastStudentIsNotEmpty && props.allowAdditions) {
         allocations.value = [...allocations.value ?? [], newEmptyAllocation()]
     }
 }

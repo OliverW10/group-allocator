@@ -2,7 +2,7 @@
 	<AdminNavBar />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
-			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos"/>
+			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
 			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
 		</div>
 		<div v-else>
@@ -40,6 +40,7 @@ const preferenceExponent = ref(0.5)
 
 const toast = useToast();
 const loading = ref(true)
+const solved = ref(false)
 
 const allProjects = ref(undefined as ProjectDto[] | undefined)
 const allStudents = ref(undefined as StudentInfoAndSubmission[] | undefined)
@@ -78,6 +79,7 @@ const solve = async () => {
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Solver completed', life: 1000 });
 	integrateResultToAllocations(solveResult)
 	loading.value = false
+	solved.value = true
 }
 
 const integrateResultToAllocations = (solveResult: SolveRunDto) => {
@@ -113,6 +115,7 @@ const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 
 }
 
+// Adds students to a project if they are not already on it
 const addMissingStudents = (autoAllocation: AllocationDto, relevantExisting: PartialAllocation) => {
 	const newStudents = autoAllocation.students.filter(s => !relevantExisting.students.some(s2 => s2.studentId == s.studentId));
 	for (const newStudent of newStudents) {

@@ -9,4 +9,5 @@ import { StudentInfoDto } from "./student-info-dto";
 export class AllocationDto {
     project: ProjectDto;
     students: StudentInfoDto[];
+    instanceId: number;
 }
