@@ -24,6 +24,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import type { AllocatedStudentInfo, PartialAllocation } from '../model/PartialAllocation';
+import { removeAutoAllocated } from '../services/AllocationsServices';
 
 const props = defineProps<{
     students: AllocatedStudentInfo[],
@@ -88,12 +89,7 @@ const maintainAllocationsList = () => {
 }
 
 const clearAutoAllocated = () => {
-    for (const allocation of allocations.value ?? []) {
-        if (!allocation.manuallyAllocatedProject) {
-            allocation.project = null
-        }
-        allocation.students = allocation.students.filter(x => x.manuallyAllocated)
-    }
+	removeAutoAllocated(allocations.value ?? []);
     maintainAllocationsList()
 }
 

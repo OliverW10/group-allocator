@@ -219,7 +219,18 @@ public class AllocationSolver : IAllocationSolver
 		// Project instance number constraint
 		foreach (var project in projects)
 		{
-			
+			var projectInstancesExpr = new LinearExpr();
+			foreach (var projInstance in projectList.Where(p => p.Project.Id == project.Id))
+			{
+				var isActiveVariable = projectActivityMap.GetValueOrDefault((projInstance.Project.Id, projInstance.GroupInstanceId));
+				if (isActiveVariable != null)
+				{
+					projectInstancesExpr += isActiveVariable;
+				}
+			}
+
+			solver.Add(projectInstancesExpr >= project.MinInstances);
+			solver.Add(projectInstancesExpr <= project.MaxInstances);
 		}
 
 		//Preference-based objective function
@@ -227,12 +238,15 @@ public class AllocationSolver : IAllocationSolver
 
 		foreach (var pref in preferences)
 		{
-			var key = (pref.Student.Id, pref.Project.Id);
-
-			if (variables.ContainsKey(key))
+			foreach (var projectInstance in projectList.Where(x => x.Project.Id == pref.Project.Id))
 			{
-				//this sets the coefficients for the variables based on strengths
-				objective.SetCoefficient(variables[key], pref.Strength);
+				var key = (pref.Student.Id, pref.Project.Id, projectInstance.GroupInstanceId);
+
+				if (variables.TryGetValue(key, out var variable))
+				{
+					//this sets the coefficients for the variables based on strengths
+					objective.SetCoefficient(variable, pref.Strength);
+				}
 			}
 
 		}
@@ -255,7 +269,7 @@ public class AllocationSolver : IAllocationSolver
 		var assignments = new List<StudentAssignmentModel>();
 
 		//loops through dictionary of variables
-		foreach (var ((studentId, projectId), variable) in variables)
+		foreach (var ((studentId, projectId, instanceNum), variable) in variables)
 		{
 
 			//if the variable has assigned student to project
@@ -270,7 +284,7 @@ public class AllocationSolver : IAllocationSolver
 					Student = student,
 					Project = project.Project,
 					Run = solveRun,
-					GroupInstanceId = project.GroupInstanceId,
+					GroupInstanceId = instanceNum,
 				});
 
 			}

@@ -33,6 +33,7 @@ import type { AllocationDto } from '../../dtos/allocation-dto';
 import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
 import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
+import { removeAutoAllocated } from '../../services/AllocationsServices';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -65,6 +66,7 @@ onMounted(async () => {
 
 const solve = async () => {
 	loading.value = true;
+	removeAutoAllocated(allocations.value ?? [])
 	const solveRequest: SolveRequestDto = {
 		clientLimits: clientLimits.value,
 		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
@@ -109,7 +111,8 @@ const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 		allocations.value.push({
 			manuallyAllocatedProject: false,
 			project: autoAllocation.project,
-			students: autoAllocation.students.map(x => studentInfoToAllocated(x))
+			students: autoAllocation.students.map(x => studentInfoToAllocated(x)),
+			instanceId: 1, // Can't manually allocate multiple instances of the same project for now
 		})
 	}
 
