@@ -1,3 +1,4 @@
+using Google.Apis.Util;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using Microsoft.EntityFrameworkCore;
@@ -56,30 +57,33 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 	{
 		var allClients = db.Clients.ToList();
 		string? line;
+		var header = "project_name,client,min_students,max_students,requires_nda,min_instances,max_instances";
+		var expectedCols = header.Split(',').Length;
 		while ((line = await csvStream.ReadLineAsync()) != null)
 		{
+			if (RemoveWhitespace(line).Equals(header, StringComparison.InvariantCultureIgnoreCase))
+			{
+				continue;
+			}
+
 			var fields = line.Split(',').Select(x => x.Trim()).ToArray();
-			if (fields.Length != 5)
+			if (fields.Length != expectedCols)
 			{
 				throw new InvalidOperationException("Invalid csv");
 			}
 
-			// project name, client, min_students, max_students, requires_nda
-			var projectName = fields[0];
 			var clientName = fields[1];
-			var minStudents = int.Parse(fields[2]);
-			var maxStudents = int.Parse(fields[3]);
-			var requiredContract = bool.Parse(fields[4]);
-
 			var client = GetOrAddClient(clientName);
 
 			db.Projects.Add(new ProjectModel()
 			{
-				Name = projectName,
-				MinStudents = minStudents,
-				MaxStudents = maxStudents,
-				RequiresNda = requiredContract,
-				Client = client
+				Name = fields[0],
+				Client = client,
+				MinStudents = int.Parse(fields[2]),
+				MaxStudents = int.Parse(fields[3]),
+				RequiresNda = bool.Parse(fields[4]),
+				MinInstances = int.Parse(fields[5]),
+				MaxInstances = int.Parse(fields[6]),
 			});
 		}
 
@@ -103,4 +107,6 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 			return newClient;
 		}
 	}
+
+	string RemoveWhitespace(string s) => new string(s.Where(c => !Char.IsWhiteSpace(c)).ToArray());
 }

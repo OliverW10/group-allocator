@@ -7,9 +7,10 @@
             <p>
                 Please upload a csv file with the following format and no header
                 <br />
-                <code>project name, client, min_students, max_students, requires_nda</code>
+                <code>project_name, client, min_students, max_students, requires_nda, min_instances, max_instances</code>
                 <br />
-                New projects will be added in addition to existing ones.
+                New projects will be added in addition to existing ones.<br>
+                To modify a project, delete it from the table and upload a file with just the new values for that project.
             </p>
         </FileUploader>
         <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
@@ -21,6 +22,8 @@
             </Column>
             <Column field="minStudents" header="Min. Students"></Column>
             <Column field="maxStudents" header="Max. Students"></Column>
+            <Column field="minInstances" header="Min. Instances"></Column>
+            <Column field="maxInstances" header="Max. Instances"></Column>
             <Column field="id" header="Actions">
 				<template #body="slotProps">
                     <Button severity="danger" class="i-mdi-delete" @click="deleteProject(slotProps.data.id)" />

@@ -2,7 +2,7 @@
 	<AdminNavBar />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
-			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos"/>
+			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
 			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
 		</div>
 		<div v-else>
@@ -33,6 +33,7 @@ import type { AllocationDto } from '../../dtos/allocation-dto';
 import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
 import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
+import { removeAutoAllocated } from '../../services/AllocationsServices';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -40,6 +41,7 @@ const preferenceExponent = ref(0.5)
 
 const toast = useToast();
 const loading = ref(true)
+const solved = ref(false)
 
 const allProjects = ref(undefined as ProjectDto[] | undefined)
 const allStudents = ref(undefined as StudentInfoAndSubmission[] | undefined)
@@ -64,6 +66,7 @@ onMounted(async () => {
 
 const solve = async () => {
 	loading.value = true;
+	removeAutoAllocated(allocations.value ?? [])
 	const solveRequest: SolveRequestDto = {
 		clientLimits: clientLimits.value,
 		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
@@ -78,6 +81,7 @@ const solve = async () => {
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Solver completed', life: 1000 });
 	integrateResultToAllocations(solveResult)
 	loading.value = false
+	solved.value = true
 }
 
 const integrateResultToAllocations = (solveResult: SolveRunDto) => {
@@ -107,12 +111,14 @@ const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 		allocations.value.push({
 			manuallyAllocatedProject: false,
 			project: autoAllocation.project,
-			students: autoAllocation.students.map(x => studentInfoToAllocated(x))
+			students: autoAllocation.students.map(x => studentInfoToAllocated(x)),
+			instanceId: 1, // Can't manually allocate multiple instances of the same project for now
 		})
 	}
 
 }
 
+// Adds students to a project if they are not already on it
 const addMissingStudents = (autoAllocation: AllocationDto, relevantExisting: PartialAllocation) => {
 	const newStudents = autoAllocation.students.filter(s => !relevantExisting.students.some(s2 => s2.studentId == s.studentId));
 	for (const newStudent of newStudents) {

@@ -10,4 +10,6 @@ export class ProjectDto {
     requiresNda: boolean;
     minStudents: number;
     maxStudents: number;
+    minInstances: number;
+    maxInstances: number;
 }

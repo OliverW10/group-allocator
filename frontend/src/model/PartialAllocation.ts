@@ -7,6 +7,8 @@ export interface AllocatedStudentInfo extends StudentInfoDto {
 
 export interface PartialAllocation {
     project: ProjectDto | null,
-    manuallyAllocatedProject: boolean,
     students: AllocatedStudentInfo[],
+	instanceId: number,
+
+    manuallyAllocatedProject: boolean,
 }

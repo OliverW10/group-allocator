@@ -46,39 +46,47 @@ async function login(url: string) {
 	}
 }
 
+// can't access globals from template
+const _window = window;
+
 </script>
 
 <template>
 	<div class="flex flex-col justify-center h-screen">
 		<div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
-			<h1 class="heading py-4">Group Allocator</h1>
-			<div>
-				<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
-					Sign in with Google
-					<i class="i-logos-google-icon ml-2"></i>
-				</button>
-			</div>
-			<div v-if="is_dev" class="flex flex-col gap-4">
-				<hr class="my-4" />
-				<div class="flex gap-2">
-					<label for="devNameInput">Name:</label>
-					<input id="devNameInput" v-model="devName" type="text" class="border">
+			<Message v-if="_window.location.hash" severity="contrast" icon="i-mdi-account-check" class="w-full">
+				Login Successful, Redirecting...
+			</Message>
+			<div v-else>
+				<h1 class="heading py-4">Group Allocator</h1>
+				<div>
+					<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
+						Sign in with Google
+						<i class="i-logos-google-icon ml-2"></i>
+					</button>
 				</div>
-
-				<div class="flex gap-2">
-					<label for="devEmailInput">Email:</label>
-					<input id="devEmailInput" v-model="devEmail" type="email" class="border">
+				<div v-if="is_dev" class="flex flex-col gap-4">
+					<hr class="my-4" />
+					<div class="flex gap-2">
+						<label for="devNameInput">Name:</label>
+						<input id="devNameInput" v-model="devName" type="text" class="border">
+					</div>
+	
+					<div class="flex gap-2">
+						<label for="devEmailInput">Email:</label>
+						<input id="devEmailInput" v-model="devEmail" type="email" class="border">
+					</div>
+	
+					<div class="flex gap-2">
+						<label for="devAdminInput">Admin:</label>
+						<input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
+					</div>
+	
+					<button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
+						Development Test Login
+						<i class="i-mdi-robot ml-2"></i>
+					</button>
 				</div>
-
-				<div class="flex gap-2">
-					<label for="devAdminInput">Admin:</label>
-					<input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
-				</div>
-
-				<button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
-					Development Test Login
-					<i class="i-mdi-robot ml-2"></i>
-				</button>
 			</div>
 		</div>
 	</div>

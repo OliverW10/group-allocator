@@ -19,7 +19,7 @@
             <p>
                 Please upload a text (/csv) file with emails on each line.
                 <br />
-                Note that students will not appear on this page until they have submitted their preferences.
+                Students in yellow have not submitted any preferences yet
             </p>
         </FileUploader>
         <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">

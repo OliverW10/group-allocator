@@ -35,15 +35,25 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		{
 			Id = lastRun.Id,
 			RanAt = lastRun.Timestamp,
-			Projects = allProjects.Select(p => new AllocationDto()
-			{
-				Project = p.ToDto(),
-				Students = lastRun.StudentAssignments
-					.Where(a => a.Project.Id == p.Id)
-					.Select(a => a.Student.ToInfoDto())
-			})
+			Projects = allProjects.SelectMany(ProjectGroupsForProject),
 		};
 		return Ok(result);
+
+		IEnumerable<AllocationDto> ProjectGroupsForProject(ProjectModel p)
+		{
+			var assignmentsToThisProject = lastRun.StudentAssignments.Where(a => a.Project.Id == p.Id);
+			var groupNumbers = assignmentsToThisProject.Select(a => a.GroupInstanceId).Distinct();
+			return groupNumbers.Select(groupId =>
+				new AllocationDto()
+				{
+					Project = p.ToDto(),
+					Students = assignmentsToThisProject
+						.Where(a => a.GroupInstanceId == groupId)
+						.Select(a => a.Student.ToInfoDto()),
+					InstanceId = groupId,
+				}
+			);
+		};
 	}
 
 	[HttpPost]
@@ -59,7 +69,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			db.Users.ToList(),
 			db.Projects.ToList(),
 			db.Clients.ToList(),
-			db.Preferences.ToList(),
+			db.Preferences.Include(p => p.Student).Include(p => p.Project).ToList(),
 			solveConfig.PreAllocations.ToList(),
 			solveConfig.ClientLimits.ToList(),
 			solveConfig.PreferenceExponent
