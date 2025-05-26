@@ -89,7 +89,7 @@ const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 		return
 	}
 	for (const autoAllocation of solveResult.projects) {
-		const existingWithMatchingProjects = allocations.value.filter(x => x.project?.id == autoAllocation.project.id)
+		const existingWithMatchingProjects = allocations.value.filter(x => x.project?.id == autoAllocation.project.id && x.instanceId == autoAllocation.instanceId);
 		// There was a manual allocation with a matching project
 		if (existingWithMatchingProjects.length) {
 			const relevantExisting = existingWithMatchingProjects[0]
@@ -112,7 +112,7 @@ const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 			manuallyAllocatedProject: false,
 			project: autoAllocation.project,
 			students: autoAllocation.students.map(x => studentInfoToAllocated(x)),
-			instanceId: 1, // Can't manually allocate multiple instances of the same project for now
+			instanceId: autoAllocation.instanceId,
 		})
 	}
 
