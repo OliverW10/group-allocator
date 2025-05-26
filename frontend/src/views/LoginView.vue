@@ -46,11 +46,17 @@ async function login(url: string) {
 	}
 }
 
+// can't access globals from template
+const _window = window;
+
 </script>
 
 <template>
 	<div class="flex flex-col justify-center h-screen">
 		<div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
+			<Message v-if="_window.location.href" severity="contrast" icon="i-mdi-account-check" class="w-full">
+				Login Successful, Redirecting...
+			</Message>
 			<h1 class="heading py-4">Group Allocator</h1>
 			<div>
 				<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">

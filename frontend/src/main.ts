@@ -11,7 +11,7 @@ import Tooltip from 'primevue/tooltip'
 
 const app = createApp(App)
 const pinia = createPinia()
-
+Vue.prototype.$window = window
 app.use(PrimeVue, {
 	theme: {
 		preset: Lara,
