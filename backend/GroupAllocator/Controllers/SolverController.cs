@@ -69,7 +69,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			db.Users.ToList(),
 			db.Projects.ToList(),
 			db.Clients.ToList(),
-			db.Preferences.ToList(),
+			db.Preferences.Include(p => p.Student).Include(p => p.Project).ToList(),
 			solveConfig.PreAllocations.ToList(),
 			solveConfig.ClientLimits.ToList(),
 			solveConfig.PreferenceExponent

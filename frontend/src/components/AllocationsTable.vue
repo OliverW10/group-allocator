@@ -6,12 +6,12 @@
     <DataTable :value="allocations" :loading="false">
         <Column field="project" header="Project">
             <template #body="slotProps">
-                <Select v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
+                <Select v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject, 'supressed' : slotProps.data.project == undefined}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
             </template>
         </Column>
         <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + (idx+1).toString()">
             <template #body="slotProps">
-                <Select v-if="slotProps.data.students" v-model="slotProps.data.students[idx]" :class="{'font-extrabold' : slotProps.data?.students?.[idx]?.manuallyAllocated ?? false}" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
+                <Select v-if="idx == 0 || slotProps.data.students[idx-1]" v-model="slotProps.data.students[idx]" :class="{'font-extrabold' : slotProps.data?.students?.[idx]?.manuallyAllocated ?? false, 'supressed' : slotProps.data.students[idx] == undefined}" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
             </template>
         </Column>
     </DataTable>
@@ -51,7 +51,7 @@ const numStudents = computed(() => {
 })
 // TODO: fix page shift when selecting project
 
-const emptyAllocation: PartialAllocation = {project: null, manuallyAllocatedProject: false, students: []}
+const emptyAllocation: PartialAllocation = {project: null, manuallyAllocatedProject: false, students: [], instanceId: 1}
 const newEmptyAllocation = () => structuredClone(emptyAllocation)
 const isEmptyAllocaton = (allocation: PartialAllocation) => {
     return allocation.project == null && (allocation.students == null || allocation.students?.every(x => x == null))
@@ -110,3 +110,15 @@ onMounted(() => {
     maintainAllocationsList()
 })
 </script>
+<style scoped>
+
+.supressed {
+	opacity: 0.5;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.supressed:hover {
+	opacity: 1;
+}
+
+</style>
