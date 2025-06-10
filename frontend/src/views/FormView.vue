@@ -95,7 +95,7 @@ onMounted(async () => {
 		if (maybeStudent) {
 			console.log(maybeStudent)
 			files.value = maybeStudent.files ?? []
-			willSignContract.value = maybeStudent.willSignContract ?? true
+			willSignContract.value = true
 			const isSelected = (x: ProjectDto) => maybeStudent.orderedPreferences.some(id => x.id == id)
 			projects.value[0] = projectsRaw.value.filter(not(isSelected))
 			projects.value[1] = projectsRaw.value.filter(isSelected)

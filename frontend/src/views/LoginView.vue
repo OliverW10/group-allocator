@@ -66,7 +66,7 @@ const _window = window;
 					</button>
 				</div>
 				<div v-if="is_dev" class="flex flex-col gap-4">
-					<hr class="my-4" />
+					<hr class="my-4 border-gray-500" />
 					<div class="flex gap-2">
 						<label for="devNameInput">Name:</label>
 						<input id="devNameInput" v-model="devName" type="text" class="border">

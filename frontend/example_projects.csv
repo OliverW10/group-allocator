@@ -1,5 +1,5 @@
 project_name, client, min_students, max_students, requires_nda, min_instances, max_instances
-AI-powered Chatbot,TechNova Inc.,2,4,True,0,2
+AI-powered Chatbot,TechNova Inc.,2,4,True,0,1
 E-commerce Website Redesign,ShopEase,3,5,False,0,1
 IoT Home Automation System,SmartLiving Co.,2,3,True,0,1
 Social Media Analytics Dashboard,BuzzMetrics,1,2,False,1,1
@@ -9,5 +9,5 @@ Virtual Reality Training Module,SimuLearn,2,5,True,0,1
 Inventory Management System,RetailPro,2,3,False,0,1
 Natural Disaster Alert App,SafeZone,1,3,False,0,1
 AI Resume Screener,HireSmart,2,4,True,0,1
-Something,Somewhere,1,1,False,0,2
+Something,Somewhere,1,1,False,0,1
 Not a real company,mother's basement,2,4,True,0,1
