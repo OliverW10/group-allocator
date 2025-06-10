@@ -1,56 +1,3 @@
-<script setup lang="ts">
-import router from '../router';
-import { useAuthStore } from '../store/auth';
-import { getOidcUrl } from "../helpers/oauth";
-import { onMounted } from 'vue';
-import type { UserInfoDto } from '../dtos/user-info-dto';
-import ApiService from '../services/ApiService';
-
-const authStore = useAuthStore();
-const devName = defineModel<string>("name");
-const devEmail = defineModel<string>("email");
-const devIsAdmin = defineModel<boolean>("isAdmin")
-
-devName.value = `Dummy User ${crypto.randomUUID().slice(0, 2)}`
-devEmail.value = `email${crypto.randomUUID().slice(0, 6)}@domain.com`
-
-const is_dev = import.meta.env.DEV;
-
-const navigateToOidc = () => {
-	location.href = getOidcUrl();
-};
-
-onMounted(async () => {
-	if (window.location.hash) {
-		await loginWithGoogle();
-	}
-});
-
-
-async function loginWithGoogle() {
-	const id_token = new URLSearchParams(window.location.hash).get("id_token");
-	await login(`/auth/login-google?idToken=${id_token}`);
-}
-
-async function loginForDev() {
-	await login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
-}
-
-async function login(url: string) {
-	authStore.userInfo = await ApiService.get<UserInfoDto>(url);
-	const isAdmin = authStore.userInfo?.isAdmin ?? false;
-	if (isAdmin) {
-		router.push('/admin/projects');
-	} else {
-		router.push('/form');
-	}
-}
-
-// can't access globals from template
-const _window = window;
-
-</script>
-
 <template>
 	<div class="flex flex-col justify-center h-screen">
 		<div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
@@ -79,7 +26,7 @@ const _window = window;
 	
 					<div class="flex gap-2">
 						<label for="devAdminInput">Admin:</label>
-						<input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
+						<SelectButton v-model="devLoginType" name="selection" :options="devLoginOptions" />
 					</div>
 	
 					<button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
@@ -91,3 +38,56 @@ const _window = window;
 		</div>
 	</div>
 </template>
+<script setup lang="ts">
+import router from '../router';
+import { useAuthStore } from '../store/auth';
+import { getOidcUrl } from "../helpers/oauth";
+import { onMounted, ref } from 'vue';
+import type { UserInfoDto } from '../dtos/user-info-dto';
+import ApiService from '../services/ApiService';
+import SelectButton from 'primevue/selectbutton';
+
+type LoginType = "admin" | "student" | "teacher";
+
+const authStore = useAuthStore();
+const devName = ref(`Dummy User ${crypto.randomUUID().slice(0, 2)}`);
+const devEmail = ref(`email${crypto.randomUUID().slice(0, 6)}@domain.com`);
+const devLoginType = ref('student' as LoginType);
+const devLoginOptions = ref(["admin", "student", "teacher"] as LoginType[]);
+
+const is_dev = import.meta.env.DEV;
+
+const navigateToOidc = () => {
+	location.href = getOidcUrl();
+};
+
+onMounted(async () => {
+	if (window.location.hash) {
+		await loginWithGoogle();
+	}
+});
+
+
+async function loginWithGoogle() {
+	const id_token = new URLSearchParams(window.location.hash).get("id_token");
+	await login(`/auth/login-google?idToken=${id_token}`);
+}
+
+async function loginForDev() {
+	await login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devLoginType.value == "teacher"}`); // TODO: support admin login
+}
+
+async function login(url: string) {
+	authStore.userInfo = await ApiService.get<UserInfoDto>(url);
+	const isAdmin = authStore.userInfo?.isAdmin ?? false;
+	if (isAdmin) {
+		router.push('/admin/projects');
+	} else {
+		router.push('/form');
+	}
+}
+
+// can't access globals from template
+const _window = window;
+
+</script>

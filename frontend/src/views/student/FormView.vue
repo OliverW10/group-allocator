@@ -63,15 +63,15 @@ import Card from "primevue/card";
 import Message from "primevue/message"
 import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
-import { ProjectDto } from "../dtos/project-dto";
-import LogoutButton from "../components/LogoutButton.vue";
+import { ProjectDto } from "../../dtos/project-dto";
+import LogoutButton from "../../components/LogoutButton.vue";
 import { computed, onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
 import ProgressBar from 'primevue/progressbar'
-import ApiService from "../services/ApiService";
+import ApiService from "../../services/ApiService";
 import { useToast } from "primevue/usetoast";
-import type { FileDetailsDto } from "../dtos/file-details-dto";
-import type { StudentSubmissionDto } from "../dtos/student-submission-dto";
+import type { FileDetailsDto } from "../../dtos/file-details-dto";
+import type { StudentSubmissionDto } from "../../dtos/student-submission-dto";
 import { Column, DataTable } from "primevue";
 
 const toast = useToast();
