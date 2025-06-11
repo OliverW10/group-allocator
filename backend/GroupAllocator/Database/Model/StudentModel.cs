@@ -9,8 +9,10 @@ namespace GroupAllocator.Database.Model;
 public class StudentModel
 {
 	public int Id { get; set; }
-	public required bool WillSignContract { get; set; }
+	public required bool? WillSignContract { get; set; }
 	[ForeignKey(nameof(StudentModel.Id))]
 	public required UserModel User { get; set; }
+	public required ClassModel Class { get; set; }
+
 	public ICollection<PreferenceModel> Preferences { get; } = new List<PreferenceModel>();
 }
