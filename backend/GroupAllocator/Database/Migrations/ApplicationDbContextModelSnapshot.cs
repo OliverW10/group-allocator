@@ -179,7 +179,7 @@ namespace GroupAllocator.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Student");
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.UserModel", b =>
@@ -228,7 +228,7 @@ namespace GroupAllocator.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GroupAllocator.Database.Model.StudentModel", "Student")
+                    b.HasOne("GroupAllocator.Database.Model.StudentModel", "Students")
                         .WithMany("Preferences")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -236,7 +236,7 @@ namespace GroupAllocator.Database.Migrations
 
                     b.Navigation("Project");
 
-                    b.Navigation("Student");
+                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.ProjectModel", b =>
@@ -264,7 +264,7 @@ namespace GroupAllocator.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Student")
+                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Students")
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -274,7 +274,7 @@ namespace GroupAllocator.Database.Migrations
 
                     b.Navigation("Run");
 
-                    b.Navigation("Student");
+                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.StudentModel", b =>

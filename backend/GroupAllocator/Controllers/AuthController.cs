@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Google.Apis.Auth;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
@@ -13,7 +14,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IUserService userService, IGroupAllocatorAuthenticationService tokenService, IConfiguration configuration, ApplicationDbContext db) : ControllerBase
+public class AuthController(IUserService userService, IConfiguration configuration, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet("me")]
 	[Authorize]
@@ -33,9 +34,20 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 		});
 	}
 
-	[HttpGet("login-google")]
-	public async Task<IActionResult> LoginGoogle(string idToken)
+	[HttpGet("login-google-student")]
+	public async Task<IActionResult> LoginGoogleStudent(string idToken)
 	{
+
+	}
+
+	[HttpGet("login-google-teacher")]
+	public async Task<IActionResult> LoginGoogleTeacher(string idToken)
+	{
+	}
+
+	public async UserInfoDto LoginCommon(string idToken)
+	{
+
 		var googleToken = await ValidateGoogleToken(idToken);
 
 		var user = await userService.GetOrCreateUserAsync(googleToken.Name, googleToken.Email);
@@ -47,13 +59,18 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 
 		await SignIn(user);
 
-		return UserDto(user);
+		return new UserInfoDto()
+		{
+			Name = user.Name,
+			Email = user.Email,
+			Role = user.Role
+		}
 	}
 
 	[HttpGet("login-dev")]
 	public async Task<IActionResult> LoginDev(string name, string email, string? role = "student")
 	{
-		var user = await userService.GetOrCreateUserAsync(name, email, role);
+		var user = await userService.GetOrCreateUserAsync(name, email);
 
 		if (user is null)
 		{
@@ -102,22 +119,32 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 
 	static IActionResult UserDto(UserModel user)
 	{
-		return new JsonResult(new UserInfoDto()
-		{
-			Name = user.Name,
-			Email = user.Email,
-			Role = user.Role
-		});
+		return new JsonResult();
 	}
 
 	async Task SignIn(UserModel user)
 	{
-		var principal = tokenService.GetPrincipal(user);
+		var principal = GetPrincipal(user);
 		var authProperties = new AuthenticationProperties
 		{
 			IsPersistent = true,
 		};
 		await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
+	}
+
+	ClaimsPrincipal GetPrincipal(UserModel user)
+	{
+		var claims = new List<Claim>()
+		{
+			new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+			new Claim(JwtRegisteredClaimNames.Name, user.Name),
+			new Claim(JwtRegisteredClaimNames.Email, user.Email),
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+			new Claim("role", user.Role),
+		};
+
+		var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+		return new ClaimsPrincipal(id);
 	}
 
 	static async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string idToken)

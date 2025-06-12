@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,7 @@ public class ClassController : ControllerBase
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<IActionResult> GetClassesForTeacher()
 	{
-		var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
 		var classes = await _dbContext.Classes
 			.Include(c => c.Teachers)
@@ -42,8 +43,8 @@ public class ClassController : ControllerBase
 	[Authorize(Policy = "StudentOnly")]
 	public async Task<IActionResult> GetClassesForStudent()
 	{
-		var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-		
+		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+
 		var classes = await _dbContext.Classes
 			.Include(c => c.Students)
 			.Where(c => c.Students.Any(s => s.User.Id == userId))

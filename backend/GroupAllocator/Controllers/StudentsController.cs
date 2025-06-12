@@ -73,7 +73,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 		}
 
 		await using var transaction = await db.Database.BeginTransactionAsync();
-		await db.Student.Where(s => s.User.Email == userEmail).ExecuteDeleteAsync();
+		await db.Students.Where(s => s.User.Email == userEmail).ExecuteDeleteAsync();
 		var student = new StudentModel()
 		{
 			User = user,
@@ -103,7 +103,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			strength -= 0.1;
 		}
 
-		db.Student.Add(student);
+		db.Students.Add(student);
 
 		await db.SaveChangesAsync();
 		await transaction.CommitAsync();
@@ -155,7 +155,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 
 	private async Task<UserModel> UserFromEmail(string userEmail)
 	{
-		return await db.Users.FirstOrDefaultAsync(s => s.Email == userEmail) ?? throw new BadHttpRequestException("Student not found");
+		return await db.Users.FirstOrDefaultAsync(s => s.Email == userEmail) ?? throw new BadHttpRequestException("Students not found");
 	}
 
 	[HttpDelete("file/{id:int}")]

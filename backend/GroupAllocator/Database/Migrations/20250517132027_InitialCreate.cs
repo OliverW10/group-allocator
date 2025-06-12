@@ -100,7 +100,7 @@ namespace GroupAllocator.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student",
+                name: "Students",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
@@ -172,7 +172,7 @@ namespace GroupAllocator.Database.Migrations
                     table.ForeignKey(
                         name: "FK_Preferences_Student_StudentId",
                         column: x => x.StudentId,
-                        principalTable: "Student",
+                        principalTable: "Students",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -226,7 +226,7 @@ namespace GroupAllocator.Database.Migrations
                 name: "StudentAssignments");
 
             migrationBuilder.DropTable(
-                name: "Student");
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Projects");

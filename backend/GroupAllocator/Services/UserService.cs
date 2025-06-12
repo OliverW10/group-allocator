@@ -6,68 +6,69 @@ namespace GroupAllocator.Services;
 
 public interface IUserService
 {
-	Task<UserModel?> GetOrCreateUserAsync(string name, string email, string? role = null);
-	Task CreateStudentAllowlist(StreamReader reader);
+	Task<UserModel?> GetOrCreateUserAsync(string name, string email);
+	Task CreateStudentAllowlist(int classId, StreamReader reader);
 }
 
 public class UserService(ApplicationDbContext db, IConfiguration configuration) : IUserService
 {
-	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email, string? role = null)
+	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email)
 	{
-		var knownRole = role ?? DetermineRole(email);
 		var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
 
 		if (existingUser is null)
 		{
-			return await CreateNewUser(name, email, knownRole);
+			return await CreateNewUser(name, email);
 		}
 
 		existingUser.Name = name;
-		if (knownRole == "admin" && existingUser.Role != "admin")
-		{
-			existingUser.Role = knownRole;
-		}
 		await db.SaveChangesAsync();
 		
-
 		return existingUser;
+
 	}
-	async Task<UserModel> CreateNewUser(string name, string email, string role)
+	async Task<UserModel> CreateNewUser(string name, string email)
 	{
-		var newUser = new UserModel { Email = email, Name = name, Role = role, IsVerified = false };
+		var newUser = new UserModel { Email = email, Name = name, IsAdmin = IsPredeterminedAdmin(email) };
 		db.Users.Add(newUser);
 		await db.SaveChangesAsync();
 		return newUser;
 	}
 
-	string DetermineRole(string email)
+	bool IsPredeterminedAdmin(string email)
 	{
 		string[] adminEmails = configuration.GetSection("AdminEmails").Get<string[]>() ?? Array.Empty<string>();
-		return adminEmails.Contains(email) ? "admin" : "student";
+		return adminEmails.Contains(email);
 	}
 
-	public async Task CreateStudentAllowlist(StreamReader csvStream)
+	public async Task CreateStudentAllowlist(int classId, StreamReader csvStream)
 	{
-		// Handles the case a student un-enrols and the list is updated
-		await db.Users.ExecuteUpdateAsync(s => s.SetProperty(u => u.IsVerified, u => false));
+		var @class = db.Classes.Find(classId) ?? throw new InvalidOperationException($"Class {classId} does not exist");
 
 		string? line;
 		while ((line = await csvStream.ReadLineAsync()) != null)
 		{
-			var existingUser = db.Users.FirstOrDefault(u => u.Email == line);
+			var existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == line);
 			if (existingUser == null)
 			{
-				db.Users.Add(new UserModel
+				existingUser = new UserModel
 				{
 					Email = line,
-					Role = "student",
-					IsVerified = true,
 					Name = line.Split("@").First(),
-				});
+					IsAdmin = IsPredeterminedAdmin(line),
+				};
+				db.Users.Add(existingUser);
+				await db.SaveChangesAsync();
 			}
-			else
+
+			var existingStudent = await db.Students.FirstOrDefaultAsync(s => s.Id == existingUser.Id);
+			if (existingStudent == null)
 			{
-				existingUser.IsVerified = true;
+				db.Students.Add(new StudentModel
+				{
+					Class = @class,
+					User = existingUser,
+				});
 			}
 		}
 

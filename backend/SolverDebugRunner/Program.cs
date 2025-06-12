@@ -32,18 +32,18 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 //];
 
 //List<PreferenceModel> preferences = [
-//    new PreferenceModel { Id = 1, Student = students[0], Project = projects[0], Strength = 1.0 },
-//    new PreferenceModel { Id = 2, Student = students[1], Project = projects[0], Strength = 0.8 },
-//    new PreferenceModel { Id = 3, Student = students[2], Project = projects[0], Strength = 0.9 },
-//    new PreferenceModel { Id = 4, Student = students[3], Project = projects[1], Strength = 1.0 },
-//    new PreferenceModel { Id = 5, Student = students[4], Project = projects[1], Strength = 0.7 }, 
-//    new PreferenceModel { Id = 6, Student = students[5], Project = projects[2], Strength = 0.85 },
-//    new PreferenceModel { Id = 7, Student = students[6], Project = projects[2], Strength = 0.95 },
-//    new PreferenceModel { Id = 8, Student = students[7], Project = projects[2], Strength = 0.75 },
-//    new PreferenceModel { Id = 9, Student = students[0], Project = projects[1], Strength = 0.6 },
-//    new PreferenceModel { Id = 10, Student = students[3], Project = projects[2], Strength = 0.8 },
-//    new PreferenceModel { Id = 11, Student = students[1], Project = projects[2], Strength = 0.4 },
-//    new PreferenceModel { Id = 12, Student = students[2], Project = projects[1], Strength = 0.9 }
+//    new PreferenceModel { Id = 1, Students = students[0], Project = projects[0], Strength = 1.0 },
+//    new PreferenceModel { Id = 2, Students = students[1], Project = projects[0], Strength = 0.8 },
+//    new PreferenceModel { Id = 3, Students = students[2], Project = projects[0], Strength = 0.9 },
+//    new PreferenceModel { Id = 4, Students = students[3], Project = projects[1], Strength = 1.0 },
+//    new PreferenceModel { Id = 5, Students = students[4], Project = projects[1], Strength = 0.7 }, 
+//    new PreferenceModel { Id = 6, Students = students[5], Project = projects[2], Strength = 0.85 },
+//    new PreferenceModel { Id = 7, Students = students[6], Project = projects[2], Strength = 0.95 },
+//    new PreferenceModel { Id = 8, Students = students[7], Project = projects[2], Strength = 0.75 },
+//    new PreferenceModel { Id = 9, Students = students[0], Project = projects[1], Strength = 0.6 },
+//    new PreferenceModel { Id = 10, Students = students[3], Project = projects[2], Strength = 0.8 },
+//    new PreferenceModel { Id = 11, Students = students[1], Project = projects[2], Strength = 0.4 },
+//    new PreferenceModel { Id = 12, Students = students[2], Project = projects[1], Strength = 0.9 }
 //];
 
 
@@ -78,20 +78,20 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 //List<PreferenceModel> preferences = [
 
-//    new PreferenceModel { Id = 1, Student = students[0], Project = projects[0], Strength = 1.0 },
-//    new PreferenceModel { Id = 2, Student = students[1], Project = projects[0], Strength = 0.8 },
-//    new PreferenceModel { Id = 3, Student = students[2], Project = projects[1], Strength = 0.9 },
-//    new PreferenceModel { Id = 4, Student = students[3], Project = projects[1], Strength = 1.0 },
-//    new PreferenceModel { Id = 5, Student = students[4], Project = projects[0], Strength = 0.6 },
-//    new PreferenceModel { Id = 6, Student = students[5], Project = projects[1], Strength = 0.7 },
-//    new PreferenceModel { Id = 7, Student = students[6], Project = projects[2], Strength = 0.9 },
-//    new PreferenceModel { Id = 8, Student = students[7], Project = projects[2], Strength = 1.0 },
-//    new PreferenceModel { Id = 9, Student = students[8], Project = projects[3], Strength = 0.6 },
-//    new PreferenceModel { Id = 10, Student = students[9], Project = projects[4], Strength = 0.8 },
-//    new PreferenceModel { Id = 11, Student = students[3], Project = projects[3], Strength = 0.5 },
-//    new PreferenceModel { Id = 12, Student = students[1], Project = projects[4], Strength = 0.7 },
-//    new PreferenceModel { Id = 13, Student = students[6], Project = projects[0], Strength = 0.6 },
-//    new PreferenceModel { Id = 14, Student = students[9], Project = projects[2], Strength = 0.9 },
+//    new PreferenceModel { Id = 1, Students = students[0], Project = projects[0], Strength = 1.0 },
+//    new PreferenceModel { Id = 2, Students = students[1], Project = projects[0], Strength = 0.8 },
+//    new PreferenceModel { Id = 3, Students = students[2], Project = projects[1], Strength = 0.9 },
+//    new PreferenceModel { Id = 4, Students = students[3], Project = projects[1], Strength = 1.0 },
+//    new PreferenceModel { Id = 5, Students = students[4], Project = projects[0], Strength = 0.6 },
+//    new PreferenceModel { Id = 6, Students = students[5], Project = projects[1], Strength = 0.7 },
+//    new PreferenceModel { Id = 7, Students = students[6], Project = projects[2], Strength = 0.9 },
+//    new PreferenceModel { Id = 8, Students = students[7], Project = projects[2], Strength = 1.0 },
+//    new PreferenceModel { Id = 9, Students = students[8], Project = projects[3], Strength = 0.6 },
+//    new PreferenceModel { Id = 10, Students = students[9], Project = projects[4], Strength = 0.8 },
+//    new PreferenceModel { Id = 11, Students = students[3], Project = projects[3], Strength = 0.5 },
+//    new PreferenceModel { Id = 12, Students = students[1], Project = projects[4], Strength = 0.7 },
+//    new PreferenceModel { Id = 13, Students = students[6], Project = projects[0], Strength = 0.6 },
+//    new PreferenceModel { Id = 14, Students = students[9], Project = projects[2], Strength = 0.9 },
 //];
 
 
@@ -430,7 +430,7 @@ for (int i = 0; i < students.Count(); i++)
 //this prints student info and preferences
 //foreach (PreferenceModel preference in preferences)
 //{
-//    Console.WriteLine($"prefId: {preference.Id}|{preference.Student.Id}|{preference.Student.User.Name}|{preference.Project.Name}|{preference.Project.Id}|{preference.Strength}");
+//    Console.WriteLine($"prefId: {preference.Id}|{preference.Students.Id}|{preference.Students.User.Name}|{preference.Project.Name}|{preference.Project.Id}|{preference.Strength}");
 //}
 
 
@@ -505,7 +505,7 @@ else
 
 	//	}
 
-	//	Console.WriteLine($"{studentCount++}: student:{assignment.Student.User.Name}_{assignment.Student.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id} project rank: {projectRank}");
+	//	Console.WriteLine($"{studentCount++}: student:{assignment.Students.User.Name}_{assignment.Students.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id} project rank: {projectRank}");
 
 	//	rankTracker[projectRank] += 1;
 
