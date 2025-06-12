@@ -1,12 +1,26 @@
 <template>
+	<h1 class="heading py-4">Group allocator</h1>
+	<ul>
+		<li>Collect student group preferences</li>
+		<li>Automatically group students and assign projects</li>
+		<li>Apply manual constraints and customize algorithm</li>
+	</ul>
 	<div class="flex flex-col justify-center h-screen">
 		<div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
 			<Message v-if="_window.location.hash" severity="contrast" icon="i-mdi-account-check" class="w-full">
 				Login Successful, Redirecting...
 			</Message>
 			<div v-else>
-				<h1 class="heading py-4">Group Allocator</h1>
 				<div>
+					<h1 class="heading py-4">Login as teacher</h1>
+					<h2 class="heading py-4">Get started for free</h2>
+					<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
+						Sign in with Google
+						<i class="i-logos-google-icon ml-2"></i>
+					</button>
+				</div>
+				<div>
+					<h1 class="heading py-4">Login as student</h1>
 					<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
 						Sign in with Google
 						<i class="i-logos-google-icon ml-2"></i>

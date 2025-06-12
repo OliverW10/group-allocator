@@ -21,7 +21,7 @@ public class AuthenticationService : IGroupAllocatorAuthenticationService
 			new Claim(JwtRegisteredClaimNames.Name, user.Name),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-			new Claim("admin", user.IsAdmin.ToString()),
+			new Claim("role", user.Role),
 		};
 
 		var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

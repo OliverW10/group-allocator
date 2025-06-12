@@ -5,7 +5,7 @@ namespace GroupAllocator.Database.Model;
 public class UserModel
 {
 	public int Id { get; set; }
-	public required bool IsAdmin { get; set; }
+	public required string Role { get; set; } = "student";
 	public required string Name { get; set; }
 	public required string Email { get; set; }
 	public required bool IsVerified { get; set; }

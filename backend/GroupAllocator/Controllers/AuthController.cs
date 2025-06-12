@@ -29,7 +29,7 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 		{
 			Name = claims.First(c => c.Type == JwtRegisteredClaimNames.Name).Value,
 			Email = claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value,
-			IsAdmin = bool.Parse(claims.First(c => c.Type == "admin").Value)
+			Role = claims.FirstOrDefault(c => c.Type == "role")?.Value ?? "student"
 		});
 	}
 
@@ -51,9 +51,9 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 	}
 
 	[HttpGet("login-dev")]
-	public async Task<IActionResult> LoginDev(string name, string email, bool? isAdmin)
+	public async Task<IActionResult> LoginDev(string name, string email, string? role = "student")
 	{
-		var user = await userService.GetOrCreateUserAsync(name, email, isAdmin);
+		var user = await userService.GetOrCreateUserAsync(name, email, role);
 
 		if (user is null)
 		{
@@ -72,36 +72,32 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 		return Ok();
 	}
 
-	[HttpGet("role/claim-admin/{email}")]
-	public async Task<IActionResult> ClaimAdmin(string email)
+	[HttpGet("role/set/{email}/{role}")]
+	[Authorize(Policy = "AdminOnly")]
+	public async Task<IActionResult> SetRole(string email, string role)
 	{
-		if (!configuration.GetValue<bool>("AdminClaimable") && !User.HasClaim("admin", "true"))
+		if (!new[] { "admin", "teacher", "student" }.Contains(role.ToLower()))
 		{
-			return NotFound();
-		}
-
-		await userService.GetOrCreateUserAsync("Unknown", email, true);
-		return Ok($"Set {email} to admin.");
-	}
-
-	[HttpGet("role/drop-admin/{email}")]
-	public async Task<IActionResult> DropAdmin(string email)
-	{
-		if (!configuration.GetValue<bool>("AdminClaimable") && !User.HasClaim("admin", "true"))
-		{
-			return NotFound();
+			return BadRequest("Invalid role. Must be one of: admin, teacher, student");
 		}
 
 		var user = await userService.GetOrCreateUserAsync("Unknown", email);
 		if (user is not null)
 		{
-			user.IsAdmin = false;
+			// Update user's role in the database
+			user.Role = role.ToLower();
 			await db.SaveChangesAsync();
-			return Ok($"Set {email} to student.");
+
+			// If the user is currently logged in, sign them out to force a re-login with new role
+			if (User.FindFirst(JwtRegisteredClaimNames.Email)?.Value == email)
+			{
+				await HttpContext.SignOutAsync();
+			}
+
+			return Ok($"Set {email} to {role}.");
 		}
 
 		return Ok($"User not found, no action taken.");
-
 	}
 
 	static IActionResult UserDto(UserModel user)
@@ -110,14 +106,12 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 		{
 			Name = user.Name,
 			Email = user.Email,
-			IsAdmin = user.IsAdmin,
+			Role = user.Role
 		});
 	}
 
 	async Task SignIn(UserModel user)
 	{
-		// Generate our own token rather than use the one obtained from google so we can add our own claims (e.g. IsAdmin) to it
-		// and to keep it standard with dev login or other auth methods
 		var principal = tokenService.GetPrincipal(user);
 		var authProperties = new AuthenticationProperties
 		{

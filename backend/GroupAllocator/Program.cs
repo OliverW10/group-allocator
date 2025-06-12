@@ -52,7 +52,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("AdminOnly", policy => policy.RequireClaim("admin", "True"));
+	options.AddPolicy("AdminOnly", policy => policy.RequireClaim("role", "admin"));
+	options.AddPolicy("TeacherOnly", policy => policy.RequireClaim("role", "teacher"));
+	options.AddPolicy("StudentOnly", policy => policy.RequireClaim("role", "student"));
 });
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("MainDb")));
 builder.Services.AddControllers();

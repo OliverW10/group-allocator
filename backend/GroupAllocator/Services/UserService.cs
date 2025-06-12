@@ -6,44 +6,44 @@ namespace GroupAllocator.Services;
 
 public interface IUserService
 {
-	Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null);
+	Task<UserModel?> GetOrCreateUserAsync(string name, string email, string? role = null);
 	Task CreateStudentAllowlist(StreamReader reader);
 }
 
 public class UserService(ApplicationDbContext db, IConfiguration configuration) : IUserService
 {
-	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email, bool? isAdmin = null)
+	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email, string? role = null)
 	{
-		var knownIsAdmin = isAdmin ?? ShouldBeAdmin(email);
+		var knownRole = role ?? DetermineRole(email);
 		var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
 
 		if (existingUser is null)
 		{
-			return await CreateNewUser(name, email, knownIsAdmin);
+			return await CreateNewUser(name, email, knownRole);
 		}
 
 		existingUser.Name = name;
-		if (knownIsAdmin && !existingUser.IsAdmin)
+		if (knownRole == "admin" && existingUser.Role != "admin")
 		{
-			existingUser.IsAdmin = knownIsAdmin;
+			existingUser.Role = knownRole;
 		}
 		await db.SaveChangesAsync();
 		
 
 		return existingUser;
 	}
-	async Task<UserModel> CreateNewUser(string name, string email, bool isAdmin)
+	async Task<UserModel> CreateNewUser(string name, string email, string role)
 	{
-		var newUser = new UserModel { Email = email, Name = name, IsAdmin = isAdmin, IsVerified = false };
+		var newUser = new UserModel { Email = email, Name = name, Role = role, IsVerified = false };
 		db.Users.Add(newUser);
 		await db.SaveChangesAsync();
 		return newUser;
 	}
 
-	bool ShouldBeAdmin(string email)
+	string DetermineRole(string email)
 	{
 		string[] adminEmails = configuration.GetSection("AdminEmails").Get<string[]>() ?? Array.Empty<string>();
-		return adminEmails.Contains(email);
+		return adminEmails.Contains(email) ? "admin" : "student";
 	}
 
 	public async Task CreateStudentAllowlist(StreamReader csvStream)
@@ -60,7 +60,7 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 				db.Users.Add(new UserModel
 				{
 					Email = line,
-					IsAdmin = false,
+					Role = "student",
 					IsVerified = true,
 					Name = line.Split("@").First(),
 				});

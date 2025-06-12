@@ -10,7 +10,7 @@ public class StudentModel
 {
 	public int Id { get; set; }
 	public required bool? WillSignContract { get; set; }
-	[ForeignKey(nameof(StudentModel.Id))]
+	[ForeignKey(nameof(StudentModel.Id))] // Share PK with UserModel
 	public required UserModel User { get; set; }
 	public required ClassModel Class { get; set; }
 

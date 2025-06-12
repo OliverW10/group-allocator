@@ -9,16 +9,20 @@ const routes: RouteRecordRaw[] = [
         path: '/form',
         component: () => import('./views/student/FormView.vue')
     },
+	{
+        path: '/teacher',
+        component: () => import('./views/teacher/TeacherDashboardView.vue'),
+    },
     {
-        path: '/admin/solver',
+        path: '/teacher/solver',
         component: () => import('./views/teacher/SolverView.vue'),
     },
     {
-        path: '/admin/projects',
+        path: '/teacher/projects',
         component: () => import('./views/teacher/ProjectsView.vue')
     },
     {
-        path: '/admin/students',
+        path: '/teacher/students',
         component: () => import('./views/teacher/StudentsView.vue'),
     }
 ]
