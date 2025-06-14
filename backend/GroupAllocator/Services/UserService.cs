@@ -6,13 +6,13 @@ namespace GroupAllocator.Services;
 
 public interface IUserService
 {
-	Task<UserModel?> GetOrCreateUserAsync(string name, string email);
+	Task<UserModel> GetOrCreateUserAsync(string name, string email);
 	Task CreateStudentAllowlist(int classId, StreamReader reader);
 }
 
 public class UserService(ApplicationDbContext db, IConfiguration configuration) : IUserService
 {
-	public async Task<UserModel?> GetOrCreateUserAsync(string name, string email)
+	public async Task<UserModel> GetOrCreateUserAsync(string name, string email)
 	{
 		var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
 

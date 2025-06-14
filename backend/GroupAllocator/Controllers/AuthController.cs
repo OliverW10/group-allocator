@@ -18,7 +18,7 @@ public class AuthController(IUserService userService, IConfiguration configurati
 {
 	[HttpGet("me")]
 	[Authorize]
-	public IActionResult GetCurrentUser()
+	public ActionResult<UserInfoDto> GetCurrentUser()
 	{
 		var claims = HttpContext.User.Claims.ToList();
 		if ((HttpContext.User.Identity is null || !claims.Any()))
@@ -30,56 +30,48 @@ public class AuthController(IUserService userService, IConfiguration configurati
 		{
 			Name = claims.First(c => c.Type == JwtRegisteredClaimNames.Name).Value,
 			Email = claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value,
-			Role = claims.FirstOrDefault(c => c.Type == "role")?.Value ?? "student"
+			Role = Enum.Parse<AuthRole>(claims.First(c => c.Type == AuthRolesConstants.RoleClaimName).Value),
+			IsAdmin = bool.Parse(claims.First(c => c.Type == AuthRolesConstants.AdminClaimName).Value),
 		});
 	}
 
 	[HttpGet("login-google-student")]
-	public async Task<IActionResult> LoginGoogleStudent(string idToken)
+	public async Task<ActionResult<UserInfoDto>> LoginGoogleStudent(string idToken)
 	{
-
+		return await LoginGoogleCommon(idToken, AuthRole.Student);
 	}
 
 	[HttpGet("login-google-teacher")]
-	public async Task<IActionResult> LoginGoogleTeacher(string idToken)
+	public async Task<ActionResult<UserInfoDto>> LoginGoogleTeacher(string idToken)
 	{
+		return await LoginGoogleCommon(idToken, AuthRole.Teacher);
 	}
 
-	public async UserInfoDto LoginCommon(string idToken)
+	async Task<UserInfoDto> LoginGoogleCommon(string idToken, AuthRole role)
 	{
-
 		var googleToken = await ValidateGoogleToken(idToken);
-
 		var user = await userService.GetOrCreateUserAsync(googleToken.Name, googleToken.Email);
-
-		if (user is null)
-		{
-			return Unauthorized();
-		}
-
-		await SignIn(user);
-
-		return new UserInfoDto()
-		{
-			Name = user.Name,
-			Email = user.Email,
-			Role = user.Role
-		}
+		await SignIn(user, role);
+		return UserDto(role, user);
 	}
 
 	[HttpGet("login-dev")]
-	public async Task<IActionResult> LoginDev(string name, string email, string? role = "student")
+	public async Task<UserInfoDto> LoginDev(string name, string email, AuthRole role)
 	{
 		var user = await userService.GetOrCreateUserAsync(name, email);
+		await SignIn(user, role);
+		return UserDto(role, user);
+	}
 
-		if (user is null)
+	private static UserInfoDto UserDto(AuthRole role, UserModel user)
+	{
+		return new UserInfoDto
 		{
-			return Unauthorized();
-		}
-
-		await SignIn(user);
-
-		return UserDto(user);
+			Name = user.Name,
+			Email = user.Email,
+			Role = role,
+			IsAdmin = user.IsAdmin,
+		};
 	}
 
 	[HttpGet("logout")]
@@ -89,20 +81,15 @@ public class AuthController(IUserService userService, IConfiguration configurati
 		return Ok();
 	}
 
-	[HttpGet("role/set/{email}/{role}")]
+	[HttpGet("role/set/{email}/{value}")]
 	[Authorize(Policy = "AdminOnly")]
-	public async Task<IActionResult> SetRole(string email, string role)
+	public async Task<IActionResult> SetAdmin(string email, bool value)
 	{
-		if (!new[] { "admin", "teacher", "student" }.Contains(role.ToLower()))
-		{
-			return BadRequest("Invalid role. Must be one of: admin, teacher, student");
-		}
-
 		var user = await userService.GetOrCreateUserAsync("Unknown", email);
 		if (user is not null)
 		{
 			// Update user's role in the database
-			user.Role = role.ToLower();
+			user.IsAdmin = value;
 			await db.SaveChangesAsync();
 
 			// If the user is currently logged in, sign them out to force a re-login with new role
@@ -111,20 +98,15 @@ public class AuthController(IUserService userService, IConfiguration configurati
 				await HttpContext.SignOutAsync();
 			}
 
-			return Ok($"Set {email} to {role}.");
+			return Ok($"Set {email} admin state to {value}.");
 		}
 
 		return Ok($"User not found, no action taken.");
 	}
 
-	static IActionResult UserDto(UserModel user)
+	async Task SignIn(UserModel user, AuthRole role)
 	{
-		return new JsonResult();
-	}
-
-	async Task SignIn(UserModel user)
-	{
-		var principal = GetPrincipal(user);
+		var principal = GetPrincipal(user, role, user.IsAdmin);
 		var authProperties = new AuthenticationProperties
 		{
 			IsPersistent = true,
@@ -132,7 +114,7 @@ public class AuthController(IUserService userService, IConfiguration configurati
 		await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
 	}
 
-	ClaimsPrincipal GetPrincipal(UserModel user)
+	ClaimsPrincipal GetPrincipal(UserModel user, AuthRole role, bool isAdmin)
 	{
 		var claims = new List<Claim>()
 		{
@@ -140,7 +122,8 @@ public class AuthController(IUserService userService, IConfiguration configurati
 			new Claim(JwtRegisteredClaimNames.Name, user.Name),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-			new Claim("role", user.Role),
+			new Claim(AuthRolesConstants.RoleClaimName, role.ToString().ToLowerInvariant()),
+			new Claim(AuthRolesConstants.AdminClaimName, isAdmin.ToString()),
 		};
 
 		var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -156,4 +139,12 @@ public class AuthController(IUserService userService, IConfiguration configurati
 		var googleToken = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
 		return googleToken;
 	}
+}
+
+public static class AuthRolesConstants
+{
+	public const string RoleClaimName = "role";
+	public const string AdminClaimName = "admin";
+	public static string Student => AuthRole.Student.ToString().ToLowerInvariant();
+	public static string Teacher => AuthRole.Teacher.ToString().ToLowerInvariant();
 }
