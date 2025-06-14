@@ -28,6 +28,7 @@ public static class UserModelExtensions
 			WillSignContract = model.StudentModel?.WillSignContract ?? false,
 			OrderedPreferences = model.StudentModel?.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList() ?? [],
 			Files = model.Files.Select(f => f.ToDto()),
+			ClassId = model.StudentModel?.Class.Id ?? 0
 		};
 	}
 }

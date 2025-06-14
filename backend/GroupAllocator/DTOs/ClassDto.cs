@@ -5,7 +5,6 @@ namespace GroupAllocator.DTOs;
 [ExportTsClass]
 public class ClassDto
 {
-    public required string Code { get; set; }
     public required string Name { get; set; }
 }
 

@@ -51,25 +51,34 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		return Ok(classes);
 	}
 
+	private async Task<string> GenerateUniqueCode()
+	{
+		const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		var random = new Random();
+		string code;
+		
+		do
+		{
+			code = new string(Enumerable.Repeat(chars, 5)
+				.Select(s => s[random.Next(s.Length)]).ToArray());
+		} while (await db.Classes.AnyAsync(c => c.Code == code));
+		
+		return code;
+	}
+
 	[HttpPost("")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> CreateClass([FromBody] ClassDto classDto)
+	public async Task<IActionResult> CreateClass(ClassDto classDto)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
-		// Check if code already exists
-		if (await db.Classes.AnyAsync(c => c.Code == classDto.Code))
-		{
-			return BadRequest("A class with this code already exists");
-		}
-
 		var teacher = await db.Teachers
 			.Include(t => t.User)
 			.FirstOrDefaultAsync(t => t.User.Id == userId) ?? throw new InvalidOperationException("Teacher not found");
 
 		var newClass = new ClassModel
 		{
-			Code = classDto.Code,
+			Code = await GenerateUniqueCode(),
 			Name = classDto.Name,
 			CreatedAt = DateTimeOffset.UtcNow
 		};
@@ -98,7 +107,7 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 
 	[HttpPut("{id}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto classDto)
+	public async Task<IActionResult> UpdateClass(int id, ClassDto classDto)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		

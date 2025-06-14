@@ -37,7 +37,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 
 	[HttpGet("me")]
 	[Authorize]
-	public async Task<IActionResult> Get()
+	public async Task<IActionResult> Get(int classId)
 	{
 		var userEmail = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 		if (userEmail == null)
@@ -45,7 +45,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return BadRequest("Not logged in");
 		}
 
-		var student = await studentService.GetStudents().Where(s => s.Email == userEmail).FirstOrDefaultAsync();
+		var student = await studentService.GetStudents().Where(s => s.Email == userEmail && s.Class.Id == classId).FirstOrDefaultAsync();
 		if (student == null)
 		{
 			return NoContent();
@@ -72,11 +72,18 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			return BadRequest("User doesn't exist");
 		}
 
+		var @class = await db.Classes.FindAsync(preferences.ClassId);
+		if (@class == null)
+		{
+			return BadRequest("Class not found");
+		}
+
 		await using var transaction = await db.Database.BeginTransactionAsync();
 		await db.Students.Where(s => s.User.Email == userEmail).ExecuteDeleteAsync();
 		var student = new StudentModel()
 		{
 			User = user,
+			Class = @class,
 			WillSignContract = preferences.WillSignContract,
 		};
 		var preferenceModels = new List<PreferenceModel>();
