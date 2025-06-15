@@ -8,6 +8,8 @@ public class UserModel
 	public required bool IsAdmin { get; set; }
 	public required string Name { get; set; }
 	public required string Email { get; set; }
+	public StudentModel? StudentModel { get; set; }
+	public ICollection<FileModel> Files { get; } = new List<FileModel>();
 }
 
 public static class UserModelExtensions
@@ -29,6 +31,17 @@ public static class UserModelExtensions
 			OrderedPreferences = model.StudentModel?.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList() ?? [],
 			Files = model.Files.Select(f => f.ToDto()),
 			ClassId = model.StudentModel?.Class.Id ?? 0
+		};
+	}
+
+	public static StudentInfoDto ToInfoDto(this UserModel model)
+	{
+		return new StudentInfoDto
+		{
+			StudentId = model.Id,
+			Name = model.Name,
+			Email = model.Email,
+			IsVerified = model.StudentModel?.IsVerified ?? false
 		};
 	}
 }

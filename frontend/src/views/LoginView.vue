@@ -1,49 +1,62 @@
 <template>
-	<h1 class="heading py-4">Group allocator</h1>
-	<ul>
-		<li>Collect student group preferences</li>
-		<li>Automatically group students and assign projects</li>
-		<li>Apply manual constraints and customize algorithm</li>
-	</ul>
-	<div class="flex flex-col justify-center h-screen">
-		<div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
-			<Message v-if="_window.location.hash" severity="contrast" icon="i-mdi-account-check" class="w-full">
+	<div class="min-h-screen flex flex-col">
+		<!-- Login Buttons Section -->
+		<div class="flex justify-end gap-4 p-4">
+			<button class="flex items-center px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600" @click="navigateToOidc">
+				Sign in as Teacher
+				<i class="i-mdi-account-tie ml-2"></i>
+			</button>
+			<button class="flex items-center px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600" @click="navigateToOidc">
+				Sign in as Student
+				<i class="i-mdi-account ml-2"></i>
+			</button>
+		</div>
+
+		<!-- Main Content -->
+		<div class="flex-grow flex flex-col items-center justify-center p-8">
+			<Message v-if="_window.location.hash" severity="contrast" icon="i-mdi-account-check" class="w-full max-w-md">
 				Login Successful, Redirecting...
 			</Message>
-			<div v-else>
-				<div>
-					<h1 class="heading py-4">Login as teacher</h1>
-					<h2 class="heading py-4">Get started for free</h2>
-					<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
-						Sign in with Google
-						<i class="i-logos-google-icon ml-2"></i>
-					</button>
+			<div v-else class="text-center">
+				<h1 class="text-4xl font-bold mb-6">Group Allocator</h1>
+				<div class="max-w-2xl mx-auto space-y-4">
+					<p class="text-xl">Streamline your group project management</p>
+					<ul class="text-lg space-y-2">
+						<li class="flex items-center justify-center">
+							<i class="i-mdi-check-circle text-green-500 mr-2"></i>
+							Collect student group preferences
+						</li>
+						<li class="flex items-center justify-center">
+							<i class="i-mdi-check-circle text-green-500 mr-2"></i>
+							Automatically group students and assign projects
+						</li>
+						<li class="flex items-center justify-center">
+							<i class="i-mdi-check-circle text-green-500 mr-2"></i>
+							Apply manual constraints and customize algorithm
+						</li>
+					</ul>
 				</div>
-				<div>
-					<h1 class="heading py-4">Login as student</h1>
-					<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
-						Sign in with Google
-						<i class="i-logos-google-icon ml-2"></i>
-					</button>
-				</div>
-				<div v-if="is_dev" class="flex flex-col gap-4">
-					<hr class="my-4 border-gray-500" />
+			</div>
+		</div>
+
+		<!-- Dev Login Section -->
+		<div v-if="is_dev" class="p-4 border-t border-gray-200">
+			<div class="max-w-md mx-auto">
+				<h2 class="text-xl font-semibold mb-4">Development Login</h2>
+				<div class="space-y-4">
 					<div class="flex gap-2">
 						<label for="devNameInput">Name:</label>
-						<input id="devNameInput" v-model="devName" type="text" class="border">
+						<input id="devNameInput" v-model="devName" type="text" class="border rounded px-2 py-1">
 					</div>
-	
 					<div class="flex gap-2">
 						<label for="devEmailInput">Email:</label>
-						<input id="devEmailInput" v-model="devEmail" type="email" class="border">
+						<input id="devEmailInput" v-model="devEmail" type="email" class="border rounded px-2 py-1">
 					</div>
-	
-					<div class="flex gap-2">
-						<label for="devAdminInput">Admin:</label>
+					<div class="flex gap-2 items-center">
+						<label for="devAdminInput">Role:</label>
 						<SelectButton v-model="devLoginType" name="selection" :options="devLoginOptions" />
 					</div>
-	
-					<button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
+					<button class="flex items-center px-4 py-2 rounded-md bg-gray-500 text-white hover:bg-gray-600" @click="loginForDev">
 						Development Test Login
 						<i class="i-mdi-robot ml-2"></i>
 					</button>

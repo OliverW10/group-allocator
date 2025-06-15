@@ -7,7 +7,7 @@ public enum PaymentPlan
 
 public class PaymentModel
 {
-	public required TeacherModel Payer { get; set; }
+	public required UserModel Payer { get; set; }
 	public required ClassModel ForClass { get; set; }
 	public required decimal Amount { get; set; }
 	public required DateTimeOffset PayedAt { get; set; }

@@ -85,6 +85,7 @@ public class StudentsController(ApplicationDbContext db, IStudentService student
 			User = user,
 			Class = @class,
 			WillSignContract = preferences.WillSignContract,
+			IsVerified = false
 		};
 		var preferenceModels = new List<PreferenceModel>();
 		var allProjects = await db.Projects.ToListAsync();

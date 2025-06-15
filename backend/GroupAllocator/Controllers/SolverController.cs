@@ -59,10 +59,17 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 	[HttpPost]
 	public async Task<IActionResult> Solve(SolveRequestDto solveConfig)
 	{
+		var @class = await db.Classes.FindAsync(solveConfig.ClassId);
+		if (@class == null)
+		{
+			return BadRequest("Class not found");
+		}
+
 		var solveRun = new SolveRunModel
 		{
 			Timestamp = DateTime.UtcNow,
 			PreferenceExponent = solveConfig.PreferenceExponent,
+			Class = @class
 		};
 
 		var assignments = solver.AssignStudentsToGroups(solveRun,

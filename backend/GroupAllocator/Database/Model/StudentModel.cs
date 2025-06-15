@@ -13,6 +13,7 @@ public class StudentModel
 	public required UserModel User { get; set; }
 	public required ClassModel Class { get; set; }
 	public bool? WillSignContract { get; set; }
+	public bool IsVerified { get; set; }
 
 	public ICollection<PreferenceModel> Preferences { get; } = new List<PreferenceModel>();
 	public ICollection<FileModel> Files { get; } = new List<FileModel>();
