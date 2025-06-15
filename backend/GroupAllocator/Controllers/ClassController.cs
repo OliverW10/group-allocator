@@ -20,12 +20,14 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		
 		var classes = await db.Classes
 			.Include(c => c.Teachers)
-			.Where(c => c.Teachers.Any(t => t.Teacher.User.Id == userId))
-			.Select(c => new
+			.Where(c => c.Teachers.Any(t => t.Teacher.Id == userId))
+			.Select(c => new ClassResponseDto
 			{
-				c.Id,
-				c.Code,
-				TeacherRole = c.Teachers.First(t => t.Teacher.User.Id == userId).Role
+				Id = c.Id,
+				Code = c.Code,
+				Name = c.Name,
+				CreatedAt = c.CreatedAt,
+				TeacherRole = c.Teachers.First(t => t.Teacher.Id == userId).Role
 			})
 			.ToListAsync();
 
@@ -41,10 +43,13 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		var classes = await db.Classes
 			.Include(c => c.Students)
 			.Where(c => c.Students.Any(s => s.User.Id == userId))
-			.Select(c => new
+			.Select(c => new ClassResponseDto
 			{
-				c.Id,
-				c.Code
+				Id = c.Id,
+				Code = c.Code,
+				Name = c.Name,
+				CreatedAt = c.CreatedAt,
+				TeacherRole = ClassTeacherRole.None // Students don't have a teacher role
 			})
 			.ToListAsync();
 

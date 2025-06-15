@@ -9,4 +9,5 @@ public class ClassModel
 
 	public ICollection<ClassTeacherModel> Teachers { get; set; }
 	public ICollection<StudentModel> Students { get; set; }
+	public ICollection<PaymentModel> Payments { get; set; }
 }
