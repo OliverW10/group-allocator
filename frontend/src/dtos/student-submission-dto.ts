@@ -9,4 +9,5 @@ export class StudentSubmissionDto {
     orderedPreferences: number[];
     willSignContract: boolean;
     files: FileDetailsDto[];
+    classId: number;
 }
