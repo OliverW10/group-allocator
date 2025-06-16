@@ -236,6 +236,11 @@ public class AllocationSolver : IAllocationSolver
 		//Preference-based objective function
 		Objective objective = solver.Objective();
 
+		var subjectStrengthFunc = (int ordinal) =>
+		{
+			return 1.0 - ordinal * 0.1;
+		};
+
 		foreach (var pref in preferences)
 		{
 			foreach (var projectInstance in projectList.Where(x => x.Project.Id == pref.Project.Id))
@@ -245,7 +250,7 @@ public class AllocationSolver : IAllocationSolver
 				if (variables.TryGetValue(key, out var variable))
 				{
 					//this sets the coefficients for the variables based on strengths
-					objective.SetCoefficient(variable, pref.Strength);
+					objective.SetCoefficient(variable, subjectStrengthFunc(pref.Ordinal));
 				}
 			}
 

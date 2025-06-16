@@ -24,6 +24,7 @@ public class PaymentService(ApplicationDbContext db)
 		{
 			PaymentPlan.None => 0,
 			PaymentPlan.Basic => 5,
+			_ => throw new InvalidOperationException("Not a valid enum"),
 		};
 	}
 }

@@ -12,7 +12,7 @@ public interface IProjectService
 	Task<ProjectModel> AddProject(ProjectModel project);
 	Task<ProjectModel> UpdateProject(ProjectModel project);
 	Task DeleteProject(int id);
-	Task AddFromCsv(StreamReader csvStream);
+	Task AddFromCsv(StreamReader csvStream, int classId);
 }
 
 public class ProjectService(ApplicationDbContext db) : IProjectService
@@ -53,8 +53,9 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 		}
 	}
 
-	public async Task AddFromCsv(StreamReader csvStream)
+	public async Task AddFromCsv(StreamReader csvStream, int classId)
 	{
+		var @class = db.Classes.Find(classId) ?? throw new InvalidOperationException($"No class with id {classId}");
 		var allClients = db.Clients.ToList();
 		string? line;
 		var header = "project_name,client,min_students,max_students,requires_nda,min_instances,max_instances";
@@ -84,6 +85,7 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 				RequiresNda = bool.Parse(fields[4]),
 				MinInstances = int.Parse(fields[5]),
 				MaxInstances = int.Parse(fields[6]),
+				Class = @class,
 			});
 		}
 
@@ -99,7 +101,8 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
 
 			var newClient = new ClientModel()
 			{
-				Name = name
+				Name = name,
+				Class = @class,
 			};
 
 			db.Clients.Add(newClient);

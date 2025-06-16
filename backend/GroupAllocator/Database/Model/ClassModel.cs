@@ -7,7 +7,7 @@ public class ClassModel
 	public required string Name { get; set; }
 	public required DateTimeOffset CreatedAt { get; set; }
 
-	public ICollection<ClassTeacherModel> Teachers { get; set; }
-	public ICollection<StudentModel> Students { get; set; }
-	public ICollection<PaymentModel> Payments { get; set; }
+	public ICollection<ClassTeacherModel> Teachers { get; set; } = null!;
+	public ICollection<StudentModel> Students { get; set; } = null!;
+	public ICollection<PaymentModel> Payments { get; set; } = null!;
 }

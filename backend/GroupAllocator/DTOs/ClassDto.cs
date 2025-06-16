@@ -1,3 +1,4 @@
+using GroupAllocator.Database.Model;
 using TypeGen.Core.TypeAnnotations;
 
 namespace GroupAllocator.DTOs;
@@ -15,5 +16,5 @@ public class ClassResponseDto
     public required string Code { get; set; }
     public required string Name { get; set; }
     public required DateTimeOffset CreatedAt { get; set; }
-    public required ClassTeacherRole TeacherRole { get; set; }
+    public required ClassTeacherRole? TeacherRole { get; set; }
 } 

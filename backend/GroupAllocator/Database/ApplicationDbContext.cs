@@ -15,6 +15,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<SolveRunModel> SolveRuns { get; set; } = null!;
 	public DbSet<StudentAssignmentModel> StudentAssignments { get; set; } = null!;
 	public DbSet<StudentModel> Students { get; set; } = null!;
-	public DbSet<TeacherModel> Teachers { get; set; } = null!;
 	public DbSet<UserModel> Users { get; set; } = null!;
 }

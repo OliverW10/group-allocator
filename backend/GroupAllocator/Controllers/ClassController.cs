@@ -49,7 +49,7 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 				Code = c.Code,
 				Name = c.Name,
 				CreatedAt = c.CreatedAt,
-				TeacherRole = ClassTeacherRole.None // Students don't have a teacher role
+				TeacherRole = null,
 			})
 			.ToListAsync();
 
@@ -77,9 +77,7 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
-		var teacher = await db.Teachers
-			.Include(t => t.User)
-			.FirstOrDefaultAsync(t => t.User.Id == userId) ?? throw new InvalidOperationException("Teacher not found");
+		var teacher = await db.Users.FirstOrDefaultAsync(t => t.Id == userId) ?? throw new InvalidOperationException("Teacher not found");
 
 		var newClass = new ClassModel
 		{
@@ -119,7 +117,6 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		var @class = await db.Classes
 			.Include(c => c.Teachers)
 				.ThenInclude(t => t.Teacher)
-					.ThenInclude(t => t.User)
 			.FirstOrDefaultAsync(c => c.Id == id);
 
 		if (@class == null)
@@ -129,20 +126,13 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 
 		// Check if the teacher is the owner of the class
 		var teacherRole = @class.Teachers
-			.FirstOrDefault(t => t.Teacher.User.Id == userId)?.Role;
+			.FirstOrDefault(t => t.Teacher.Id == userId)?.Role;
 
 		if (teacherRole != ClassTeacherRole.Owner)
 		{
 			return Forbid("Only the class owner can update the class");
 		}
 
-		// Check if the new code conflicts with an existing class
-		if (classDto.Code != @class.Code && await db.Classes.AnyAsync(c => c.Code == classDto.Code))
-		{
-			return BadRequest("A class with this code already exists");
-		}
-
-		@class.Code = classDto.Code;
 		@class.Name = classDto.Name;
 
 		await db.SaveChangesAsync();

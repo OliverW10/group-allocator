@@ -22,7 +22,7 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 			return BadRequest("Already upgraded");
 		}
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		var user = await db.Teachers.FindAsync(userId) ?? throw new InvalidOperationException("User not found");
+		var user = await db.Users.FindAsync(userId) ?? throw new InvalidOperationException("User not found");
 		var @class = await db.Classes.FindAsync(id) ?? throw new InvalidOperationException("Class not found"); ;
 
 		var requiredCost = paymentService.CostOfPlan(PaymentPlan.Basic);
@@ -59,7 +59,7 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 			ReturnUrl = returnDomain + "?session_id={CHECKOUT_SESSION_ID}",
 		};
 		var service = new SessionService();
-		Session session = service.Create(options);
+		Session session = await service.CreateAsync(options);
 
 		return new JsonResult(new { clientSecret = session.ClientSecret });
 	}
