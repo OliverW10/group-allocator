@@ -63,7 +63,7 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 		return UserDto(role, user);
 	}
 
-	private static UserInfoDto UserDto(AuthRole role, UserModel user)
+	static UserInfoDto UserDto(AuthRole role, UserModel user)
 	{
 		return new UserInfoDto
 		{

@@ -1,4 +1,3 @@
-
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // TODO: replace all direct uses of ApiService with a specialised service to centralise endpoint paths - maybe also look at generating the services (open api or something)
@@ -19,6 +18,12 @@ export default class ApiService {
 
     static async postRaw<T>(path: string, body: BodyInit | undefined): Promise<T> {
         return this.#makeRequest(path, 'POST', body)
+    }
+
+    static put<T>(path: string, data: unknown): Promise<T> {
+        return this.#makeRequest(path, 'PUT', JSON.stringify(data), {
+            "Content-Type": "application/json",
+        })
     }
 
     static makeUrl(path: string): URL {

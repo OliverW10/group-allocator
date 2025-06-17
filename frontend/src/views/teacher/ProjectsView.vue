@@ -40,16 +40,18 @@ import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import Column from 'primevue/column';
-import ProjectService from '../../services/ProjectService';
 import AdminNavBar from '../../components/AdminNavBar.vue';
 import FileUploader from '../../components/FileUploader.vue';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
 import ApiService from '../../services/ApiService';
 import { useToast } from 'primevue/usetoast';
+import { useRoute } from 'vue-router';
 
 const projects = ref([] as ProjectDto[]);
 const loading = ref(false);
 const toast = useToast();
+const route = useRoute();
+const classId = route.params.classId as string;
 
 onMounted(() => {
     getProjects();
@@ -58,7 +60,7 @@ onMounted(() => {
 const getProjects = async () => {
     try {
         loading.value = true;
-        setProjects(await ProjectService.getProjects())
+        setProjects(await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`))
     } catch (error) {
         console.error(error);
     } finally {
@@ -78,7 +80,7 @@ const uploadProjects = async (event: FileUploadSelectEvent) => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     try {
-        const result = await ApiService.postRaw('projects/upload', formData) // , 'multipart/form-data'
+        const result = await ApiService.postRaw(`projects/upload?classId=${classId}`, formData)
         setProjects(result as ProjectDto[])
         if (result != undefined) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Projects uploaded', life: 5000 });
@@ -91,7 +93,7 @@ const uploadProjects = async (event: FileUploadSelectEvent) => {
 }
 
 const deleteProject = async (id: string) => {
-    const newProjects = await ProjectService.deleteProject(id);
+    const newProjects = await ApiService.delete<ProjectDto[]>(`/projects/delete/${id}?classId=${classId}`);
     setProjects(newProjects);
 }
 

@@ -34,6 +34,7 @@ import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
 import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import { removeAutoAllocated } from '../../services/AllocationsServices';
+import { useRoute } from 'vue-router';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -53,14 +54,17 @@ const allStudentInfos = computed(() => {
 	}) ?? []
 })
 
+const route = useRoute();
+const classId = route.params.classId as string;
+
 onMounted(async () => {
-	const solveResult = await ApiService.get<SolveRunDto>("/solver")
+	const solveResult = await ApiService.get<SolveRunDto>(`/solver?classId=${classId}`)
 	if (solveResult) {
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	}
 	integrateResultToAllocations(solveResult)
-	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>("/students");
-	allProjects.value = await ApiService.get<ProjectDto[]>("/projects");
+	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);
+	allProjects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`);
 	loading.value = false
 })
 
@@ -72,7 +76,7 @@ const solve = async () => {
 		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
 		preferenceExponent: preferenceExponent.value
 	}
-	const solveResult = await ApiService.post<SolveRunDto>("/solver", solveRequest)
+	const solveResult = await ApiService.post<SolveRunDto>(`/solver?classId=${classId}`, solveRequest)
 	if (!solveResult) {
 		toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to find solution for student allocations', life: 3000 });
 		loading.value = false

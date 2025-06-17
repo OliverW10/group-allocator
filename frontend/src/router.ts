@@ -14,16 +14,20 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./views/teacher/TeacherDashboardView.vue'),
     },
     {
-        path: '/teacher/solver',
+        path: '/teacher/:classId/solver',
         component: () => import('./views/teacher/SolverView.vue'),
     },
     {
-        path: '/teacher/projects',
+        path: '/teacher/:classId/projects',
         component: () => import('./views/teacher/ProjectsView.vue')
     },
     {
-        path: '/teacher/students',
+        path: '/teacher/:classId/students',
         component: () => import('./views/teacher/StudentsView.vue'),
+    },
+    {
+        path: '/teacher/:classId/purchase',
+        component: () => import('./views/teacher/Purchase.vue'),
     }
 ]
 

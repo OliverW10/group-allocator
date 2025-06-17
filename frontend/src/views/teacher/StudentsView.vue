@@ -49,6 +49,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import AdminNavBar from '../../components/AdminNavBar.vue';
 import ApiService from '../../services/ApiService';
 import DataTable from 'primevue/datatable';
@@ -65,6 +66,8 @@ const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const toast = useToast();
 const fileModal = ref(null as null | number);
+const route = useRoute();
+const classId = route.params.classId as string;
 
 const showFiles = (id: number) => {
 	fileModal.value = id;
@@ -79,8 +82,8 @@ const rowClass = (data: StudentInfoAndSubmission) => {
 onMounted(async () => {
     try {
         loading.value = true;
-        students.value = await ApiService.get<StudentInfoAndSubmission[]>("/students")
-        projects.value = await ApiService.get<ProjectDto[]>("/projects")
+        students.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`)
+        projects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`)
     } catch (error) {
         console.error(error);
     } finally {
@@ -89,12 +92,12 @@ onMounted(async () => {
 });
 
 const deleteFile = async (id: string) => {
-	await ApiService.delete(`/students/file/${id}`)
-	students.value = await ApiService.get<StudentInfoAndSubmission[]>("/students")
+	await ApiService.delete(`/students/file/${id}?classId=${classId}`)
+	students.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`)
 }
 
 const download = async (id: unknown, name: string) => {
-	const url = await ApiService.makeUrl(`/students/file/${id}`)
+	const url = await ApiService.makeUrl(`/students/file/${id}?classId=${classId}`)
 	const a = document.createElement('a')
 	a.href = url.toString()
 	a.download = name
@@ -108,7 +111,7 @@ const setStudents = (data: StudentInfoAndSubmission[]) => {
 }
 
 const remove = async (id: string) => {
-    const newProjects = await ApiService.delete<StudentInfoAndSubmission[]>(`/students/${id}`);
+    const newProjects = await ApiService.delete<StudentInfoAndSubmission[]>(`/students/${id}?classId=${classId}`);
     setStudents(newProjects);
 }
 
@@ -120,7 +123,7 @@ const uploadStudents = async (event: FileUploadSelectEvent) => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     try {
-        const result = await ApiService.postRaw<StudentInfoAndSubmission[]>('students/whitelist', formData) // , 'multipart/form-data'
+        const result = await ApiService.postRaw<StudentInfoAndSubmission[]>(`students/whitelist?classId=${classId}`, formData)
         setStudents(result)
         if (result != undefined) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Students added to whitelist', life: 5000 });

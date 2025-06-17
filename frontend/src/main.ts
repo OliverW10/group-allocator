@@ -8,6 +8,7 @@ import 'virtual:uno.css'
 import '@unocss/reset/tailwind-compat.css'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
+import ConfirmationService from 'primevue/confirmationservice'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -19,6 +20,7 @@ app.use(PrimeVue, {
 app.use(pinia)
 app.use(router)
 app.use(ToastService)
+app.use(ConfirmationService)
 app.directive('tooltip', Tooltip)
 
 app.mount('#app')

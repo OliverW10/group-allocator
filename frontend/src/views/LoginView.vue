@@ -2,14 +2,8 @@
 	<div class="min-h-screen flex flex-col">
 		<!-- Login Buttons Section -->
 		<div class="flex justify-end gap-4 p-4">
-			<button class="flex items-center px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600" @click="navigateToOidc">
-				Sign in as Teacher
-				<i class="i-mdi-account-tie ml-2"></i>
-			</button>
-			<button class="flex items-center px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600" @click="navigateToOidc">
-				Sign in as Student
-				<i class="i-mdi-account ml-2"></i>
-			</button>
+			<Button class="flex items-center" icon="pi pi-user" label="Sign in as Teacher" @click="loginGoogle('teacher')" />
+			<Button class="flex items-center" icon="pi pi-users" label="Sign in as Student" @click="loginGoogle('student')" severity="success" />
 		</div>
 
 		<!-- Main Content -->
@@ -46,20 +40,17 @@
 				<div class="space-y-4">
 					<div class="flex gap-2">
 						<label for="devNameInput">Name:</label>
-						<input id="devNameInput" v-model="devName" type="text" class="border rounded px-2 py-1">
+						<InputText id="devNameInput" v-model="devName" type="text" />
 					</div>
 					<div class="flex gap-2">
 						<label for="devEmailInput">Email:</label>
-						<input id="devEmailInput" v-model="devEmail" type="email" class="border rounded px-2 py-1">
+						<InputText id="devEmailInput" v-model="devEmail" type="email" />
 					</div>
 					<div class="flex gap-2 items-center">
 						<label for="devAdminInput">Role:</label>
 						<SelectButton v-model="devLoginType" name="selection" :options="devLoginOptions" />
 					</div>
-					<button class="flex items-center px-4 py-2 rounded-md bg-gray-500 text-white hover:bg-gray-600" @click="loginForDev">
-						Development Test Login
-						<i class="i-mdi-robot ml-2"></i>
-					</button>
+					<Button class="flex items-center" icon="pi pi-cog" label="Development Test Login" @click="loginForDev" severity="secondary" />
 				</div>
 			</div>
 		</div>
@@ -73,7 +64,11 @@ import { onMounted, ref } from 'vue';
 import type { UserInfoDto } from '../dtos/user-info-dto';
 import ApiService from '../services/ApiService';
 import SelectButton from 'primevue/selectbutton';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Message from 'primevue/message';
 
+// Types
 type LoginType = "admin" | "student" | "teacher";
 
 const authStore = useAuthStore();
@@ -84,37 +79,71 @@ const devLoginOptions = ref(["admin", "student", "teacher"] as LoginType[]);
 
 const is_dev = import.meta.env.DEV;
 
-const navigateToOidc = () => {
-	location.href = getOidcUrl();
+function getGoogleIdToken() {
+	const hash = window.location.hash;
+	if (!hash) return null;
+	const params = new URLSearchParams(hash.replace('#', '?'));
+	return params.get('id_token');
+}
+
+const loginGoogle = async (role: 'teacher' | 'student') => {
+	location.href = getOidcUrl(role);
 };
 
+function getOidcState() {
+	const hash = window.location.hash;
+	if (!hash) return null;
+	const params = new URLSearchParams(hash.replace('#', '?'));
+	const state = params.get('state');
+	if (!state) return null;
+	try {
+		return JSON.parse(state);
+	} catch {
+		return null;
+	}
+}
+
 onMounted(async () => {
-	if (window.location.hash) {
-		await loginWithGoogle();
+	const id_token = getGoogleIdToken();
+	const state = getOidcState();
+	if (id_token && state?.role) {
+		await loginWithGoogle(id_token, state.role);
 	}
 });
 
-
-async function loginWithGoogle() {
-	const id_token = new URLSearchParams(window.location.hash).get("id_token");
-	await login(`/auth/login-google?idToken=${id_token}`);
+async function loginWithGoogle(id_token: string, role: 'teacher' | 'student') {
+	let endpoint = '';
+	let redirect = '';
+	if (role === 'teacher') {
+		endpoint = `/auth/login-google-teacher?idToken=${id_token}`;
+		redirect = '/teacher';
+	} else {
+		endpoint = `/auth/login-google-student?idToken=${id_token}`;
+		redirect = '/class-select';
+	}
+	authStore.userInfo = await ApiService.get<UserInfoDto>(endpoint);
+	router.push(redirect);
 }
 
 async function loginForDev() {
-	await login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devLoginType.value == "teacher"}`); // TODO: support admin login
-}
-
-async function login(url: string) {
-	authStore.userInfo = await ApiService.get<UserInfoDto>(url);
-	const isAdmin = authStore.userInfo?.isAdmin ?? false;
-	if (isAdmin) {
-		router.push('/admin/projects');
-	} else {
-		router.push('/form');
+	let endpoint = '';
+	let redirect = '';
+	endpoint = `/auth/login-dev?name=${devName.value}&email=${devEmail.value}&role=${devLoginType.value}`;
+	switch (devLoginType.value) {
+		case 'teacher':
+			redirect = '/teacher';
+			break;
+		case 'student':
+			redirect = '/class-select';
+			break;
+		case 'admin':
+			redirect = '/admin';
+			break;
 	}
+	authStore.userInfo = await ApiService.get<UserInfoDto>(endpoint);
+	router.push(redirect);
 }
 
 // can't access globals from template
 const _window = window;
-
 </script>

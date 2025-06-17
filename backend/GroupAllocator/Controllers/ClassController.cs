@@ -12,7 +12,7 @@ namespace GroupAllocator.Controllers;
 [Route("[controller]")]
 public class ClassController(ApplicationDbContext db) : ControllerBase
 {
-	[HttpGet("list")]
+	[HttpGet("list-teacher")]
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<IActionResult> GetClassesForTeacher()
 	{
@@ -34,7 +34,7 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		return Ok(classes);
 	}
 
-	[HttpGet("")]
+	[HttpGet("list-student")]
 	[Authorize(Policy = "StudentOnly")]
 	public async Task<IActionResult> GetClassesForStudent()
 	{
@@ -56,7 +56,7 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		return Ok(classes);
 	}
 
-	private async Task<string> GenerateUniqueCode()
+	async Task<string> GenerateUniqueCode()
 	{
 		const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		var random = new Random();
