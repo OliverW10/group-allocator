@@ -10,22 +10,24 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "TeacherOnly")]
 public class SolverController(IAllocationSolver solver, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet]
-	public async Task<IActionResult> GetLatest()
+	public async Task<IActionResult> GetLatest(int classId)
 	{
 		// this logic should really be in a service
-		var runs = await db.SolveRuns
+		var runs = db.SolveRuns
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Student)
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
+			.Include(r => r.Class)
+			.Where(r => r.Class.Id == classId)
 			.ToListAsync();
-		var allProjects = db.Projects.Include(p => p.Client).ToList();
+		var allProjects = db.Projects.Include(p => p.Client).Include(p => p.Class).Where(p => p.Class.Id == classId).ToListAsync();
 
-		var lastRun = runs.OrderByDescending(x => x.Timestamp).FirstOrDefault();
+		var lastRun = (await runs).OrderByDescending(x => x.Timestamp).FirstOrDefault();
 		if (lastRun == null)
 		{
 			return NotFound();
@@ -35,7 +37,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		{
 			Id = lastRun.Id,
 			RanAt = lastRun.Timestamp,
-			Projects = allProjects.SelectMany(ProjectGroupsForProject),
+			Projects = (await allProjects).SelectMany(ProjectGroupsForProject),
 		};
 		return Ok(result);
 
@@ -91,6 +93,6 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		db.SolveRuns.Add(solveRun);
 		db.StudentAssignments.AddRange(assignments);
 		await db.SaveChangesAsync();
-		return await GetLatest();
+		return await GetLatest(solveConfig.ClassId);
 	}
 }

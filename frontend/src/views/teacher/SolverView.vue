@@ -1,5 +1,5 @@
 <template>
-	<AdminNavBar />
+	<AdminNavBar :classId="classId" />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
 			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
@@ -17,7 +17,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-import AdminNavBar from '../../components/AdminNavBar.vue';
+import AdminNavBar from '../../components/TeacherNavBar.vue';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import { computed, onMounted, ref } from 'vue';
@@ -74,7 +74,8 @@ const solve = async () => {
 	const solveRequest: SolveRequestDto = {
 		clientLimits: clientLimits.value,
 		preAllocations: (allocations.value as AllocationDto[]).filter(x => x.project != null || x.students.length > 0),
-		preferenceExponent: preferenceExponent.value
+		preferenceExponent: preferenceExponent.value,
+		classId: parseInt(classId),
 	}
 	const solveResult = await ApiService.post<SolveRunDto>(`/solver?classId=${classId}`, solveRequest)
 	if (!solveResult) {

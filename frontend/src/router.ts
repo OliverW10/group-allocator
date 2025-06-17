@@ -9,6 +9,10 @@ const routes: RouteRecordRaw[] = [
         path: '/form',
         component: () => import('./views/student/FormView.vue')
     },
+    {
+        path: '/class-select',
+        component: () => import('./views/student/ClassSelect.vue')
+    },
 	{
         path: '/teacher',
         component: () => import('./views/teacher/TeacherDashboardView.vue'),

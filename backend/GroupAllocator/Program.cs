@@ -1,4 +1,5 @@
 using GroupAllocator;
+using GroupAllocator.Controllers;
 using GroupAllocator.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -52,9 +53,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("AdminOnly", policy => policy.RequireClaim("role", "admin"));
-	options.AddPolicy("TeacherOnly", policy => policy.RequireClaim("role", "teacher"));
-	options.AddPolicy("StudentOnly", policy => policy.RequireClaim("role", "student"));
+	options.AddPolicy("AdminOnly", policy => policy.RequireClaim(AuthRolesConstants.AdminClaimName, true.ToString()));
+	options.AddPolicy("TeacherOnly", policy => policy.RequireClaim(AuthRolesConstants.RoleClaimName, AuthRolesConstants.Teacher));
+	options.AddPolicy("StudentOnly", policy => policy.RequireClaim(AuthRolesConstants.RoleClaimName, AuthRolesConstants.Student));
 });
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("MainDb")));
 builder.Services.AddControllers();

@@ -18,11 +18,11 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	public async Task<IActionResult> GetAll(int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
+
 		// Check if teacher has access to this class
 		var hasAccess = await db.ClassTeachers
 			.AnyAsync(t => t.Teacher.Id == userId && t.Class.Id == classId);
-			
+
 		if (!hasAccess)
 		{
 			return Forbid("You don't have access to this class");
@@ -34,6 +34,8 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			.Include(u => u.StudentModel)
 				.ThenInclude(s => s!.Preferences)
 					.ThenInclude(p => p.Project)
+			.Include(u => u.StudentModel)
+				.ThenInclude(s => s.Class)
 			.Where(u => u.StudentModel != null && u.StudentModel.Class.Id == classId)
 			.Select(u => u.ToDto())
 			.ToListAsync();
@@ -70,6 +72,8 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			.Include(u => u.StudentModel)
 				.ThenInclude(s => s!.Preferences)
 					.ThenInclude(p => p.Project)
+			.Include(u => u.StudentModel)
+				.ThenInclude(s => s.Class)
 			.Where(u => u.StudentModel != null && u.StudentModel.Class.Id == classId)
 			.Select(u => u.ToDto())
 			.ToListAsync();

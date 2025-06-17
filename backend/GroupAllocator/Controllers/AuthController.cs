@@ -122,7 +122,7 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 			new Claim(JwtRegisteredClaimNames.Name, user.Name),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-			new Claim(AuthRolesConstants.RoleClaimName, role.ToString().ToLowerInvariant()),
+			new Claim(AuthRolesConstants.RoleClaimName, role.ToString()),
 			new Claim(AuthRolesConstants.AdminClaimName, isAdmin.ToString()),
 		};
 
@@ -145,6 +145,6 @@ public static class AuthRolesConstants
 {
 	public const string RoleClaimName = "role";
 	public const string AdminClaimName = "admin";
-	public static string Student => AuthRole.Student.ToString().ToLowerInvariant();
-	public static string Teacher => AuthRole.Teacher.ToString().ToLowerInvariant();
+	public static string Student => AuthRole.Student.ToString();
+	public static string Teacher => AuthRole.Teacher.ToString();
 }

@@ -1,5 +1,5 @@
 <template>
-    <AdminNavBar />
+    <AdminNavBar :classId="classId" />
 	<Dialog :visible="fileModal != null" :modal="true" :closable="false" :draggable="false" :header="'Files for ' + students.find((student) => student.studentInfo.studentId == fileModal)?.studentInfo.name" :style="{ width: '50vw' }">
 		<DataTable :value="students.find((student) => student.studentInfo.studentId == fileModal)?.studentSubmission.files" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
 			<Column field="name" header="Name"></Column>
@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import AdminNavBar from '../../components/AdminNavBar.vue';
+import AdminNavBar from '../../components/TeacherNavBar.vue';
 import ApiService from '../../services/ApiService';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';

@@ -38,6 +38,13 @@
           />
         </template>
       </Column>
+      <Column field="code" header="Class Code">
+        <template #body="{ data }">
+          <span>
+            {{ data.code }}
+          </span>
+        </template>
+      </Column>
       <Column field="studentCount" header="Number of Students" />
       <Column header="Actions">
         <template #body="{ data }">
@@ -184,7 +191,7 @@ const deleteClass = (classId: number) => {
 }
 
 const navigateToSolver = (classId: number) => {
-  router.push(`/teacher/solver/${classId}`)
+  router.push(`/teacher/${classId}/solver/`)
 }
 
 onMounted(fetchClasses)

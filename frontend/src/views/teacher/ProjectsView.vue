@@ -1,5 +1,5 @@
 <template>
-    <AdminNavBar />
+    <AdminNavBar :classId="classId" />
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Projects</h1>
         <Divider style="margin: 0;" />
@@ -40,7 +40,7 @@ import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import Column from 'primevue/column';
-import AdminNavBar from '../../components/AdminNavBar.vue';
+import AdminNavBar from '../../components/TeacherNavBar.vue';
 import FileUploader from '../../components/FileUploader.vue';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
 import ApiService from '../../services/ApiService';
