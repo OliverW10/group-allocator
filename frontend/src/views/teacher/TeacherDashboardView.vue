@@ -191,7 +191,7 @@ const deleteClass = (classId: number) => {
 }
 
 const navigateToSolver = (classId: number) => {
-  router.push(`/teacher/${classId}/solver/`)
+  router.push(`/teacher/${classId}/projects/`)
 }
 
 onMounted(fetchClasses)

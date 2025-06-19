@@ -32,7 +32,12 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/teacher/:classId/purchase',
         component: () => import('./views/teacher/Purchase.vue'),
-    }
+    },
+    {
+        path: '/teacher/:classId/code',
+        component: () => import('./views/teacher/CodeView.vue'),
+    },
+    
 ]
 
 export default createRouter({

@@ -56,6 +56,41 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		return Ok(classes);
 	}
 
+	[HttpGet("code/{id}")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<IActionResult> GetClassInfo(int id)
+	{
+		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		
+		var @class = await db.Classes
+			.Include(c => c.Teachers)
+				.ThenInclude(t => t.Teacher)
+			.Include(c => c.Students)
+				.ThenInclude(s => s.Preferences)
+			.FirstOrDefaultAsync(c => c.Id == id);
+
+		if (@class == null)
+		{
+			return NotFound("Class not found");
+		}
+
+		// Check if the teacher is in the class
+		var teacherInClass = @class.Teachers.Any(t => t.Teacher.Id == userId);
+		if (!teacherInClass)
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
+		var studentsWithPreferences = @class.Students.Count(s => s.Preferences.Any());
+
+		return Ok(new ClassInfoDto
+		{
+			Code = @class.Code,
+			StudentCount = @class.Students.Count,
+			StudentsWithPreferencesCount = studentsWithPreferences
+		});
+	}
+
 	async Task<string> GenerateUniqueCode()
 	{
 		const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

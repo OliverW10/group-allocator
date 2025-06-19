@@ -42,6 +42,11 @@ const items = ref([
     label: 'Solver',
     icon: 'i-mdi-cogs',
     command: () => router.push(`/teacher/${classId.value}/solver`)
+},
+{
+    label: 'Code',
+    icon: 'i-mdi-application-export',
+    command: () => router.push(`/teacher/${classId.value}/code`)
 }
 ])
 

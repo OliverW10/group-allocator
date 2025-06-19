@@ -28,18 +28,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			return Forbid("You don't have access to this class");
 		}
 
-		var students = await db.Users
-			.Where(u => !u.IsAdmin)
-			.Include(u => u.Files)
-			.Include(u => u.StudentModel)
-				.ThenInclude(s => s!.Preferences)
-					.ThenInclude(p => p.Project)
-			.Include(u => u.StudentModel)
-				.ThenInclude(s => s.Class)
-			.Where(u => u.StudentModel != null && u.StudentModel.Class.Id == classId)
-			.Select(u => u.ToDto())
-			.ToListAsync();
-			
+		var students = GetStudents(classId);
+
+
 		return Ok(students);
 	}
 
@@ -66,7 +57,15 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 		using var reader = new StreamReader(file.OpenReadStream());
 		await userService.CreateStudentAllowlist(classId, reader);
 
-		var students = await db.Users
+		var students = GetStudents(classId);
+
+			
+		return Ok(students);
+	}
+
+	async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
+	{
+		return await db.Users
 			.Where(u => !u.IsAdmin)
 			.Include(u => u.Files)
 			.Include(u => u.StudentModel)
@@ -77,8 +76,6 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			.Where(u => u.StudentModel != null && u.StudentModel.Class.Id == classId)
 			.Select(u => u.ToDto())
 			.ToListAsync();
-			
-		return Ok(students);
 	}
 
 	[HttpGet("me")]
