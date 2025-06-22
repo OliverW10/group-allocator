@@ -14,10 +14,9 @@ namespace GroupAllocator.Controllers;
 public class SolverController(IAllocationSolver solver, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet]
-	public async Task<IActionResult> GetLatest(int classId)
+	public async Task<ActionResult<SolveRunDto>> GetLatest(int classId)
 	{
-		// this logic should really be in a service
-		var runs = db.SolveRuns
+		var runs = await db.SolveRuns
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Student)
 			.Include(r => r.StudentAssignments)
@@ -25,9 +24,9 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			.Include(r => r.Class)
 			.Where(r => r.Class.Id == classId)
 			.ToListAsync();
-		var allProjects = db.Projects.Include(p => p.Client).Include(p => p.Class).Where(p => p.Class.Id == classId).ToListAsync();
+		var allProjects = await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(p => p.Class.Id == classId).ToListAsync();
 
-		var lastRun = (await runs).OrderByDescending(x => x.Timestamp).FirstOrDefault();
+		var lastRun = runs.OrderByDescending(x => x.Timestamp).FirstOrDefault();
 		if (lastRun == null)
 		{
 			return NotFound();
@@ -37,9 +36,9 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		{
 			Id = lastRun.Id,
 			RanAt = lastRun.Timestamp,
-			Projects = (await allProjects).SelectMany(ProjectGroupsForProject),
+			Projects = allProjects.SelectMany(ProjectGroupsForProject),
 		};
-		return Ok(result);
+		return result;
 
 		IEnumerable<AllocationDto> ProjectGroupsForProject(ProjectModel p)
 		{
@@ -59,7 +58,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Solve(SolveRequestDto solveConfig)
+	public async Task<ActionResult<SolveRunDto>> Solve(SolveRequestDto solveConfig)
 	{
 		var @class = await db.Classes.FindAsync(solveConfig.ClassId);
 		if (@class == null)

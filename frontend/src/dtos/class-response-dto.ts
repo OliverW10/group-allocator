@@ -11,4 +11,6 @@ export class ClassResponseDto {
     name: string;
     createdAt: Date;
     teacherRole: ClassTeacherRole;
+    payed: boolean;
+    studentCount: number;
 }

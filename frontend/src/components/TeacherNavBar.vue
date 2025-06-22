@@ -1,8 +1,10 @@
 <template>
     <Menubar :model="items">
+        <template #start>
+            <Button label="Return to Classes" icon="i-mdi-logout" class="p-button-text" @click="returnToDashboard" />
+        </template>
         <template #end>
             <div class="flex items-center gap-2">
-                <Button label="Return to Classes" icon="i-mdi-logout" class="p-button-text" @click="returnToDashboard" />
                 <LogoutButton />
             </div>
         </template>

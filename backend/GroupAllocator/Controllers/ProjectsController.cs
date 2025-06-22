@@ -14,7 +14,7 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 {
 	[HttpPost("upload")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> UploadProjects(int classId, [FromForm] IFormFile file)
+	public async Task<ActionResult<List<ProjectDto>>> UploadProjects(int classId, [FromForm] IFormFile file)
 	{
 		if (file == null || file.Length == 0)
 		{
@@ -84,15 +84,15 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 
 	[HttpGet]
 	[Authorize]
-	public async Task<IActionResult> GetProjects()
+	public async Task<ActionResult<List<ProjectDto>>> GetProjects()
 	{
-		return Ok(await db.Projects.Include(p => p.Client).Select(x => x.ToDto()).ToListAsync());
+		return await db.Projects.Include(p => p.Client).Select(x => x.ToDto()).ToListAsync();
 	}
 
 	[HttpPut]
 	[Route("update/{id}")]
-	[Authorize(Policy = "AdminOnly")]
-	public async Task<IActionResult> UpdateProject(int id, [FromBody] ProjectDto projectDto)
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<ProjectDto>> UpdateProject(int id, [FromBody] ProjectDto projectDto)
 	{
 		var project = await db.Projects
 			.Include(p => p.Client)
@@ -106,13 +106,13 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 		db.Projects.Update(project);
 		await db.SaveChangesAsync();
 
-		return Ok(project.ToDto());
+		return project.ToDto();
 	}
 
 	[HttpDelete]
 	[Route("delete/{id}")]
-	[Authorize(Policy = "AdminOnly")]
-	public async Task<IActionResult> DeleteProject(int id)
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<List<ProjectDto>>> DeleteProject(int id)
 	{
 		var project = await db.Projects
 			.Include(p => p.Client)

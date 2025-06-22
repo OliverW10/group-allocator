@@ -3,6 +3,7 @@ using GroupAllocator.Database.Model;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Stripe.Checkout;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,15 +16,15 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 {
 	[HttpPut("{id}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> UpgradeClass(int id)
+	public async Task<ActionResult> UpgradeClass(int id)
 	{
-		if (paymentService.GetPaymentPlanForClass(id) == PaymentPlan.Basic)
+		var @class = await db.Classes.Include(c => c.Payments).FirstAsync(c => c.Id == id) ?? throw new InvalidOperationException("Class not found");
+		if (paymentService.GetPaymentPlanForClass(@class) == PaymentPlan.Basic)
 		{
 			return BadRequest("Already upgraded");
 		}
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		var user = await db.Users.FindAsync(userId) ?? throw new InvalidOperationException("User not found");
-		var @class = await db.Classes.FindAsync(id) ?? throw new InvalidOperationException("Class not found"); ;
 
 		var requiredCost = paymentService.CostOfPlan(PaymentPlan.Basic);
 		// validate payment
@@ -41,7 +42,7 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 
 	[HttpGet("create")]
 	[Authorize(Policy = "TeachersOnly")]
-	public async Task<IActionResult> CreateStripeSession(string returnDomain)
+	public async Task<ActionResult<object>> CreateStripeSession(string returnDomain)
 	{
 		var options = new SessionCreateOptions
 		{
@@ -61,6 +62,6 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 		var service = new SessionService();
 		Session session = await service.CreateAsync(options);
 
-		return new JsonResult(new { clientSecret = session.ClientSecret });
+		return new { clientSecret = session.ClientSecret };
 	}
 }

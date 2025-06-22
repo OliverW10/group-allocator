@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
+using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,55 +11,63 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ClassController(ApplicationDbContext db) : ControllerBase
+public class ClassController(ApplicationDbContext db, PaymentService paymentService) : ControllerBase
 {
 	[HttpGet("list-teacher")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> GetClassesForTeacher()
+	public async Task<ActionResult<List<ClassResponseDto>>> GetClassesForTeacher()
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
 		var classes = await db.Classes
 			.Include(c => c.Teachers)
+			.Include(c => c.Students)
+			.Include(c => c.Payments)
+			.AsSplitQuery()
 			.Where(c => c.Teachers.Any(t => t.Teacher.Id == userId))
 			.Select(c => new ClassResponseDto
 			{
 				Id = c.Id,
 				Code = c.Code,
 				Name = c.Name,
+				StudentCount = c.Students.Count,
 				CreatedAt = c.CreatedAt,
-				TeacherRole = c.Teachers.First(t => t.Teacher.Id == userId).Role
+				TeacherRole = c.Teachers.First(t => t.Teacher.Id == userId).Role,
+				Payed = paymentService.GetPaymentPlanForClass(c) != PaymentPlan.None
 			})
 			.ToListAsync();
 
-		return Ok(classes);
+		return classes;
 	}
 
 	[HttpGet("list-student")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<IActionResult> GetClassesForStudent()
+	public async Task<ActionResult<List<ClassResponseDto>>> GetClassesForStudent()
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 
 		var classes = await db.Classes
 			.Include(c => c.Students)
+			.Include(c => c.Payments)
 			.Where(c => c.Students.Any(s => s.User.Id == userId))
 			.Select(c => new ClassResponseDto
 			{
 				Id = c.Id,
 				Code = c.Code,
 				Name = c.Name,
+				StudentCount = c.Students.Count,
 				CreatedAt = c.CreatedAt,
 				TeacherRole = null,
+				Payed = paymentService.GetPaymentPlanForClass(c) != PaymentPlan.None
 			})
 			.ToListAsync();
 
-		return Ok(classes);
+		return classes;
 	}
 
 	[HttpGet("code/{id}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> GetClassInfo(int id)
+	public async Task<ActionResult<ClassInfoDto>> GetClassInfo(int id)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -83,12 +92,12 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 
 		var studentsWithPreferences = @class.Students.Count(s => s.Preferences.Any());
 
-		return Ok(new ClassInfoDto
+		return new ClassInfoDto
 		{
 			Code = @class.Code,
 			StudentCount = @class.Students.Count,
 			StudentsWithPreferencesCount = studentsWithPreferences
-		});
+		};
 	}
 
 	async Task<string> GenerateUniqueCode()
@@ -108,7 +117,7 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 
 	[HttpPost("")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> CreateClass(ClassDto classDto)
+	public async Task<ActionResult<ClassResponseDto>> CreateClass(ClassDto classDto)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -133,25 +142,29 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 		});
 		await db.SaveChangesAsync();
 
-		return Ok(new ClassResponseDto
+		return new ClassResponseDto
 		{
 			Id = newClass.Id,
 			Code = newClass.Code,
 			Name = newClass.Name,
 			CreatedAt = newClass.CreatedAt,
-			TeacherRole = ClassTeacherRole.Owner
-		});
+			TeacherRole = ClassTeacherRole.Owner,
+			Payed = false,
+			StudentCount = 0
+		};
 	}
 
 	[HttpPut("{id}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> UpdateClass(int id, ClassDto classDto)
+	public async Task<ActionResult<ClassResponseDto>> UpdateClass(int id, ClassDto classDto)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
 		var @class = await db.Classes
 			.Include(c => c.Teachers)
 				.ThenInclude(t => t.Teacher)
+			.Include(c => c.Students)
+			.Include(c => c.Payments)
 			.FirstOrDefaultAsync(c => c.Id == id);
 
 		if (@class == null)
@@ -172,25 +185,27 @@ public class ClassController(ApplicationDbContext db) : ControllerBase
 
 		await db.SaveChangesAsync();
 
-		return Ok(new ClassResponseDto
+		return new ClassResponseDto
 		{
 			Id = @class.Id,
 			Code = @class.Code,
 			Name = @class.Name,
 			CreatedAt = @class.CreatedAt,
-			TeacherRole = ClassTeacherRole.Owner
-		});
+			TeacherRole = ClassTeacherRole.Owner,
+			Payed = paymentService.GetPaymentPlanForClass(@class) != PaymentPlan.None,
+			StudentCount = @class.Students.Count
+		};
 	}
 
 	[HttpGet("join-code/{code}")]
-	public async Task<IActionResult> JoinClassFromCode(string code)
+	public async Task<ActionResult> JoinClassFromCode(string code)
 	{
 		var classId = db.Classes.FirstAsync(x => x.Code == code).Id;
 		return await JoinClass(classId);
 	}
 
 	[HttpGet("join/{id}")]
-	public async Task<IActionResult> JoinClass(int id)
+	public async Task<ActionResult> JoinClass(int id)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 

@@ -26,13 +26,13 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 			return Unauthorized();
 		}
 
-		return new JsonResult(new UserInfoDto()
+		return new UserInfoDto()
 		{
 			Name = claims.First(c => c.Type == JwtRegisteredClaimNames.Name).Value,
 			Email = claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value,
 			Role = Enum.Parse<AuthRole>(claims.First(c => c.Type == AuthRolesConstants.RoleClaimName).Value),
 			IsAdmin = bool.Parse(claims.First(c => c.Type == AuthRolesConstants.AdminClaimName).Value),
-		});
+		};
 	}
 
 	[HttpGet("login-google-student")]
@@ -75,7 +75,7 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 	}
 
 	[HttpGet("logout")]
-	public async Task<IActionResult> Logout()
+	public async Task<ActionResult> Logout()
 	{
 		await HttpContext.SignOutAsync();
 		return Ok();
@@ -83,7 +83,7 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 
 	[HttpGet("role/set/{email}/{value}")]
 	[Authorize(Policy = "AdminOnly")]
-	public async Task<IActionResult> SetAdmin(string email, bool value)
+	public async Task<ActionResult<string>> SetAdmin(string email, bool value)
 	{
 		var user = await userService.GetOrCreateUserAsync("Unknown", email);
 		if (user is not null)
@@ -98,10 +98,10 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 				await HttpContext.SignOutAsync();
 			}
 
-			return Ok($"Set {email} admin state to {value}.");
+			return $"Set {email} admin state to {value}.";
 		}
 
-		return Ok($"User not found, no action taken.");
+		return $"User not found, no action taken.";
 	}
 
 	async Task SignIn(UserModel user, AuthRole role)

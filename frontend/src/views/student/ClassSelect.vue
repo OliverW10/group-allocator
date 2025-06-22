@@ -61,7 +61,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import ProgressBar from 'primevue/progressbar';
 import ApiService from '../../services/ApiService';
-import type { ClassResponseDto } from '../../dtos/class-dto';
+import type { ClassResponseDto } from '../../dtos/class-response-dto';
 import type { UserInfoDto } from '../../dtos/user-info-dto';
 
 const router = useRouter();

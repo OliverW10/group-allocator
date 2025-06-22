@@ -15,7 +15,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 {
 	[HttpGet]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> GetAll(int classId)
+	public async Task<ActionResult<List<StudentInfoAndSubmission>>> GetAll(int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 
@@ -28,15 +28,14 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			return Forbid("You don't have access to this class");
 		}
 
-		var students = GetStudents(classId);
+		var students = await GetStudents(classId);
 
-
-		return Ok(students);
+		return students;
 	}
 
 	[HttpPost("whitelist")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> PostWhitelist(int classId, [FromForm] IFormFile file)
+	public async Task<ActionResult<List<StudentInfoAndSubmission>>> PostWhitelist(int classId, [FromForm] IFormFile file)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -57,10 +56,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 		using var reader = new StreamReader(file.OpenReadStream());
 		await userService.CreateStudentAllowlist(classId, reader);
 
-		var students = GetStudents(classId);
+		var students = await GetStudents(classId);
 
-			
-		return Ok(students);
+		return students;
 	}
 
 	async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
@@ -72,7 +70,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 				.ThenInclude(s => s!.Preferences)
 					.ThenInclude(p => p.Project)
 			.Include(u => u.StudentModel)
-				.ThenInclude(s => s.Class)
+				.ThenInclude(s => s!.Class)
 			.Where(u => u.StudentModel != null && u.StudentModel.Class.Id == classId)
 			.Select(u => u.ToDto())
 			.ToListAsync();
@@ -80,7 +78,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpGet("me")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<IActionResult> Get(int classId)
+	public async Task<ActionResult<StudentSubmissionDto>> Get(int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -97,12 +95,12 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			return NoContent();
 		}
 
-		return Ok(student.ToSubmissionDto());
+		return student.ToSubmissionDto();
 	}
 
 	[HttpPost("me")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<IActionResult> Post([FromBody] StudentSubmissionDto preferences)
+	public async Task<ActionResult> Post([FromBody] StudentSubmissionDto preferences)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -160,7 +158,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpPost("file")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<IActionResult> PostFile(int classId, [FromForm] IFormFile file)
+	public async Task<ActionResult<FileDetailsDto>> PostFile(int classId, [FromForm] IFormFile file)
 	{
 		switch (file.Length)
 		{
@@ -198,17 +196,17 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 		await db.Files.AddAsync(fileModel);
 		await db.SaveChangesAsync();
-		return Ok(new FileDetailsDto
+		return new FileDetailsDto
 		{
 			Id = fileModel.Id,
 			Name = fileModel.Name,
 			UserId = fileModel.Student.Id,
-		});
+		};
 	}
 
 	[HttpDelete("file/{id:int}")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<IActionResult> DeleteFile(int id, int classId)
+	public async Task<ActionResult> DeleteFile(int id, int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		var user = await db.Users.FindAsync(userId);
@@ -238,7 +236,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpGet("files")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> GetFiles(int classId)
+	public async Task<ActionResult<List<FileDetailsDto>>> GetFiles(int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -256,17 +254,17 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			.Where(f => f.Student.Class.Id == classId)
 			.ToListAsync();
 			
-		return Ok(files.Select(f => new FileDetailsDto
+		return files.Select(f => new FileDetailsDto
 		{
 			Id = f.Id,
 			Name = f.Name,
 			UserId = f.Student.Id,
-		}));
+		}).ToList();
 	}
 
 	[HttpGet("file/{id:int}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> GetFile(int id, int classId)
+	public async Task<ActionResult> GetFile(int id, int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
@@ -293,7 +291,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpDelete("{id}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<IActionResult> Delete(int id, int classId)
+	public async Task<ActionResult<List<StudentInfoAndSubmission>>> Delete(int id, int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		

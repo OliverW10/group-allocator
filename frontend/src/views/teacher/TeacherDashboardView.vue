@@ -17,11 +17,11 @@
       :value="classes" 
       :paginator="true" 
       :rows="10"
-      :rowsPerPageOptions="[5, 10, 20]"
-      tableStyle="min-width: 50rem"
+      :rows-per-page-options="[5, 10, 20]"
+      table-style="min-width: 50rem"
       class="p-datatable-sm"
+      selection-mode="single"
       @row-click="(event) => navigateToSolver(event.data.id)"
-      selectionMode="single"
     >
       <Column field="name" header="Class Name">
         <template #body="{ data }">
@@ -30,19 +30,21 @@
           </span>
           <InputText
             v-else
+            ref="editInput"
             v-model="editingClass.name"
+            class="w-full"
             @blur="saveClassEdit"
             @keyup.enter="saveClassEdit"
-            ref="editInput"
-            class="w-full"
           />
         </template>
       </Column>
       <Column field="code" header="Class Code">
         <template #body="{ data }">
-          <span>
-            {{ data.code }}
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono" @click.stop="copyClassCode(data.code)">
+              <Button :label="data.code" icon="i-mdi-content-copy" variant="text" />
+            </span>
+          </div>
         </template>
       </Column>
       <Column field="studentCount" header="Number of Students" />
@@ -50,11 +52,11 @@
         <template #body="{ data }">
           <div class="flex gap-2">
             <Button
+              v-if="!editingClass || editingClass.id !== data.id"
               icon="pi pi-pencil"
               severity="info"
               text
               @click.stop="startEditing(data)"
-              v-if="!editingClass || editingClass.id !== data.id"
             />
             <Button
               icon="pi pi-trash"
@@ -74,7 +76,7 @@
       header="Create New Class"
       :style="{ width: '30rem' }"
     >
-      <form @submit.prevent="createClass" class="flex flex-col gap-4">
+      <form class="flex flex-col gap-4" @submit.prevent="createClass">
         <div class="field">
           <label for="className" class="block mb-2">Class Name:</label>
           <InputText
@@ -104,6 +106,9 @@
 
     <!-- Delete Confirmation Dialog -->
     <ConfirmDialog />
+    
+    <!-- Toast for copy feedback -->
+    <Toast />
   </div>
 </template>
 
@@ -111,12 +116,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
 import Dialog from 'primevue/dialog'
 import ConfirmDialog from 'primevue/confirmdialog'
+import Toast from 'primevue/toast'
 import ApiService from '../../services/ApiService'
 import LogoutButton from '../../components/LogoutButton.vue'
 
@@ -130,6 +137,7 @@ interface Class {
 
 const router = useRouter()
 const confirm = useConfirm()
+const toast = useToast()
 const classes = ref<Class[]>([])
 const showCreateModal = ref(false)
 const newClass = ref({ name: '' })
@@ -142,6 +150,26 @@ const fetchClasses = async () => {
     )
   } catch (error) {
     console.error('Error fetching classes:', error)
+  }
+}
+
+const copyClassCode = async (code: string) => {
+  try {
+    await navigator.clipboard.writeText(code)
+    toast.add({
+      severity: 'success',
+      summary: 'Copied!',
+      detail: `Class code "${code}" copied to clipboard`,
+      life: 2000
+    })
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Copy Failed',
+      detail: 'Failed to copy class code to clipboard',
+      life: 3000
+    })
   }
 }
 

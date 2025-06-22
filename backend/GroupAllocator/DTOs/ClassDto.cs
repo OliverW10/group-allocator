@@ -17,4 +17,6 @@ public class ClassResponseDto
     public required string Name { get; set; }
     public required DateTimeOffset CreatedAt { get; set; }
     public required ClassTeacherRole? TeacherRole { get; set; }
+    public required bool Payed { get; set; }
+    public required int StudentCount { get; set; }
 }

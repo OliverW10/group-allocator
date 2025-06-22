@@ -15,7 +15,7 @@
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Students</h1>
         <Divider style="margin: 0;" />
-        <FileUploader label="Upload Allow List" @projects-changed="uploadStudents">
+        <FileUploader label="Upload Students List" @projects-changed="uploadStudents">
             <p>
                 Please upload a text (/csv) file with emails on each line.
                 <br />

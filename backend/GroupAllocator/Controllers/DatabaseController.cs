@@ -10,11 +10,11 @@ public class DatabaseController : ControllerBase
 {
 #if DEBUG
 	[HttpGet("reset")]
-	public async Task<IActionResult> ResetDatabase([FromServices] ApplicationDbContext db)
+	public async Task<ActionResult<string>> ResetDatabase([FromServices] ApplicationDbContext db)
 	{
 		await db.Database.EnsureDeletedAsync();
 		await db.Database.EnsureCreatedAsync();
-		return Ok("Database reset successfully.");
+		return "Database reset successfully.";
 	}
 #endif
 }

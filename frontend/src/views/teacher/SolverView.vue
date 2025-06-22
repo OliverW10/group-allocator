@@ -1,5 +1,5 @@
 <template>
-	<AdminNavBar :classId="classId" />
+	<AdminNavBar :class-id="classId" />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
 			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
