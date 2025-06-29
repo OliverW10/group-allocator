@@ -211,6 +211,10 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 
 		var @class = await db.Classes.FindAsync(id) ?? throw new InvalidOperationException("Class not found");
 		var user = await db.Users.FindAsync(userId) ?? throw new InvalidOperationException("User not found"); ;
+		if (db.Students.Any(x => x.Class == @class && x.User == user))
+		{
+			return Ok();
+		}
 
 		db.Add(new StudentModel
 		{

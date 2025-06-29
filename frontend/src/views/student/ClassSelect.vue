@@ -2,7 +2,7 @@
 	<div class="flex flex-col gap-4 p-4">
 		<header class="flex justify-between items-center">
 			<h1 class="heading">Select a Class</h1>
-			<p>Logged in as {{ userInfo?.name }}</p>
+			<LogoutButton />
 		</header>
 
 		<div class="flex gap-8">
@@ -16,15 +16,16 @@
 							<p>You are not enrolled in any classes yet.</p>
 						</div>
 						<div v-else class="flex flex-col gap-2">
-							<Button v-for="classItem in classes" 
+							<div v-for="classItem in classes" 
 								:key="classItem.id" 
-								class="w-full text-left p-3"
+								variant="text"
+								class="w-full text-left p-3 cursor-pointer hover:bg-gray-100 rounded-md border-1 border-gray-200"
 								@click="joinClass(classItem.id)">
 								<div class="flex flex-col">
 									<span class="font-bold">{{ classItem.name }}</span>
 									<span class="text-sm text-gray-600">Code: {{ classItem.code }}</span>
 								</div>
-							</Button>
+							</div>
 						</div>
 					</template>
 				</Card>
@@ -63,6 +64,7 @@ import ProgressBar from 'primevue/progressbar';
 import ApiService from '../../services/ApiService';
 import type { ClassResponseDto } from '../../dtos/class-response-dto';
 import type { UserInfoDto } from '../../dtos/user-info-dto';
+import LogoutButton from '../../components/LogoutButton.vue';
 
 const router = useRouter();
 const toast = useToast();
@@ -81,7 +83,7 @@ onMounted(async () => {
 		userInfo.value = await ApiService.get<UserInfoDto>('/auth/me');
 		
 		// Get list of classes
-		classes.value = await ApiService.get<ClassResponseDto[]>('/class');
+		classes.value = await ApiService.get<ClassResponseDto[]>('/class/list-student');
 	} catch (error) {
 		console.error('Failed to load data:', error);
 		toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });

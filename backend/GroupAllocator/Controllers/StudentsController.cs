@@ -63,16 +63,14 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
 	{
-		return await db.Users
-			.Where(u => !u.IsAdmin)
-			.Include(u => u.Files)
-			.Include(u => u.StudentModel)
-				.ThenInclude(s => s!.Preferences)
-					.ThenInclude(p => p.Project)
-			.Include(u => u.StudentModel)
-				.ThenInclude(s => s!.Class)
-			.Where(u => u.StudentModel != null && u.StudentModel.Class.Id == classId)
-			.Select(u => u.ToDto())
+		return await db.Students
+			.Include(s => s.Files)
+			.Include(s => s.User)
+			.Include(s => s.Preferences)
+				.ThenInclude(p => p.Project)
+			.Include(s => s.Class)
+			.Where(s => s.Class.Id == classId)
+			.Select(s => s.ToDto())
 			.ToListAsync();
 	}
 
@@ -82,12 +80,12 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
-		var student = await db.Users
-			.Include(u => u.Files)
-			.Include(u => u.StudentModel)
-				.ThenInclude(s => s!.Preferences)
-					.ThenInclude(p => p.Project)
-			.Where(u => u.Id == userId && u.StudentModel != null && u.StudentModel.Class.Id == classId)
+		var student = await db.Students
+			.Include(s => s.User)
+			.Include(s => s.Files)
+			.Include(s => s!.Preferences)
+				.ThenInclude(p => p.Project)
+			.Where(s => s.User.Id == userId && s.Class.Id == classId)
 			.FirstOrDefaultAsync();
 			
 		if (student == null)

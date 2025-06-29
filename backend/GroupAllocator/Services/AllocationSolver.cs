@@ -14,7 +14,7 @@ namespace GroupAllocator.Services;
 public interface IAllocationSolver
 {
 	IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
-		IEnumerable<UserModel> users,
+		IEnumerable<StudentModel> students,
 		IEnumerable<ProjectModel> projects,
 		IEnumerable<ClientModel> clients,
 		IEnumerable<PreferenceModel> preferences,
@@ -28,7 +28,7 @@ record ProjectInstance(ProjectModel Project, int GroupInstanceId);
 public class AllocationSolver : IAllocationSolver
 {
 	public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
-		IEnumerable<UserModel> users,
+		IEnumerable<StudentModel> students,
 		IEnumerable<ProjectModel> projects,
 		IEnumerable<ClientModel> clients,
 		IEnumerable<PreferenceModel> preferences,
@@ -43,7 +43,6 @@ public class AllocationSolver : IAllocationSolver
 			throw new Exception("Could not create solver");
 		}
 
-		var studentList = users.Where(u => !u.IsAdmin).ToList();
 		var projectList = projects.Select(x => new ProjectInstance(x, 0)).ToList();
 		foreach (var proj in projects)
 		{
@@ -62,7 +61,7 @@ public class AllocationSolver : IAllocationSolver
 		// Create a 2d array of boolean (0 or 1) 'Variable's
 		// each row represents one student and each column is one project
 		// and each variable is if that student is assigned to that project
-		foreach (var student in studentList)
+		foreach (var student in students)
 		{
 			foreach (var project in projectList)
 			{
@@ -72,7 +71,7 @@ public class AllocationSolver : IAllocationSolver
 		}
 
 		// Create constraint for each student is only assigned to one project
-		foreach (var student in studentList)
+		foreach (var student in students)
 		{
 
 			// variable for each project for this specific student
@@ -114,7 +113,7 @@ public class AllocationSolver : IAllocationSolver
 					{
 						sumExpr += v;
 					}
-					var countVar = solver.MakeIntVar(0, studentList.Count, $"count_manual_{firstStudentId}_proj_{project.Project.Id}");
+					var countVar = solver.MakeIntVar(0, students.Count(), $"count_manual_{firstStudentId}_proj_{project.Project.Id}");
 					// TODO: do we even need this countVar?
 					solver.Add(countVar == sumExpr);
 
@@ -128,14 +127,14 @@ public class AllocationSolver : IAllocationSolver
 		foreach (var project in projectList)
 		{
 			//list of student variables for specific project
-			var assignedVars = studentList
+			var assignedVars = students
 				// .Where(s => variables.ContainsKey((s.Id, project.Project.Id, project.GroupInstanceId)))
 				.Select(s => variables[(s.Id, project.Project.Id, project.GroupInstanceId)])
 				.ToList();
 
 			//variable that will represent number of students assigned to projects
 			//on creation the max amount is all students but this will be narrowed down later
-			var countVar = solver.MakeIntVar(0, studentList.Count, $"count_proj_{project.Project.Id}");
+			var countVar = solver.MakeIntVar(0, students.Count(), $"count_proj_{project.Project.Id}");
 
 			LinearExpr sumExpr = new LinearExpr();
 
@@ -281,7 +280,7 @@ public class AllocationSolver : IAllocationSolver
 			if (variable.SolutionValue() > 0.5)
 			{
 				//assign student to first student in student list where the id matches with the studentId we are iterated to
-				var student = studentList.First(s => s.Id == studentId);
+				var student = students.First(s => s.Id == studentId);
 				var project = projectList.First(p => p.Project.Id == projectId);
 
 				assignments.Add(new StudentAssignmentModel

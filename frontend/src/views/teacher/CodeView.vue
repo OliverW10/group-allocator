@@ -9,7 +9,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Back to Projects
+                Back
             </button>
         </div>
 
@@ -116,7 +116,7 @@ const copyCode = async () => {
 };
 
 const goBack = () => {
-    router.push(`/teacher/${classId}/projects`);
+    router.push(`/teacher`);
 };
 
 onMounted(() => {

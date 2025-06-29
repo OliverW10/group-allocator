@@ -74,7 +74,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		};
 
 		var assignments = solver.AssignStudentsToGroups(solveRun,
-			db.Users.ToList(),
+			db.Students.ToList(),
 			db.Projects.ToList(),
 			db.Clients.ToList(),
 			db.Preferences.Include(p => p.Student).Include(p => p.Project).ToList(),

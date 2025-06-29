@@ -61,8 +61,8 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 				await db.SaveChangesAsync();
 			}
 
-			var existingStudent = await db.Students.FirstOrDefaultAsync(s => s.Id == existingUser.Id);
-			if (existingStudent == null)
+			var hasExistingStudent = await db.Students.Include(s => s.User).Include(s => s.Class).AnyAsync(s => s.User == existingUser && s.Class == @class);
+			if (!hasExistingStudent)
 			{
 				db.Students.Add(new StudentModel
 				{
