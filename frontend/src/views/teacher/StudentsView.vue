@@ -1,5 +1,5 @@
 <template>
-    <AdminNavBar :classId="classId" />
+    <AdminNavBar :class-id="classId" />
 	<Dialog :visible="fileModal != null" :modal="true" :closable="false" :draggable="false" :header="'Files for ' + students.find((student) => student.studentInfo.studentId == fileModal)?.studentInfo.name" :style="{ width: '50vw' }">
 		<DataTable :value="students.find((student) => student.studentInfo.studentId == fileModal)?.studentSubmission.files" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
 			<Column field="name" header="Name"></Column>
@@ -17,9 +17,12 @@
         <Divider style="margin: 0;" />
         <FileUploader label="Upload Students List" @projects-changed="uploadStudents">
             <p>
-                Please upload a text (/csv) file with emails on each line.
+                You can upload a list of students to allow them to join the class without a code or to allocate them to a project group without them submitting preferences.
                 <br />
-                Students in yellow have not submitted any preferences yet
+                Please upload a text file with a single student email on each line.
+                <br />
+                <br />
+                Student rows highlighted in yellow have not submitted any preferences yet, students highlighted in green have submitted preferences and were part of the uploaded students list, students highlighted in red have submitted preferences but were not part of the uploaded students list.
             </p>
         </FileUploader>
         <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
@@ -44,6 +47,11 @@
 					</div>
                 </template>
             </Column>
+            <template #empty>
+                <div class="text-center p-4 text-gray-500">
+                  No students yet, either share the class code with students or upload a list of students.
+                </div>
+            </template>
         </DataTable>
     </div>
 </template>

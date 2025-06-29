@@ -4,7 +4,6 @@
       <h1 class="text-2xl font-bold">My Classes</h1>
       <div class="flex items-center gap-4">
         <Button 
-          icon="pi pi-plus"
           label="Create New Class"
           @click="showCreateModal = true"
         />
@@ -67,6 +66,9 @@
           </div>
         </template>
       </Column>
+      <template #empty>
+        <div class="text-center p-4 text-gray-500">No classes yet</div>
+      </template>
     </DataTable>
 
     <!-- Create Class Modal -->

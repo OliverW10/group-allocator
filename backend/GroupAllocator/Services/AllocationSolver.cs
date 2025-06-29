@@ -1,7 +1,6 @@
 using Google.OrTools.LinearSolver;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
-using Microsoft.AspNetCore.Components.Forms;
 
 namespace GroupAllocator.Services;
 

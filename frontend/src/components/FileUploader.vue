@@ -6,7 +6,7 @@
             @click="showHelp = true" />
     </div>
 
-    <Dialog v-model:visible="showHelp" header="File Upload Help" modal :draggable="false">
+    <Dialog v-model:visible="showHelp" header="File Upload Help" modal :draggable="false" :style="{ width: '50vw' }">
         <slot></slot>
     </Dialog>
 </template>

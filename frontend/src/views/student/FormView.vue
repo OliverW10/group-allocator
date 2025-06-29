@@ -73,8 +73,11 @@ import { useToast } from "primevue/usetoast";
 import type { FileDetailsDto } from "../../dtos/file-details-dto";
 import type { StudentSubmissionDto } from "../../dtos/student-submission-dto";
 import { Column, DataTable } from "primevue";
+import { useRoute } from 'vue-router';
 
 const toast = useToast();
+const route = useRoute();
+const classId = parseInt(route.params.classId as string);
 
 const files = ref([] as FileDetailsDto[])
 const willSignContract = ref(true)
@@ -111,7 +114,7 @@ const loadProjects = async () => {
 	try {
 		loading.value = true
 
-		const allProjects = await ApiService.get<ProjectDto[]>("/projects")
+		const allProjects = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`)
 		if (allProjects.length == 0) {
 			console.warn("no projects")
 			toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
@@ -158,6 +161,7 @@ const submitForm = async () => {
 		files: files.value,
 		orderedPreferences: projects.value[1].map(p => p.id).splice(0, maxNumberOfPreferences),
 		willSignContract: willSignContract.value,
+		classId: classId,
 	}
 	const result = await ApiService.post("/students/me", submitModel)
 	if (result == null) {
@@ -180,12 +184,12 @@ const onUpload = async (event: FileUploadUploaderEvent) => {
 		await ApiService.postRaw('students/file', formData)
 	}
 
-	files.value = await ApiService.get<FileDetailsDto[]>('/students/files')
+	files.value = await ApiService.get<FileDetailsDto[]>(`/students/files?classId=${classId}`)
 }
 
 const deleteFile = async (id: string) => {
-	await ApiService.delete(`/students/file/${id}`)
-	files.value = await ApiService.get<FileDetailsDto[]>('/students/files')
+	await ApiService.delete(`/students/file/${id}?classId=${classId}`)
+	files.value = await ApiService.get<FileDetailsDto[]>(`/students/files?classId=${classId}`)
 	toast.add({ severity: 'success', summary: 'Success', detail: 'File deleted successfully', life: 5000 });
 }
 const not = <Args extends unknown[]>(f: (...args: Args) => boolean) => (...args: Args): boolean => !f(...args);

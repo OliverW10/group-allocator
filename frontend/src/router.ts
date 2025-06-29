@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./views/LoginView.vue')
     },
     {
-        path: '/form',
+        path: '/form/:classId',
         component: () => import('./views/student/FormView.vue')
     },
     {

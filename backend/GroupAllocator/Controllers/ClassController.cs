@@ -198,14 +198,14 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 	}
 
 	[HttpGet("join-code/{code}")]
-	public async Task<ActionResult> JoinClassFromCode(string code)
+	public async Task<ActionResult<int>> JoinClassFromCode(string code)
 	{
-		var classId = db.Classes.FirstAsync(x => x.Code == code).Id;
+		var classId = db.Classes.First(x => x.Code == code).Id;
 		return await JoinClass(classId);
 	}
 
 	[HttpGet("join/{id}")]
-	public async Task<ActionResult> JoinClass(int id)
+	public async Task<ActionResult<int>> JoinClass(int id)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 
@@ -223,6 +223,6 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 		});
 		await db.SaveChangesAsync();
 
-		return Ok();
+		return Ok(@class.Id);
 	}
 }

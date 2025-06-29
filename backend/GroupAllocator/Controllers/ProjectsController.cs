@@ -4,6 +4,7 @@ using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace GroupAllocator.Controllers;
@@ -77,16 +78,16 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 			return newClient;
 		}
 
-		return await GetProjects();
+		return await GetProjects(classId);
 	}
 
 	string RemoveWhitespace(string s) => new string(s.Where(c => !Char.IsWhiteSpace(c)).ToArray());
 
 	[HttpGet]
 	[Authorize]
-	public async Task<ActionResult<List<ProjectDto>>> GetProjects()
+	public async Task<ActionResult<List<ProjectDto>>> GetProjects([FromQuery, BindRequired] int classId)
 	{
-		return await db.Projects.Include(p => p.Client).Select(x => x.ToDto()).ToListAsync();
+		return await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(x => x.Class.Id == classId).Select(x => x.ToDto()).ToListAsync();
 	}
 
 	[HttpPut]
@@ -116,12 +117,15 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 	{
 		var project = await db.Projects
 			.Include(p => p.Client)
+			.Include(p => p.Class)
 			.FirstOrDefaultAsync(x => x.Id == id);
-		if (project != null)
+		if (project == null)
 		{
-			db.Projects.Remove(project);
-			await db.SaveChangesAsync();
+			return NotFound();
 		}
-		return await GetProjects();
+		
+		db.Projects.Remove(project);
+		await db.SaveChangesAsync();
+		return await GetProjects(project.Class.Id);
 	}
 }

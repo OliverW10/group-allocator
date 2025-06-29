@@ -11,14 +11,15 @@ namespace GroupAllocator.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(Policy = "TeacherOnly")]
-public class SolverController(IAllocationSolver solver, ApplicationDbContext db) : ControllerBase
+public class SolverController(IAllocationSolver solver, ApplicationDbContext db, PaymentService paymentService) : ControllerBase
 {
 	[HttpGet]
-	public async Task<ActionResult<SolveRunDto>> GetLatest(int classId)
+	public async Task<ActionResult<SolveRunDto?>> GetLatest(int classId)
 	{
 		var runs = await db.SolveRuns
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Student)
+					.ThenInclude(s => s.User)
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
 			.Include(r => r.Class)
@@ -29,7 +30,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		var lastRun = runs.OrderByDescending(x => x.Timestamp).FirstOrDefault();
 		if (lastRun == null)
 		{
-			return NotFound();
+			return Ok(null);
 		}
 
 		var result = new SolveRunDto
@@ -58,12 +59,21 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 	}
 
 	[HttpPost]
-	public async Task<ActionResult<SolveRunDto>> Solve(SolveRequestDto solveConfig)
+	public async Task<ActionResult<SolveRunDto?>> Solve(SolveRequestDto solveConfig)
 	{
-		var @class = await db.Classes.FindAsync(solveConfig.ClassId);
+		var @class = await db.Classes
+			.Include(c => c.Students)
+			.Include(c => c.Payments)
+			.FirstOrDefaultAsync(c => c.Id == solveConfig.ClassId);
 		if (@class == null)
 		{
 			return BadRequest("Class not found");
+		}
+
+		var plan = paymentService.GetPaymentPlanForClass(@class);
+		if (plan == PaymentPlan.None && @class.Students.Count > 20)
+		{
+			return StatusCode(402, "Upgrade required: Free plan classes are limited to 20 students for solver runs.");
 		}
 
 		var solveRun = new SolveRunModel

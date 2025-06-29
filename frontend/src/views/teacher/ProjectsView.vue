@@ -29,6 +29,11 @@
                     <Button severity="danger" class="i-mdi-delete" @click="deleteProject(slotProps.data.id)" />
                 </template>
             </Column>
+            <template #empty>
+                <div class="text-center p-4 text-gray-500">
+                  Projects list not uploaded, students will not be able to submit preferences until projects are added.
+                </div>
+            </template>
         </DataTable>
     </div>
 </template>

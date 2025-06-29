@@ -97,7 +97,7 @@ const joinClass = async (classId: number) => {
 	try {
 		await ApiService.get(`/class/join/${classId}`);
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Successfully joined class', life: 3000 });
-		router.push('/form');
+		router.push(`/form/${classId}`);
 	} catch (error) {
 		console.error('Failed to join class:', error);
 		toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to join class', life: 3000 });
@@ -121,9 +121,9 @@ const joinWithCode = async () => {
 	classCodeError.value = '';
 	
 	try {
-		await ApiService.get(`/class/join-code/${classCode.value}`);
+		const classId = await ApiService.get(`/class/join-code/${classCode.value}`);
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Successfully joined class', life: 3000 });
-		router.push('/form');
+		router.push(`/form/${classId}`);
 	} catch (error) {
 		console.error('Failed to join class:', error);
 		toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to join class', life: 3000 });

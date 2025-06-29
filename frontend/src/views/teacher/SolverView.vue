@@ -2,6 +2,12 @@
 	<AdminNavBar :class-id="classId" />
 	<div class="flex flex-row flex-justify-between gap-4 p-4">
 		<div v-if="!loading">
+			<div v-if="!allProjects || allProjects.length === 0" class="mb-4 p-4 bg-yellow-100 text-yellow-800 rounded border border-yellow-300">
+				⚠️ No projects found for this class. Please add projects before running the solver.
+			</div>
+			<div v-if="showOutdatedWarning" class="mb-4 p-4 bg-orange-100 text-orange-800 rounded border border-orange-300">
+				⚠️ The latest solve result is outdated
+			</div>
 			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
 			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
 		</div>
@@ -57,14 +63,25 @@ const allStudentInfos = computed(() => {
 const route = useRoute();
 const classId = route.params.classId as string;
 
+const showOutdatedWarning = computed(() => {
+	if (!allStudents.value || allocations.value.length <= 1) return false;
+	const allStudentIds = new Set(allStudents.value.map(s => s.studentInfo.studentId));
+	const allocatedStudentIds = new Set(
+		allocations.value.flatMap(a => a.students.map(s => s.studentId))
+	);
+	return allStudentIds.size > allocatedStudentIds.size;
+});
+
 onMounted(async () => {
-	const solveResult = await ApiService.get<SolveRunDto>(`/solver?classId=${classId}`)
-	if (solveResult) {
-		toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
-	}
-	integrateResultToAllocations(solveResult)
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);
 	allProjects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`);
+	const solveResult = await ApiService.get<SolveRunDto>(`/solver?classId=${classId}`)
+	if (!solveResult) {
+		loading.value = false
+		return;
+	}
+	toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
+	integrateResultToAllocations(solveResult)
 	loading.value = false
 })
 
@@ -77,7 +94,7 @@ const solve = async () => {
 		preferenceExponent: preferenceExponent.value,
 		classId: parseInt(classId),
 	}
-	const solveResult = await ApiService.post<SolveRunDto>(`/solver?classId=${classId}`, solveRequest)
+	const solveResult = await ApiService.post<SolveRunDto>(`/solver`, solveRequest)
 	if (!solveResult) {
 		toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to find solution for student allocations', life: 3000 });
 		loading.value = false

@@ -289,7 +289,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpDelete("{id}")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<ActionResult<List<StudentInfoAndSubmission>>> Delete(int id, int classId)
+	public async Task<ActionResult<List<StudentInfoAndSubmission>>> DeleteStudent(int id, int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
 		
