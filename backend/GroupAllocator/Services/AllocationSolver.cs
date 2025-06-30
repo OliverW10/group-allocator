@@ -13,10 +13,10 @@ namespace GroupAllocator.Services;
 public interface IAllocationSolver
 {
 	IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
-		IEnumerable<StudentModel> students,
-		IEnumerable<ProjectModel> projects,
-		IEnumerable<ClientModel> clients,
-		IEnumerable<PreferenceModel> preferences,
+		IReadOnlyCollection<StudentModel> students,
+		IReadOnlyCollection<ProjectModel> projects,
+		IReadOnlyCollection<ClientModel> clients,
+		IReadOnlyCollection<PreferenceModel> preferences,
 		IReadOnlyCollection<AllocationDto> manualAllocations,
 		IReadOnlyCollection<ClientLimitsDto> clientLimits,
 		double preferenceExponent);
@@ -27,10 +27,10 @@ record ProjectInstance(ProjectModel Project, int GroupInstanceId);
 public class AllocationSolver : IAllocationSolver
 {
 	public IEnumerable<StudentAssignmentModel> AssignStudentsToGroups(SolveRunModel solveRun,
-		IEnumerable<StudentModel> students,
-		IEnumerable<ProjectModel> projects,
-		IEnumerable<ClientModel> clients,
-		IEnumerable<PreferenceModel> preferences,
+		IReadOnlyCollection<StudentModel> students,
+		IReadOnlyCollection<ProjectModel> projects,
+		IReadOnlyCollection<ClientModel> clients,
+		IReadOnlyCollection<PreferenceModel> preferences,
 		IReadOnlyCollection<AllocationDto> manualAllocations,
 		IReadOnlyCollection<ClientLimitsDto> clientLimits,
 		double preferenceExponent)
@@ -45,12 +45,9 @@ public class AllocationSolver : IAllocationSolver
 		var projectList = projects.Select(x => new ProjectInstance(x, 0)).ToList();
 		foreach (var proj in projects)
 		{
-			if (proj.MaxInstances > 1)
+			for (int i = 1; i < proj.MaxInstances; i++)
 			{
-				for (int i = 1; i < proj.MaxInstances; i++)
-				{
-					projectList.Add(new ProjectInstance(proj, i));
-				}
+				projectList.Add(new ProjectInstance(proj, i));
 			}
 		}
 		var variables = new Dictionary<(int studentId, int projectId, int instanceId), Variable>();
@@ -72,7 +69,6 @@ public class AllocationSolver : IAllocationSolver
 		// Create constraint for each student is only assigned to one project
 		foreach (var student in students)
 		{
-
 			// variable for each project for this specific student
 			var terms = projectList
 				.Select(p => variables[(student.Id, p.Project.Id, p.GroupInstanceId)]);
@@ -82,6 +78,7 @@ public class AllocationSolver : IAllocationSolver
 			if (manuallyAssignedAllocation?.Project is not null)
 			{
 				var manualAssignmentConstraint = solver.MakeConstraint(1, 1, $"student_{student.Id}_manual_assignment");
+				// TODO: this relies on a implicit agreement of indexing of multiple instances of a project between frontend and this
 				manualAssignmentConstraint.SetCoefficient(variables[(student.Id, manuallyAssignedAllocation.Project.Id, manuallyAssignedAllocation.InstanceId)], 1);
 			}
 
@@ -96,28 +93,27 @@ public class AllocationSolver : IAllocationSolver
 		// Constraint for students who are manually assigned together without a project
 		foreach (var allocation in manualAllocations)
 		{
-			if (allocation.Project is null && allocation.Students.Count() > 0)
+			if (allocation.Project is null && allocation.Students.Any())
 			{
 				var firstStudentId = allocation.Students.First().StudentId;
-				// having students[0] == 1 implies that students[1..] should also be 1 for all projects
+				var studentIds = allocation.Students.Select(s => s.StudentId);
 				foreach (var project in projectList)
 				{
 					// count of the students allocated together that are on this project
 					LinearExpr sumExpr = new LinearExpr();
 					// the variables for all students in this project
-					var projectStudentVariables = variables
-						.Where(v => v.Key.projectId == project.Project.Id && v.Key.instanceId == project.GroupInstanceId)
+					var projectVariables = variables
+						.Where(v => v.Key.projectId == project.Project.Id && v.Key.instanceId == project.GroupInstanceId && studentIds.Contains(v.Key.studentId))
 						.Select(v => v.Value);
-					foreach (var v in projectStudentVariables)
+					foreach (var v in projectVariables)
 					{
 						sumExpr += v;
 					}
-					var countVar = solver.MakeIntVar(0, students.Count(), $"count_manual_{firstStudentId}_proj_{project.Project.Id}");
-					// TODO: do we even need this countVar?
-					solver.Add(countVar == sumExpr);
 
 					var firstStudentVariable = variables[(firstStudentId, project.Project.Id, project.GroupInstanceId)];
-					solver.Add(countVar == firstStudentVariable * allocation.Students.Count());
+					// having students[0] == 1 implies that students[1..] should also be 1 for all projects
+					solver.Add(sumExpr == firstStudentVariable * allocation.Students.Count());
+					// TODO: also need to contraint that at firstStudentId is 1
 				}
 			}
 		}
@@ -236,7 +232,7 @@ public class AllocationSolver : IAllocationSolver
 
 		var subjectStrengthFunc = (int ordinal) =>
 		{
-			return 1.0 - ordinal * 0.1;
+			return Math.Pow(solveRun.PreferenceExponent, ordinal);
 		};
 
 		foreach (var pref in preferences)

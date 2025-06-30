@@ -9,7 +9,37 @@
 				⚠️ The latest solve result is outdated
 			</div>
 			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
-			<!-- <SolverConfiguration v-model="solverConfig.value"></SolverConfiguration> -->
+			<div class="flex flex-col gap-2 mt-4">
+				<label for="preference-exponent" class="text-sm font-medium">Preference Exponent: {{ preferenceExponent.toFixed(2) }}</label>
+				<Slider 
+					id="preference-exponent"
+					v-model="preferenceExponent" 
+					:min="0.5" 
+					:max="0.99" 
+					:step="0.01"
+					class="w-64"
+				/>
+				<svg :width="220" :height="120" class="mt-2 bg-white border rounded">
+					<!-- Axes -->
+					<line x1="30" y1="10" x2="30" y2="100" stroke="#888" stroke-width="1" />
+					<line x1="30" y1="100" x2="200" y2="100" stroke="#888" stroke-width="1" />
+					<!-- X axis labels -->
+					<g v-for="x in 10" :key="x">
+						<text :x="30 + (x-1)*17" y="115" font-size="10" text-anchor="middle">{{ x }}</text>
+					</g>
+					<!-- Y axis labels (0, 1, max) -->
+					<text x="5" y="100" font-size="10">0</text>
+					<text x="5" y="60" font-size="10">0.5</text>
+					<text x="5" y="15" font-size="10">1</text>
+					<!-- Curve -->
+					<polyline
+						:points="svgPoints"
+						fill="none"
+						stroke="#1976d2"
+						stroke-width="2"
+					/>
+				</svg>
+			</div>
 		</div>
 		<div v-else>
 			<ProgressSpinner />
@@ -17,7 +47,7 @@
 		<div class="p-8">
 			<Divider layout="vertical" />
 		</div>
-		<div>
+		<div class="flex flex-col gap-4">
 			<Button label="Run Solver" icon="i-mdi-cogs" class="w-fit" @click="solve"></Button>
 		</div>
 	</div>
@@ -26,6 +56,7 @@
 import AdminNavBar from '../../components/TeacherNavBar.vue';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
+import Slider from 'primevue/slider';
 import { computed, onMounted, ref } from 'vue';
 import ApiService from '../../services/ApiService';
 import type { SolveRunDto } from '../../dtos/solve-run-dto';
@@ -70,6 +101,21 @@ const showOutdatedWarning = computed(() => {
 		allocations.value.flatMap(a => a.students.map(s => s.studentId))
 	);
 	return allStudentIds.size > allocatedStudentIds.size;
+});
+
+const svgPoints = computed(() => {
+	const m = preferenceExponent.value;
+	const points: string[] = [];
+	const substeps = 5;
+	for (let x = 0; x <= 10 * substeps; x++) {
+		// Calculate y = m^x, clamp to [0,1] for display
+		const y = Math.pow(m, x);
+		// Map x to [30, 200], y to [100, 10] (invert y for SVG)
+		const svgX = 30 + x * 17 / substeps;
+		const svgY = 100 - y * 90;
+		points.push(`${svgX},${svgY}`);
+	}
+	return points.join(' ');
 });
 
 onMounted(async () => {
