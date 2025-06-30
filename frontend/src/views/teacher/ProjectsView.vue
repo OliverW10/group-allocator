@@ -1,29 +1,96 @@
 <template>
     <AdminNavBar :classId="classId" />
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
-        <h1 class="heading">Projects</h1>
+        <div class="flex justify-between items-center">
+            <h1 class="heading">Projects</h1>
+            
+        </div>
         <Divider style="margin: 0;" />
-        <FileUploader label="Add Projects" @projects-changed="uploadProjects">
-            <p>
-                Please upload a csv file with the following format and no header
-                <br />
-                <code>project_name, client, min_students, max_students, requires_nda, min_instances, max_instances</code>
-                <br />
-                New projects will be added in addition to existing ones.<br>
-                To modify a project, delete it from the table and upload a file with just the new values for that project.
-            </p>
-        </FileUploader>
+        <div class="flex justify-between items-end">
+            <FileUploader label="Import Projects" @projects-changed="uploadProjects">
+                <p>
+                    Please upload a csv file with the following format and no header
+                    <br />
+                    <code>project_name, client, min_students, max_students, requires_nda, min_instances, max_instances</code>
+                    <br />
+                    New projects will be added in addition to existing ones.<br>
+                    To modify a project, delete it from the table and upload a file with just the new values for that project.
+                </p>
+            </FileUploader>
+            <Button 
+                label="Create Project" 
+                @click="showCreateModal = true"
+            />
+        </div>
         <DataTable :value="projects" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
-            <Column field="name" header="Name"></Column>
-            <Column field="requiresNda" header="Requires NDA">
+            <Column field="name" header="Name">
                 <template #body="slotProps">
-                    {{slotProps.data.requiresNda ? '✔️' : '❌'}}
+                    <InputText 
+                        v-model="slotProps.data.name" 
+                        @input="markAsChanged(slotProps.data.id)"
+                        class="w-full editable-input"
+                    />
                 </template>
             </Column>
-            <Column field="minStudents" header="Min. Students"></Column>
-            <Column field="maxStudents" header="Max. Students"></Column>
-            <Column field="minInstances" header="Min. Instances"></Column>
-            <Column field="maxInstances" header="Max. Instances"></Column>
+            <Column field="client" header="Client">
+                <template #body="slotProps">
+                    <InputText 
+                        v-model="slotProps.data.client" 
+                        @input="markAsChanged(slotProps.data.id)"
+                        class="w-full editable-input"
+                    />
+                </template>
+            </Column>
+            <Column field="requiresNda" header="Requires NDA">
+                <template #body="slotProps">
+                    <Checkbox 
+                        v-model="slotProps.data.requiresNda" 
+                        :binary="true"
+                        @change="markAsChanged(slotProps.data.id)"
+                        class="editable-checkbox"
+                    />
+                </template>
+            </Column>
+            <Column field="minStudents" header="Min. Students">
+                <template #body="slotProps">
+                    <InputNumber 
+                        v-model="slotProps.data.minStudents" 
+                        @input="markAsChanged(slotProps.data.id)"
+                        :min="1"
+                        class="w-full editable-input"
+                    />
+                </template>
+            </Column>
+            <Column field="maxStudents" header="Max. Students">
+                <template #body="slotProps">
+                    <InputNumber 
+                        v-model="slotProps.data.maxStudents" 
+                        @input="markAsChanged(slotProps.data.id)"
+                        :min="1"
+                        class="w-full editable-input"
+                    />
+                </template>
+            </Column>
+            <Column field="minInstances" header="Min. Instances">
+                <template #body="slotProps">
+                    <InputNumber 
+                        v-model="slotProps.data.minInstances" 
+                        @input="markAsChanged(slotProps.data.id)"
+                        :min="0"
+                        class="w-full editable-input"
+                    />
+                </template>
+            </Column>
+            <Column field="maxInstances" header="Max. Instances">
+                <template #body="slotProps">
+                    <InputNumber 
+                        v-model="slotProps.data.maxInstances" 
+                        @input="markAsChanged(slotProps.data.id)"
+                        :min="1"
+                        class="w-full editable-input"
+                    />
+                </template>
+            </Column>
             <Column field="id" header="Actions">
 				<template #body="slotProps">
                     <Button severity="danger" class="i-mdi-delete" @click="deleteProject(slotProps.data.id)" />
@@ -35,28 +102,57 @@
                 </div>
             </template>
         </DataTable>
+
+        <!-- Save Changes Button -->
+        <div v-if="hasChanges" class="flex justify-end">
+            <Button 
+                label="Save Changes" 
+                severity="success"
+                @click="saveChanges"
+                :loading="saving"
+            />
+        </div>
+
+        <!-- Create Project Form Component -->
+        <CreateProjectForm
+            v-model:visible="showCreateModal"
+            :classId="classId"
+            @created="(newProject) => setProjects([...projects, newProject])"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import Checkbox from 'primevue/checkbox';
 import AdminNavBar from '../../components/TeacherNavBar.vue';
 import FileUploader from '../../components/FileUploader.vue';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
 import ApiService from '../../services/ApiService';
 import { useToast } from 'primevue/usetoast';
 import { useRoute } from 'vue-router';
+import CreateProjectForm from '../../components/CreateProjectForm.vue';
 
 const projects = ref([] as ProjectDto[]);
 const loading = ref(false);
+const saving = ref(false);
 const toast = useToast();
 const route = useRoute();
 const classId = route.params.classId as string;
+const showCreateModal = ref(false);
+const changedProjectIds = ref(new Set<number>());
+
+// Store original project data for comparison
+const originalProjects = ref(new Map<number, ProjectDto>());
+
+const hasChanges = computed(() => changedProjectIds.value.size > 0);
 
 onMounted(() => {
     getProjects();
@@ -65,7 +161,8 @@ onMounted(() => {
 const getProjects = async () => {
     try {
         loading.value = true;
-        setProjects(await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`))
+        const projectData = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`);
+        setProjects(projectData);
     } catch (error) {
         console.error(error);
     } finally {
@@ -75,7 +172,49 @@ const getProjects = async () => {
 
 const setProjects = (data: ProjectDto[]) => {
     projects.value = data;
+    // Store original data for comparison
+    originalProjects.value.clear();
+    data.forEach(project => {
+        originalProjects.value.set(project.id, { ...project });
+    });
+    changedProjectIds.value.clear();
 }
+
+const markAsChanged = (projectId: number) => {
+    changedProjectIds.value.add(projectId);
+};
+
+const saveChanges = async () => {
+    if (changedProjectIds.value.size === 0) return;
+    
+    saving.value = true;
+    try {
+        const updatePromises = Array.from(changedProjectIds.value).map(async (projectId) => {
+            const project = projects.value.find(p => p.id === projectId);
+            if (project) {
+                return await ApiService.put<ProjectDto>(`/projects/update/${projectId}`, project);
+            }
+        });
+        
+        await Promise.all(updatePromises);
+        
+        // Update original data after successful save
+        changedProjectIds.value.forEach(projectId => {
+            const project = projects.value.find(p => p.id === projectId);
+            if (project) {
+                originalProjects.value.set(projectId, { ...project });
+            }
+        });
+        
+        changedProjectIds.value.clear();
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Projects updated successfully', life: 5000 });
+    } catch (error) {
+        console.error(error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update projects', life: 10000 });
+    } finally {
+        saving.value = false;
+    }
+};
 
 const uploadProjects = async (event: FileUploadSelectEvent) => {
     if (!event.files) {
@@ -107,3 +246,44 @@ const error = () => {
 }
 
 </script>
+
+<style scoped>
+.editable-input,
+.editable-input :deep(.p-inputnumber-input)
+{
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.editable-input :deep(.p-inputnumber-input:hover),
+input[type="text"].editable-input:hover  {
+    background: rgba(0, 0, 0, 0.05);
+    outline: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"].editable-input:focus,
+.editable-input :deep(.p-inputnumber-input:focus) {
+    background: white;
+    outline: 2px solid #3b82f6;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+.editable-checkbox :deep(.p-checkbox-box) {
+    border: 1px solid #d1d5db;
+    transition: all 0.2s ease;
+}
+
+.editable-checkbox :deep(.p-checkbox-box:hover) {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.editable-checkbox :deep(.p-checkbox-box.p-focus) {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+</style>

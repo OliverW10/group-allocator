@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace GroupAllocator.Controllers;
 
@@ -81,6 +82,59 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 		return await GetProjects(classId);
 	}
 
+	[HttpPost]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<ProjectDto>> CreateProject([FromQuery, BindRequired] int classId, [FromBody] CreateProjectDto createProjectDto)
+	{
+		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		
+		var @class = await db.Classes
+			.Include(c => c.Teachers)
+				.ThenInclude(t => t.Teacher)
+			.FirstOrDefaultAsync(c => c.Id == classId);
+			
+		if (@class == null)
+		{
+			return NotFound($"No class with id {classId}");
+		}
+
+		// Check if the teacher is the owner of the class
+		var isTeacher = @class.Teachers.Any(t => t.Teacher.Id == userId);
+		if (!isTeacher)
+		{
+			return Forbid("Only the class owner can create projects");
+		}
+
+		// Get or create client
+		var client = await db.Clients.FirstOrDefaultAsync(c => c.Name == createProjectDto.Client && c.Class.Id == classId);
+		if (client == null)
+		{
+			client = new ClientModel
+			{
+				Name = createProjectDto.Client,
+				Class = @class,
+			};
+			db.Clients.Add(client);
+		}
+
+		var project = new ProjectModel
+		{
+			Name = createProjectDto.Name,
+			Client = client,
+			MinStudents = createProjectDto.MinStudents,
+			MaxStudents = createProjectDto.MaxStudents,
+			RequiresNda = createProjectDto.RequiresNda,
+			MinInstances = createProjectDto.MinInstances,
+			MaxInstances = createProjectDto.MaxInstances,
+			Class = @class,
+		};
+
+		db.Projects.Add(project);
+		await db.SaveChangesAsync();
+
+		return project.ToDto();
+	}
+
 	string RemoveWhitespace(string s) => new string(s.Where(c => !Char.IsWhiteSpace(c)).ToArray());
 
 	[HttpGet]
@@ -97,12 +151,34 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 	{
 		var project = await db.Projects
 			.Include(p => p.Client)
+			.Include(p => p.Class)
 			.FirstOrDefaultAsync(x => x.Id == id);
 
 		if (project == null)
 		{
 			return NotFound();
 		}
+
+		// Update project properties
+		project.Name = projectDto.Name;
+		project.RequiresNda = projectDto.RequiresNda;
+		project.MinStudents = projectDto.MinStudents;
+		project.MaxStudents = projectDto.MaxStudents;
+		project.MinInstances = projectDto.MinInstances;
+		project.MaxInstances = projectDto.MaxInstances;
+
+		// Handle client update - get or create client
+		var client = await db.Clients.FirstOrDefaultAsync(c => c.Name == projectDto.Client && c.Class.Id == project.Class.Id);
+		if (client == null)
+		{
+			client = new ClientModel
+			{
+				Name = projectDto.Client,
+				Class = project.Class,
+			};
+			db.Clients.Add(client);
+		}
+		project.Client = client;
 
 		db.Projects.Update(project);
 		await db.SaveChangesAsync();
