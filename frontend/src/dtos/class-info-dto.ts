@@ -4,6 +4,7 @@
  */
 
 export class ClassInfoDto {
+    name: string;
     code: string;
     studentCount: number;
     studentsWithPreferencesCount: number;

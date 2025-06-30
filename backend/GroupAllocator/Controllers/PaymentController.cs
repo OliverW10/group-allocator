@@ -40,7 +40,7 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 		return Ok();
 	}
 
-	[HttpGet("create")]
+	[HttpGet("create-stripe-session")]
 	[Authorize(Policy = "TeachersOnly")]
 	public async Task<ActionResult<object>> CreateStripeSession(string returnDomain)
 	{

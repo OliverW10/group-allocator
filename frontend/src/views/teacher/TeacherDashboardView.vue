@@ -35,6 +35,13 @@
             @blur="saveClassEdit"
             @keyup.enter="saveClassEdit"
           />
+          <Button
+              v-if="!editingClass || editingClass.id !== data.id"
+              icon="i-mdi-pencil"
+              severity="info"
+              text
+              @click.stop="startEditing(data)"
+            />
         </template>
       </Column>
       <Column field="code" header="Class Code">
@@ -47,21 +54,38 @@
         </template>
       </Column>
       <Column field="studentCount" header="Number of Students" />
-      <Column header="Actions">
+      <Column field="createdAt" header="Created At">
         <template #body="{ data }">
-          <div class="flex gap-2">
+          {{ formatRelativeDate(data.createdAt) }}
+        </template>
+      </Column>
+      <Column header="Plan">
+        <template #body="{ data }">
+          <div class="flex items-center gap-2">
+            {{ data.payed ? 'Payed' : 'Free' }}
             <Button
-              v-if="!editingClass || editingClass.id !== data.id"
-              icon="pi pi-pencil"
-              severity="info"
+              v-if="!data.payed"
+              v-tooltip.top="'Free plan classes allow up to 20 students'"
+              icon="i-mdi-information"
+              severity="info" 
               text
-              @click.stop="startEditing(data)"
+              @click.stop
             />
             <Button
-              icon="pi pi-trash"
-              severity="danger"
+              v-if="!data.payed && data.studentCount > 20"
+              v-tooltip.top="'Student limit exceeded. Please upgrade your plan for this class'"
+              icon="i-mdi-alert"
+              severity="warning"
               text
-              @click.stop="deleteClass(data.id)"
+              @click.stop
+            />
+            <Button
+              v-if="!data.payed"
+              v-tooltip.top="'Upgrade to Premium'"
+              icon="i-mdi-shopping"
+              severity="success"
+              text
+              @click.stop="router.push(`/teacher/${data.id}/purchase`)"
             />
           </div>
         </template>
@@ -105,43 +129,31 @@
         </div>
       </template>
     </Dialog>
-
-    <!-- Delete Confirmation Dialog -->
-    <ConfirmDialog />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useConfirm } from 'primevue/useconfirm'
+import moment from 'moment'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'
 import Dialog from 'primevue/dialog'
-import ConfirmDialog from 'primevue/confirmdialog'
 import ApiService from '../../services/ApiService'
 import LogoutButton from '../../components/LogoutButton.vue'
-
-interface Class {
-  id: number
-  code: string
-  name: string
-  createdAt: string
-  teacherRole: string | null
-}
+import { ClassResponseDto } from '../../dtos/class-response-dto'
 
 const router = useRouter()
-const confirm = useConfirm()
-const classes = ref<Class[]>([])
+const classes = ref<ClassResponseDto[]>([])
 const showCreateModal = ref(false)
 const newClass = ref({ name: '' })
-const editingClass = ref<Class | null>(null)
+const editingClass = ref<ClassResponseDto | null>(null)
 
 const fetchClasses = async () => {
   try {
-    classes.value = await ApiService.get<Class[]>(
+    classes.value = await ApiService.get<ClassResponseDto[]>(
       '/Class/list-teacher'
     )
   } catch (error) {
@@ -160,7 +172,7 @@ const createClass = async () => {
   }
 }
 
-const startEditing = (classItem: Class) => {
+const startEditing = (classItem: ClassResponseDto) => {
   editingClass.value = { ...classItem }
 }
 
@@ -177,29 +189,16 @@ const saveClassEdit = async () => {
   }
 }
 
-const deleteClass = (classId: number) => {
-  confirm.require({
-    message: 'Are you sure you want to delete this class?',
-    header: 'Delete Confirmation',
-    icon: 'pi pi-exclamation-triangle',
-    acceptClass: 'p-button-danger',
-    accept: async () => {
-      try {
-        await ApiService.delete(`/Class/${classId}`)
-        await fetchClasses()
-      } catch (error) {
-        console.error('Error deleting class:', error)
-      }
-    }
-  })
-}
-
 const navigateToSolver = (classId: number) => {
   router.push(`/teacher/${classId}/projects/`)
 }
 
 const navigateToCode = (classId: number) => {
   router.push(`/teacher/${classId}/code/`)
+}
+
+const formatRelativeDate = (date: Date) => {
+  return moment(date).fromNow()
 }
 
 onMounted(fetchClasses)

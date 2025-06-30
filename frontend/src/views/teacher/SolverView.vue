@@ -14,28 +14,28 @@
 				<Slider 
 					id="preference-exponent"
 					v-model="preferenceExponent" 
-					:min="0.5" 
+					:min="0.6" 
 					:max="0.99" 
 					:step="0.01"
 					class="w-64"
 				/>
-				<svg :width="220" :height="120" class="mt-2 bg-white border rounded">
+				<svg :width="220" :height="120" class="mt-2 primevue-svg bg-opacity-50">
 					<!-- Axes -->
-					<line x1="30" y1="10" x2="30" y2="100" stroke="#888" stroke-width="1" />
-					<line x1="30" y1="100" x2="200" y2="100" stroke="#888" stroke-width="1" />
+					<line x1="30" y1="10" x2="30" y2="100" stroke="var(--p-surface-400, #888)" stroke-width="1" />
+					<line x1="30" y1="100" x2="200" y2="100" stroke="var(--p-surface-400, #888)" stroke-width="1" />
 					<!-- X axis labels -->
 					<g v-for="x in 10" :key="x">
-						<text :x="30 + (x-1)*17" y="115" font-size="10" text-anchor="middle">{{ x }}</text>
+						<text :x="30 + (x-1)*17" y="115" font-size="10" text-anchor="middle" fill="var(--p-text-color-secondary, #888)">{{ x }}</text>
 					</g>
 					<!-- Y axis labels (0, 1, max) -->
-					<text x="5" y="100" font-size="10">0</text>
-					<text x="5" y="60" font-size="10">0.5</text>
-					<text x="5" y="15" font-size="10">1</text>
+					<text x="5" y="100" font-size="10" fill="var(--p-text-color-secondary, #888)">0</text>
+					<text x="5" y="60" font-size="10" fill="var(--p-text-color-secondary, #888)">0.5</text>
+					<text x="5" y="15" font-size="10" fill="var(--p-text-color-secondary, #888)">1</text>
 					<!-- Curve -->
 					<polyline
 						:points="svgPoints"
 						fill="none"
-						stroke="#1976d2"
+						stroke="var(--p-primary-color, #1976d2)"
 						stroke-width="2"
 					/>
 				</svg>
@@ -75,7 +75,7 @@ import { useRoute } from 'vue-router';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
-const preferenceExponent = ref(0.5)
+const preferenceExponent = ref(0.85)
 
 const toast = useToast();
 const loading = ref(true)
@@ -200,3 +200,12 @@ const studentInfoToAllocated = (i: StudentInfoDto) => {
 }
 
 </script>
+
+<style scoped>
+.primevue-svg {
+	background: var(--p-surface-0, #fff);
+	border: 1px solid var(--p-surface-border, #d1d5db);
+	border-radius: 0.375rem;
+	display: block;
+}
+</style>

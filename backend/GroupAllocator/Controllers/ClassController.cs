@@ -94,6 +94,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 
 		return new ClassInfoDto
 		{
+			Name = @class.Name,
 			Code = @class.Code,
 			StudentCount = @class.Students.Count,
 			StudentsWithPreferencesCount = studentsWithPreferences
