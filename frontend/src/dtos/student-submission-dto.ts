@@ -10,4 +10,5 @@ export class StudentSubmissionDto {
     willSignContract: boolean;
     files: FileDetailsDto[];
     classId: number;
+    notes: string;
 }

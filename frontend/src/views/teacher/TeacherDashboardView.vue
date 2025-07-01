@@ -85,7 +85,7 @@
               icon="i-mdi-shopping"
               severity="success"
               text
-              @click.stop="router.push(`/teacher/${data.id}/purchase`)"
+              @click.stop="showPurchaseConfirmation(data)"
             />
           </div>
         </template>
@@ -129,6 +129,38 @@
         </div>
       </template>
     </Dialog>
+
+    <!-- Purchase Confirmation Dialog -->
+    <Dialog
+      v-model:visible="showPurchaseModal"
+      modal
+      header="Confirm Purchase"
+      :closable="!isPurchaseLoading"
+      :style="{ width: '50rem' }"
+    >
+      <div class="p-4">
+        <p class="mb-4">Are you sure you want to upgrade <strong>{{ selectedClass?.name }}</strong> to a paid plan for $5 AUD?</p>
+        <p class="mb-4">This will allow you to run the automatic group allocation for an unlimited number of students for this class, the paid plan for this class will expire 6 months from now on {{ moment().add(6, 'months').format('MMMM Do, YYYY') }}.</p>
+        <p class="text-sm text-gray-600 mb-4">This will redirect you to Stripe to complete the payment.</p>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <Button
+            @click="showPurchaseModal = false"
+            label="Cancel"
+            severity="secondary"
+            text
+            :disabled="isPurchaseLoading"
+          />
+          <Button
+            @click="handlePurchase"
+            label="Proceed to Purchase"
+            icon="i-mdi-check"
+            :loading="isPurchaseLoading"
+          />
+        </div>
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -150,6 +182,9 @@ const classes = ref<ClassResponseDto[]>([])
 const showCreateModal = ref(false)
 const newClass = ref({ name: '' })
 const editingClass = ref<ClassResponseDto | null>(null)
+const showPurchaseModal = ref(false)
+const selectedClass = ref<ClassResponseDto | null>(null)
+const isPurchaseLoading = ref(false)
 
 const fetchClasses = async () => {
   try {
@@ -199,6 +234,37 @@ const navigateToCode = (classId: number) => {
 
 const formatRelativeDate = (date: Date) => {
   return moment(date).fromNow()
+}
+
+const showPurchaseConfirmation = (classItem: ClassResponseDto) => {
+  selectedClass.value = classItem
+  showPurchaseModal.value = true
+}
+
+const handlePurchase = async () => {
+  if (!selectedClass.value || isPurchaseLoading.value) return
+  
+  isPurchaseLoading.value = true
+  try {
+    // Get the current frontend URL for the return domain
+    const returnDomain = window.location.origin + `/teacher/${selectedClass.value.id}/purchase`
+    
+    // Make the GET request to create Stripe session
+    const stripeUrl = await ApiService.get<string>(`/payment/create-stripe-session?returnDomain=${encodeURIComponent(returnDomain)}`)
+    
+    if (stripeUrl) {
+      // Redirect to the Stripe checkout URL
+      window.location.href = stripeUrl
+    } else {
+      throw new Error('Failed to create Stripe session')
+    }
+  } catch (error) {
+    console.error('Purchase failed:', error)
+    alert('Failed to initiate purchase. Please try again.')
+  } finally {
+    isPurchaseLoading.value = false
+    showPurchaseModal.value = false
+  }
 }
 
 onMounted(fetchClasses)

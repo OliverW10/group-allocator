@@ -13,5 +13,6 @@ public class PaymentModel
 	public required decimal Amount { get; set; }
 	public required DateTimeOffset PayedAt { get; set; }
 	public required PaymentPlan Plan { get; set; }
-	// probably need a tracking number of something from stripe
+	public required string StripeSessionId { get; set; }
+	public required string Currency { get; set; }
 }

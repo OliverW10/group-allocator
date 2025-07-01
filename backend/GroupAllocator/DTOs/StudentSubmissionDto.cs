@@ -9,4 +9,5 @@ public class StudentSubmissionDto
 	public required bool WillSignContract { get; set; }
 	public required IEnumerable<FileDetailsDto> Files { get; set; }
 	public required int ClassId { get; set; }
+	public required string Notes { get; set; }
 }

@@ -121,7 +121,8 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			User = user,
 			Class = @class,
 			WillSignContract = preferences.WillSignContract,
-			IsVerified = false
+			IsVerified = false,
+			Notes = preferences.Notes
 		};
 		var preferenceModels = new List<PreferenceModel>();
 		var allProjects = await db.Projects.Where(p => p.Class.Id == preferences.ClassId).ToListAsync();

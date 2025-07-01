@@ -1,10 +1,8 @@
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
-using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Stripe;
 using Stripe.Checkout;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -12,41 +10,14 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PaymentController(ApplicationDbContext db, PaymentService paymentService) : ControllerBase
+public class PaymentController(ApplicationDbContext db) : ControllerBase
 {
-	[HttpPut("{id}")]
-	[Authorize(Policy = "TeacherOnly")]
-	public async Task<ActionResult> UpgradeClass(int id)
-	{
-		var @class = await db.Classes.Include(c => c.Payments).FirstAsync(c => c.Id == id) ?? throw new InvalidOperationException("Class not found");
-		if (paymentService.GetPaymentPlanForClass(@class) == PaymentPlan.Basic)
-		{
-			return BadRequest("Already upgraded");
-		}
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		var user = await db.Users.FindAsync(userId) ?? throw new InvalidOperationException("User not found");
-
-		var requiredCost = paymentService.CostOfPlan(PaymentPlan.Basic);
-		// validate payment
-
-		db.Payments.Add(new PaymentModel
-		{
-			Amount = requiredCost,
-			ForClass = @class,
-			PayedAt = DateTimeOffset.Now,
-			Payer = user,
-			Plan = PaymentPlan.Basic,
-		});
-		return Ok();
-	}
-
 	[HttpGet("create-stripe-session")]
-	[Authorize(Policy = "TeachersOnly")]
-	public async Task<ActionResult<object>> CreateStripeSession(string returnDomain)
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<string>> CreateStripeSession(string returnDomain)
 	{
 		var options = new SessionCreateOptions
 		{
-			UiMode = "embedded",
 			LineItems = new List<SessionLineItemOptions>
 				{
 				  new SessionLineItemOptions
@@ -57,11 +28,60 @@ public class PaymentController(ApplicationDbContext db, PaymentService paymentSe
 				  },
 				},
 			Mode = "payment",
-			ReturnUrl = returnDomain + "?session_id={CHECKOUT_SESSION_ID}",
+			SuccessUrl = returnDomain + "?success=true&session_id={CHECKOUT_SESSION_ID}",
+			CancelUrl = returnDomain + "?success=false&session_id={CHECKOUT_SESSION_ID}",
 		};
 		var service = new SessionService();
 		Session session = await service.CreateAsync(options);
 
-		return new { clientSecret = session.ClientSecret };
+		return session.Url;
 	}
+
+	[HttpGet("verify-payment")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<bool>> VerifyPayment(string sessionId, int classId)
+	{
+		var @class = await db.Classes.FindAsync(classId) ?? throw new InvalidOperationException("Class not found");
+		var user = await db.Users.FindAsync(int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"))) ?? throw new InvalidOperationException("User not found");
+		if (string.IsNullOrEmpty(sessionId))
+		{
+			return BadRequest("Session ID is required");
+		}
+
+		try
+		{
+			var service = new SessionService();
+			var session = await service.GetAsync(sessionId);
+
+			if (session == null)
+			{
+				return false;
+			}
+			if (session.PaymentStatus != "paid" || session.AmountTotal is null)
+			{
+				return false;
+			}
+
+			var paymentModel = new PaymentModel {
+				Amount = (decimal)session.AmountTotal,
+				ForClass = @class,
+				PayedAt = new DateTimeOffset(session.Created),
+				Payer = user,
+				Plan = PaymentPlan.Basic,
+				StripeSessionId = session.Id,
+				Currency = session.Currency,
+			};
+
+			db.Payments.Add(paymentModel);
+			await db.SaveChangesAsync();
+
+			return Ok(true);
+		}
+		catch (StripeException ex)
+		{
+			return BadRequest(new { error = ex.Message });
+		}
+	}
+
+	
 }

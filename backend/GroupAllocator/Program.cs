@@ -4,7 +4,7 @@ using GroupAllocator.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using Stripe;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,8 +62,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
 	.UseNpgsql(builder.Configuration.GetConnectionString("MainDb"))
 	// .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
 );
-builder.Services.AddControllers();
 builder.Services.RegisterApplicationServices();
+StripeConfiguration.ApiKey = builder.Configuration.GetValue<string>("Stripe:SecretKey") ?? throw new InvalidOperationException("Stripe secret key not found");
+
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();

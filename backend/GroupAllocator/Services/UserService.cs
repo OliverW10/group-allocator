@@ -69,6 +69,7 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 					Class = @class,
 					User = existingUser,
 					IsVerified = true,
+					Notes = "",
 				});
 			}
 		}

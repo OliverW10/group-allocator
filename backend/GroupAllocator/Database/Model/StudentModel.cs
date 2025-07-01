@@ -8,6 +8,7 @@ public class StudentModel
 	public int Id { get; set; }
 	public required UserModel User { get; set; }
 	public required ClassModel Class { get; set; }
+	public string Notes { get; set; } = "";
 	public bool? WillSignContract { get; set; }
 	public bool IsVerified { get; set; }
 

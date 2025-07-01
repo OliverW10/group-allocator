@@ -48,6 +48,18 @@
 						</Column>
 					</DataTable>
 
+					<div class="my-4">
+						<label for="personalStatement" class="block text-sm font-medium mb-2">Personal Statement (Optional)</label>
+						<Textarea 
+							id="personalStatement"
+							v-model="personalStatement" 
+							placeholder="Tell us about yourself, your interests, and why you're interested in these projects..."
+							:auto-resize="true"
+							rows="4"
+							class="w-full"
+						/>
+					</div>
+
 					<Button label="Save Preferences" class="mt-4" icon="i-mdi-upload" @click="submitForm" />
 				</div>
 			</template>
@@ -63,6 +75,7 @@ import Card from "primevue/card";
 import Message from "primevue/message"
 import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
+import Textarea from "primevue/textarea";
 import { ProjectDto } from "../../dtos/project-dto";
 import LogoutButton from "../../components/LogoutButton.vue";
 import { computed, onMounted, ref } from 'vue'
@@ -81,6 +94,7 @@ const classId = parseInt(route.params.classId as string);
 
 const files = ref([] as FileDetailsDto[])
 const willSignContract = ref(true)
+const personalStatement = ref("")
 const maxNumberOfPreferences = 10;
 const warningMessage = "A maximum of " + maxNumberOfPreferences + " preferences has been selected. Anything more than the top " + maxNumberOfPreferences + " preferences will not be saved";
 let exceededPreferenceLimit = false
@@ -99,6 +113,7 @@ onMounted(async () => {
 			console.log(maybeStudent)
 			files.value = maybeStudent.files ?? []
 			willSignContract.value = true
+			personalStatement.value = maybeStudent.notes ?? ""
 			const isSelected = (x: ProjectDto) => maybeStudent.orderedPreferences.some(id => x.id == id)
 			projects.value[0] = projectsRaw.value.filter(not(isSelected))
 			projects.value[1] = projectsRaw.value.filter(isSelected)
@@ -162,6 +177,7 @@ const submitForm = async () => {
 		orderedPreferences: projects.value[1].map(p => p.id).splice(0, maxNumberOfPreferences),
 		willSignContract: willSignContract.value,
 		classId: classId,
+		notes: personalStatement.value,
 	}
 	const result = await ApiService.post("/students/me", submitModel)
 	if (result == null) {

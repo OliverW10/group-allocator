@@ -31,7 +31,7 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: '/teacher/:classId/purchase',
-        component: () => import('./views/teacher/Purchase.vue'),
+        component: () => import('./views/teacher/Purchased.vue'),
     },
     {
         path: '/teacher/:classId/code',

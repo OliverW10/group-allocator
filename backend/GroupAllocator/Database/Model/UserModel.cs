@@ -28,7 +28,8 @@ public static class UserModelExtensions
 			WillSignContract = model.WillSignContract ?? false,
 			OrderedPreferences = model.Preferences.OrderBy(p => p.Ordinal).Select(p => p.Project.Id).ToList() ?? [],
 			Files = model.Files.Select(f => f.ToDto()),
-			ClassId = model.Class.Id
+			ClassId = model.Class.Id,
+			Notes = model.Notes
 		};
 	}
 
