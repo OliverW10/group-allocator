@@ -48,6 +48,18 @@
 						</Column>
 					</DataTable>
 
+					<div class="my-4">
+						<label for="personalStatement" class="block text-sm font-medium mb-2">Personal Statement (Optional)</label>
+						<Textarea 
+							id="personalStatement"
+							v-model="personalStatement" 
+							placeholder="Tell us about yourself, your interests, and why you're interested in these projects..."
+							:auto-resize="true"
+							rows="4"
+							class="w-full"
+						/>
+					</div>
+
 					<Button label="Save Preferences" class="mt-4" icon="i-mdi-upload" @click="submitForm" />
 				</div>
 			</template>
@@ -63,21 +75,26 @@ import Card from "primevue/card";
 import Message from "primevue/message"
 import ToggleSwitch from "primevue/toggleswitch";
 import FileUpload, { type FileUploadUploaderEvent } from "primevue/fileupload";
-import { ProjectDto } from "../dtos/project-dto";
-import LogoutButton from "../components/LogoutButton.vue";
+import Textarea from "primevue/textarea";
+import { ProjectDto } from "../../dtos/project-dto";
+import LogoutButton from "../../components/LogoutButton.vue";
 import { computed, onMounted, ref } from 'vue'
 import PickList from 'primevue/picklist'
 import ProgressBar from 'primevue/progressbar'
-import ApiService from "../services/ApiService";
+import ApiService from "../../services/ApiService";
 import { useToast } from "primevue/usetoast";
-import type { FileDetailsDto } from "../dtos/file-details-dto";
-import type { StudentSubmissionDto } from "../dtos/student-submission-dto";
+import type { FileDetailsDto } from "../../dtos/file-details-dto";
+import type { StudentSubmissionDto } from "../../dtos/student-submission-dto";
 import { Column, DataTable } from "primevue";
+import { useRoute } from 'vue-router';
 
 const toast = useToast();
+const route = useRoute();
+const classId = parseInt(route.params.classId as string);
 
 const files = ref([] as FileDetailsDto[])
 const willSignContract = ref(true)
+const personalStatement = ref("")
 const maxNumberOfPreferences = 10;
 const warningMessage = "A maximum of " + maxNumberOfPreferences + " preferences has been selected. Anything more than the top " + maxNumberOfPreferences + " preferences will not be saved";
 let exceededPreferenceLimit = false
@@ -95,7 +112,8 @@ onMounted(async () => {
 		if (maybeStudent) {
 			console.log(maybeStudent)
 			files.value = maybeStudent.files ?? []
-			willSignContract.value = maybeStudent.willSignContract ?? true
+			willSignContract.value = true
+			personalStatement.value = maybeStudent.notes ?? ""
 			const isSelected = (x: ProjectDto) => maybeStudent.orderedPreferences.some(id => x.id == id)
 			projects.value[0] = projectsRaw.value.filter(not(isSelected))
 			projects.value[1] = projectsRaw.value.filter(isSelected)
@@ -111,7 +129,7 @@ const loadProjects = async () => {
 	try {
 		loading.value = true
 
-		const allProjects = await ApiService.get<ProjectDto[]>("/projects")
+		const allProjects = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`)
 		if (allProjects.length == 0) {
 			console.warn("no projects")
 			toast.add({ severity: 'warn', summary: 'No projects found', detail: 'Contact your admin to add project options' })
@@ -158,6 +176,8 @@ const submitForm = async () => {
 		files: files.value,
 		orderedPreferences: projects.value[1].map(p => p.id).splice(0, maxNumberOfPreferences),
 		willSignContract: willSignContract.value,
+		classId: classId,
+		notes: personalStatement.value,
 	}
 	const result = await ApiService.post("/students/me", submitModel)
 	if (result == null) {
@@ -180,12 +200,12 @@ const onUpload = async (event: FileUploadUploaderEvent) => {
 		await ApiService.postRaw('students/file', formData)
 	}
 
-	files.value = await ApiService.get<FileDetailsDto[]>('/students/files')
+	files.value = await ApiService.get<FileDetailsDto[]>(`/students/files?classId=${classId}`)
 }
 
 const deleteFile = async (id: string) => {
-	await ApiService.delete(`/students/file/${id}`)
-	files.value = await ApiService.get<FileDetailsDto[]>('/students/files')
+	await ApiService.delete(`/students/file/${id}?classId=${classId}`)
+	files.value = await ApiService.get<FileDetailsDto[]>(`/students/files?classId=${classId}`)
 	toast.add({ severity: 'success', summary: 'Success', detail: 'File deleted successfully', life: 5000 });
 }
 const not = <Args extends unknown[]>(f: (...args: Args) => boolean) => (...args: Args): boolean => !f(...args);

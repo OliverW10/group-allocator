@@ -9,10 +9,8 @@ public static class ServicesRegistration
 	{
 		collection
 			.AddScoped<IUserService, UserService>()
-			.AddScoped<IGroupAllocatorAuthenticationService, AuthenticationService>()
-			.AddScoped<IProjectService, ProjectService>()
-			.AddScoped<IStudentService, StudentService>()
 			.AddScoped<IAllocationSolver, AllocationSolver>()
+			.AddScoped<PaymentService>()
 			;
 	}
 }

@@ -1,7 +1,7 @@
 <template>
     <div class="flex items-center gap-2">
         <span>
-            Logged in as: {{ authStore.userInfo?.email }}
+            Logged in as: {{ authStore.userInfo?.email.split('@')[0] }}
         </span>
         <Button severity="danger" label="Logout" icon="i-mdi-logout" class="p-button-text" :loading="loading" @click="logout" />
     </div>

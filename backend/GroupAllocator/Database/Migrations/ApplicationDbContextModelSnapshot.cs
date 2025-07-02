@@ -17,10 +17,60 @@ namespace GroupAllocator.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.ClassModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Classes");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.ClassTeacherModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("ClassTeachers");
+                });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.ClientModel", b =>
                 {
@@ -30,11 +80,16 @@ namespace GroupAllocator.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
 
                     b.ToTable("Clients");
                 });
@@ -55,14 +110,54 @@ namespace GroupAllocator.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("StudentId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Files");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.PaymentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ForClassId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("PayedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PayerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Plan")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StripeSessionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ForClassId");
+
+                    b.HasIndex("PayerId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.PreferenceModel", b =>
@@ -73,11 +168,11 @@ namespace GroupAllocator.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int>("Ordinal")
                         .HasColumnType("integer");
 
-                    b.Property<double>("Strength")
-                        .HasColumnType("double precision");
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("integer");
@@ -99,10 +194,19 @@ namespace GroupAllocator.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ClientId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("MaxInstances")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MaxStudents")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinInstances")
                         .HasColumnType("integer");
 
                     b.Property<int>("MinStudents")
@@ -117,6 +221,8 @@ namespace GroupAllocator.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClassId");
+
                     b.HasIndex("ClientId");
 
                     b.ToTable("Projects");
@@ -130,6 +236,9 @@ namespace GroupAllocator.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
+
                     b.Property<double>("PreferenceExponent")
                         .HasColumnType("double precision");
 
@@ -137,6 +246,8 @@ namespace GroupAllocator.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
 
                     b.ToTable("SolveRuns");
                 });
@@ -148,6 +259,9 @@ namespace GroupAllocator.Database.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GroupInstanceId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
@@ -172,14 +286,34 @@ namespace GroupAllocator.Database.Migrations
             modelBuilder.Entity("GroupAllocator.Database.Model.StudentModel", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    b.Property<bool>("WillSignContract")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool?>("WillSignContract")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Student");
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.UserModel", b =>
@@ -197,9 +331,6 @@ namespace GroupAllocator.Database.Migrations
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -209,15 +340,64 @@ namespace GroupAllocator.Database.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("GroupAllocator.Database.Model.FileModel", b =>
+            modelBuilder.Entity("GroupAllocator.Database.Model.ClassTeacherModel", b =>
                 {
-                    b.HasOne("GroupAllocator.Database.Model.UserModel", "User")
-                        .WithMany("Files")
-                        .HasForeignKey("UserId")
+                    b.HasOne("GroupAllocator.Database.Model.ClassModel", "Class")
+                        .WithMany("Teachers")
+                        .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.ClientModel", b =>
+                {
+                    b.HasOne("GroupAllocator.Database.Model.ClassModel", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.FileModel", b =>
+                {
+                    b.HasOne("GroupAllocator.Database.Model.StudentModel", "Student")
+                        .WithMany("Files")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.PaymentModel", b =>
+                {
+                    b.HasOne("GroupAllocator.Database.Model.ClassModel", "ForClass")
+                        .WithMany("Payments")
+                        .HasForeignKey("ForClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Payer")
+                        .WithMany()
+                        .HasForeignKey("PayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ForClass");
+
+                    b.Navigation("Payer");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.PreferenceModel", b =>
@@ -241,13 +421,32 @@ namespace GroupAllocator.Database.Migrations
 
             modelBuilder.Entity("GroupAllocator.Database.Model.ProjectModel", b =>
                 {
+                    b.HasOne("GroupAllocator.Database.Model.ClassModel", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GroupAllocator.Database.Model.ClientModel", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Class");
+
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.SolveRunModel", b =>
+                {
+                    b.HasOne("GroupAllocator.Database.Model.ClassModel", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.StudentAssignmentModel", b =>
@@ -264,7 +463,7 @@ namespace GroupAllocator.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GroupAllocator.Database.Model.UserModel", "Student")
+                    b.HasOne("GroupAllocator.Database.Model.StudentModel", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -279,13 +478,30 @@ namespace GroupAllocator.Database.Migrations
 
             modelBuilder.Entity("GroupAllocator.Database.Model.StudentModel", b =>
                 {
-                    b.HasOne("GroupAllocator.Database.Model.UserModel", "User")
-                        .WithOne("StudentModel")
-                        .HasForeignKey("GroupAllocator.Database.Model.StudentModel", "Id")
+                    b.HasOne("GroupAllocator.Database.Model.ClassModel", "Class")
+                        .WithMany("Students")
+                        .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("GroupAllocator.Database.Model.UserModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GroupAllocator.Database.Model.ClassModel", b =>
+                {
+                    b.Navigation("Payments");
+
+                    b.Navigation("Students");
+
+                    b.Navigation("Teachers");
                 });
 
             modelBuilder.Entity("GroupAllocator.Database.Model.SolveRunModel", b =>
@@ -295,14 +511,9 @@ namespace GroupAllocator.Database.Migrations
 
             modelBuilder.Entity("GroupAllocator.Database.Model.StudentModel", b =>
                 {
-                    b.Navigation("Preferences");
-                });
-
-            modelBuilder.Entity("GroupAllocator.Database.Model.UserModel", b =>
-                {
                     b.Navigation("Files");
 
-                    b.Navigation("StudentModel");
+                    b.Navigation("Preferences");
                 });
 #pragma warning restore 612, 618
         }

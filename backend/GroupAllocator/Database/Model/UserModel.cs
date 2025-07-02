@@ -8,15 +8,11 @@ public class UserModel
 	public required bool IsAdmin { get; set; }
 	public required string Name { get; set; }
 	public required string Email { get; set; }
-	public required bool IsVerified { get; set; }
-
-	public StudentModel? StudentModel { get; set; }
-	public ICollection<FileModel> Files { get; } = new List<FileModel>();
 }
 
 public static class UserModelExtensions
 {
-	public static StudentInfoAndSubmission ToDto(this UserModel model)
+	public static StudentInfoAndSubmission ToDto(this StudentModel model)
 	{
 		return new StudentInfoAndSubmission
 		{
@@ -25,24 +21,26 @@ public static class UserModelExtensions
 		};
 	}
 
-	public static StudentSubmissionDto ToSubmissionDto(this UserModel model)
+	public static StudentSubmissionDto ToSubmissionDto(this StudentModel model)
 	{
 		return new StudentSubmissionDto
 		{
-			WillSignContract = model.StudentModel?.WillSignContract ?? false,
-			OrderedPreferences = model.StudentModel?.Preferences.OrderBy(p => p.Strength).Select(p => p.Project.Id).ToList() ?? [],
+			WillSignContract = model.WillSignContract ?? false,
+			OrderedPreferences = model.Preferences.OrderBy(p => p.Ordinal).Select(p => p.Project.Id).ToList() ?? [],
 			Files = model.Files.Select(f => f.ToDto()),
+			ClassId = model.Class.Id,
+			Notes = model.Notes
 		};
 	}
 
-	public static StudentInfoDto ToInfoDto(this UserModel model)
+	public static StudentInfoDto ToInfoDto(this StudentModel model)
 	{
 		return new StudentInfoDto
 		{
 			StudentId = model.Id,
-			Name = model.Name,
-			Email = model.Email,
-			IsVerified = model.IsVerified,
+			Name = model.User.Name,
+			Email = model.User.Email,
+			IsVerified = model.IsVerified
 		};
 	}
 }

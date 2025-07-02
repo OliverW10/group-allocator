@@ -17,4 +17,5 @@ public class SolveRequestDto
 	public required IEnumerable<AllocationDto> PreAllocations { get; set; }
 	public required IEnumerable<ClientLimitsDto> ClientLimits { get; set; }
 	public required double PreferenceExponent { get; set; }
+	public required int ClassId { get; set; }
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Google.Apis.Auth;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
@@ -13,11 +14,11 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IUserService userService, IGroupAllocatorAuthenticationService tokenService, IConfiguration configuration, ApplicationDbContext db) : ControllerBase
+public class AuthController(IUserService userService, ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet("me")]
 	[Authorize]
-	public IActionResult GetCurrentUser()
+	public ActionResult<UserInfoDto> GetCurrentUser()
 	{
 		var claims = HttpContext.User.Claims.ToList();
 		if ((HttpContext.User.Identity is null || !claims.Any()))
@@ -25,105 +26,108 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 			return Unauthorized();
 		}
 
-		return new JsonResult(new UserInfoDto()
+		return new UserInfoDto()
 		{
 			Name = claims.First(c => c.Type == JwtRegisteredClaimNames.Name).Value,
 			Email = claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value,
-			IsAdmin = bool.Parse(claims.First(c => c.Type == "admin").Value)
-		});
+			Role = Enum.Parse<AuthRole>(claims.First(c => c.Type == AuthRolesConstants.RoleClaimName).Value),
+			IsAdmin = bool.Parse(claims.First(c => c.Type == AuthRolesConstants.AdminClaimName).Value),
+		};
 	}
 
-	[HttpGet("login-google")]
-	public async Task<IActionResult> LoginGoogle(string idToken)
+	[HttpGet("login-google-student")]
+	public async Task<ActionResult<UserInfoDto>> LoginGoogleStudent(string idToken)
+	{
+		return await LoginGoogleCommon(idToken, AuthRole.Student);
+	}
+
+	[HttpGet("login-google-teacher")]
+	public async Task<ActionResult<UserInfoDto>> LoginGoogleTeacher(string idToken)
+	{
+		return await LoginGoogleCommon(idToken, AuthRole.Teacher);
+	}
+
+	async Task<UserInfoDto> LoginGoogleCommon(string idToken, AuthRole role)
 	{
 		var googleToken = await ValidateGoogleToken(idToken);
-
 		var user = await userService.GetOrCreateUserAsync(googleToken.Name, googleToken.Email);
-
-		if (user is null)
-		{
-			return Unauthorized();
-		}
-
-		await SignIn(user);
-
-		return UserDto(user);
+		await SignIn(user, role);
+		return UserDto(role, user);
 	}
 
 	[HttpGet("login-dev")]
-	public async Task<IActionResult> LoginDev(string name, string email, bool? isAdmin)
+	public async Task<UserInfoDto> LoginDev(string name, string email, AuthRole role)
 	{
-		var user = await userService.GetOrCreateUserAsync(name, email, isAdmin);
+		var user = await userService.GetOrCreateUserAsync(name, email);
+		await SignIn(user, role);
+		return UserDto(role, user);
+	}
 
-		if (user is null)
+	static UserInfoDto UserDto(AuthRole role, UserModel user)
+	{
+		return new UserInfoDto
 		{
-			return Unauthorized();
-		}
-
-		await SignIn(user);
-
-		return UserDto(user);
+			Name = user.Name,
+			Email = user.Email,
+			Role = role,
+			IsAdmin = user.IsAdmin,
+		};
 	}
 
 	[HttpGet("logout")]
-	public async Task<IActionResult> Logout()
+	public async Task<ActionResult> Logout()
 	{
 		await HttpContext.SignOutAsync();
 		return Ok();
 	}
 
-	[HttpGet("role/claim-admin/{email}")]
-	public async Task<IActionResult> ClaimAdmin(string email)
+	[HttpGet("role/set/{email}/{value}")]
+	[Authorize(Policy = "AdminOnly")]
+	public async Task<ActionResult<string>> SetAdmin(string email, bool value)
 	{
-		if (!configuration.GetValue<bool>("AdminClaimable") && !User.HasClaim("admin", "true"))
-		{
-			return NotFound();
-		}
-
-		await userService.GetOrCreateUserAsync("Unknown", email, true);
-		return Ok($"Set {email} to admin.");
-	}
-
-	[HttpGet("role/drop-admin/{email}")]
-	public async Task<IActionResult> DropAdmin(string email)
-	{
-		if (!configuration.GetValue<bool>("AdminClaimable") && !User.HasClaim("admin", "true"))
-		{
-			return NotFound();
-		}
-
 		var user = await userService.GetOrCreateUserAsync("Unknown", email);
 		if (user is not null)
 		{
-			user.IsAdmin = false;
+			// Update user's role in the database
+			user.IsAdmin = value;
 			await db.SaveChangesAsync();
-			return Ok($"Set {email} to student.");
+
+			// If the user is currently logged in, sign them out to force a re-login with new role
+			if (User.FindFirst(JwtRegisteredClaimNames.Email)?.Value == email)
+			{
+				await HttpContext.SignOutAsync();
+			}
+
+			return $"Set {email} admin state to {value}.";
 		}
 
-		return Ok($"User not found, no action taken.");
-
+		return $"User not found, no action taken.";
 	}
 
-	static IActionResult UserDto(UserModel user)
+	async Task SignIn(UserModel user, AuthRole role)
 	{
-		return new JsonResult(new UserInfoDto()
-		{
-			Name = user.Name,
-			Email = user.Email,
-			IsAdmin = user.IsAdmin,
-		});
-	}
-
-	async Task SignIn(UserModel user)
-	{
-		// Generate our own token rather than use the one obtained from google so we can add our own claims (e.g. IsAdmin) to it
-		// and to keep it standard with dev login or other auth methods
-		var principal = tokenService.GetPrincipal(user);
+		var principal = GetPrincipal(user, role, user.IsAdmin);
 		var authProperties = new AuthenticationProperties
 		{
 			IsPersistent = true,
 		};
 		await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
+	}
+
+	ClaimsPrincipal GetPrincipal(UserModel user, AuthRole role, bool isAdmin)
+	{
+		var claims = new List<Claim>()
+		{
+			new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+			new Claim(JwtRegisteredClaimNames.Name, user.Name),
+			new Claim(JwtRegisteredClaimNames.Email, user.Email),
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+			new Claim(AuthRolesConstants.RoleClaimName, role.ToString()),
+			new Claim(AuthRolesConstants.AdminClaimName, isAdmin.ToString()),
+		};
+
+		var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+		return new ClaimsPrincipal(id);
 	}
 
 	static async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string idToken)
@@ -135,4 +139,12 @@ public class AuthController(IUserService userService, IGroupAllocatorAuthenticat
 		var googleToken = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
 		return googleToken;
 	}
+}
+
+public static class AuthRolesConstants
+{
+	public const string RoleClaimName = "role";
+	public const string AdminClaimName = "admin";
+	public static string Student => AuthRole.Student.ToString();
+	public static string Teacher => AuthRole.Teacher.ToString();
 }

@@ -32,18 +32,18 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 //];
 
 //List<PreferenceModel> preferences = [
-//    new PreferenceModel { Id = 1, Student = students[0], Project = projects[0], Strength = 1.0 },
-//    new PreferenceModel { Id = 2, Student = students[1], Project = projects[0], Strength = 0.8 },
-//    new PreferenceModel { Id = 3, Student = students[2], Project = projects[0], Strength = 0.9 },
-//    new PreferenceModel { Id = 4, Student = students[3], Project = projects[1], Strength = 1.0 },
-//    new PreferenceModel { Id = 5, Student = students[4], Project = projects[1], Strength = 0.7 }, 
-//    new PreferenceModel { Id = 6, Student = students[5], Project = projects[2], Strength = 0.85 },
-//    new PreferenceModel { Id = 7, Student = students[6], Project = projects[2], Strength = 0.95 },
-//    new PreferenceModel { Id = 8, Student = students[7], Project = projects[2], Strength = 0.75 },
-//    new PreferenceModel { Id = 9, Student = students[0], Project = projects[1], Strength = 0.6 },
-//    new PreferenceModel { Id = 10, Student = students[3], Project = projects[2], Strength = 0.8 },
-//    new PreferenceModel { Id = 11, Student = students[1], Project = projects[2], Strength = 0.4 },
-//    new PreferenceModel { Id = 12, Student = students[2], Project = projects[1], Strength = 0.9 }
+//    new PreferenceModel { Id = 1, Students = students[0], Project = projects[0], Strength = 1.0 },
+//    new PreferenceModel { Id = 2, Students = students[1], Project = projects[0], Strength = 0.8 },
+//    new PreferenceModel { Id = 3, Students = students[2], Project = projects[0], Strength = 0.9 },
+//    new PreferenceModel { Id = 4, Students = students[3], Project = projects[1], Strength = 1.0 },
+//    new PreferenceModel { Id = 5, Students = students[4], Project = projects[1], Strength = 0.7 }, 
+//    new PreferenceModel { Id = 6, Students = students[5], Project = projects[2], Strength = 0.85 },
+//    new PreferenceModel { Id = 7, Students = students[6], Project = projects[2], Strength = 0.95 },
+//    new PreferenceModel { Id = 8, Students = students[7], Project = projects[2], Strength = 0.75 },
+//    new PreferenceModel { Id = 9, Students = students[0], Project = projects[1], Strength = 0.6 },
+//    new PreferenceModel { Id = 10, Students = students[3], Project = projects[2], Strength = 0.8 },
+//    new PreferenceModel { Id = 11, Students = students[1], Project = projects[2], Strength = 0.4 },
+//    new PreferenceModel { Id = 12, Students = students[2], Project = projects[1], Strength = 0.9 }
 //];
 
 
@@ -78,74 +78,80 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 //List<PreferenceModel> preferences = [
 
-//    new PreferenceModel { Id = 1, Student = students[0], Project = projects[0], Strength = 1.0 },
-//    new PreferenceModel { Id = 2, Student = students[1], Project = projects[0], Strength = 0.8 },
-//    new PreferenceModel { Id = 3, Student = students[2], Project = projects[1], Strength = 0.9 },
-//    new PreferenceModel { Id = 4, Student = students[3], Project = projects[1], Strength = 1.0 },
-//    new PreferenceModel { Id = 5, Student = students[4], Project = projects[0], Strength = 0.6 },
-//    new PreferenceModel { Id = 6, Student = students[5], Project = projects[1], Strength = 0.7 },
-//    new PreferenceModel { Id = 7, Student = students[6], Project = projects[2], Strength = 0.9 },
-//    new PreferenceModel { Id = 8, Student = students[7], Project = projects[2], Strength = 1.0 },
-//    new PreferenceModel { Id = 9, Student = students[8], Project = projects[3], Strength = 0.6 },
-//    new PreferenceModel { Id = 10, Student = students[9], Project = projects[4], Strength = 0.8 },
-//    new PreferenceModel { Id = 11, Student = students[3], Project = projects[3], Strength = 0.5 },
-//    new PreferenceModel { Id = 12, Student = students[1], Project = projects[4], Strength = 0.7 },
-//    new PreferenceModel { Id = 13, Student = students[6], Project = projects[0], Strength = 0.6 },
-//    new PreferenceModel { Id = 14, Student = students[9], Project = projects[2], Strength = 0.9 },
+//    new PreferenceModel { Id = 1, Students = students[0], Project = projects[0], Strength = 1.0 },
+//    new PreferenceModel { Id = 2, Students = students[1], Project = projects[0], Strength = 0.8 },
+//    new PreferenceModel { Id = 3, Students = students[2], Project = projects[1], Strength = 0.9 },
+//    new PreferenceModel { Id = 4, Students = students[3], Project = projects[1], Strength = 1.0 },
+//    new PreferenceModel { Id = 5, Students = students[4], Project = projects[0], Strength = 0.6 },
+//    new PreferenceModel { Id = 6, Students = students[5], Project = projects[1], Strength = 0.7 },
+//    new PreferenceModel { Id = 7, Students = students[6], Project = projects[2], Strength = 0.9 },
+//    new PreferenceModel { Id = 8, Students = students[7], Project = projects[2], Strength = 1.0 },
+//    new PreferenceModel { Id = 9, Students = students[8], Project = projects[3], Strength = 0.6 },
+//    new PreferenceModel { Id = 10, Students = students[9], Project = projects[4], Strength = 0.8 },
+//    new PreferenceModel { Id = 11, Students = students[3], Project = projects[3], Strength = 0.5 },
+//    new PreferenceModel { Id = 12, Students = students[1], Project = projects[4], Strength = 0.7 },
+//    new PreferenceModel { Id = 13, Students = students[6], Project = projects[0], Strength = 0.6 },
+//    new PreferenceModel { Id = 14, Students = students[9], Project = projects[2], Strength = 0.9 },
 //];
 
 
-
 //Real data test case
+var @class = new ClassModel
+{
+	Code = "QWERTY",
+	CreatedAt = DateTime.UtcNow,
+	Name = "name",
+};
+
 
 List<ClientModel> clients = [
 
-    new ClientModel { Id = 1, Name = "Chris Howell" },
-    new ClientModel { Id = 2, Name = "Henry Gilder" },
-    new ClientModel { Id = 3, Name = "Lindsay Lyon" },
-    new ClientModel { Id = 4, Name = "Mitra Gusheh" },
-    new ClientModel { Id = 5, Name = "Peter McArdle" },
-    new ClientModel { Id = 6, Name = "Gavin Kocsis" },
-    new ClientModel { Id = 7, Name = "Louis Fernandez" },
-    new ClientModel { Id = 8, Name = "Mick Kane" },
-    new ClientModel { Id = 9, Name = "Ahmed Rafiq" },
-    new ClientModel { Id = 10, Name = "Sheila Sutjipto" },
-    new ClientModel { Id = 11, Name = "Marc Carmichael" },
-    new ClientModel { Id = 12, Name = "Isira Wijegunawardana" },
-    new ClientModel { Id = 13, Name = "Wade Marynowsky" },
-    new ClientModel { Id = 14, Name = "Katrina Leung" },
-    new ClientModel { Id = 15, Name = "Rafael Luna Zelaya" },
-    new ClientModel { Id = 16, Name = "Steven Vasilescu" },
-    new ClientModel { Id = 17, Name = "Rodney Berry" },
-    new ClientModel { Id = 18, Name = "David Chambers" },
+    new ClientModel { Id = 1, Name = "Chris Howell", Class = @class },
+    new ClientModel { Id = 2, Name = "Henry Gilder", Class = @class },
+    new ClientModel { Id = 3, Name = "Lindsay Lyon", Class = @class },
+    new ClientModel { Id = 4, Name = "Mitra Gusheh", Class = @class },
+    new ClientModel { Id = 5, Name = "Peter McArdle", Class = @class },
+    new ClientModel { Id = 6, Name = "Gavin Kocsis", Class = @class },
+    new ClientModel { Id = 7, Name = "Louis Fernandez", Class = @class },
+    new ClientModel { Id = 8, Name = "Mick Kane", Class = @class },
+    new ClientModel { Id = 9, Name = "Ahmed Rafiq", Class = @class },
+    new ClientModel { Id = 10, Name = "Sheila Sutjipto", Class = @class },
+    new ClientModel { Id = 11, Name = "Marc Carmichael", Class = @class },
+    new ClientModel { Id = 12, Name = "Isira Wijegunawardana", Class = @class },
+    new ClientModel { Id = 13, Name = "Wade Marynowsky", Class = @class },
+    new ClientModel { Id = 14, Name = "Katrina Leung", Class = @class },
+    new ClientModel { Id = 15, Name = "Rafael Luna Zelaya", Class = @class },
+    new ClientModel { Id = 16, Name = "Steven Vasilescu", Class = @class },
+    new ClientModel { Id = 17, Name = "Rodney Berry", Class = @class },
+    new ClientModel { Id = 18, Name = "David Chambers", Class = @class },
 
 ];
 
 List<ProjectModel> projects = [
 
-    new ProjectModel { Id = 101, Name = "StevTech Docking Station", RequiresNda = true, Client = clients[0], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 102, Name = "StevTech Computer Vision", RequiresNda = true, Client = clients[0], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 103, Name = "SPYDER", RequiresNda = true, Client = clients[1], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 104, Name = "GIAGO Placement", RequiresNda = true, Client = clients[2], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 105, Name = "GIAGO Feeder", RequiresNda = true, Client = clients[2], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 106, Name = "Glebe Youth Services - Bash the Trash", RequiresNda = false, Client = clients[3], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 108, Name = "EWB", RequiresNda = false, Client = clients[4], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 109, Name = "Pura Link", RequiresNda = true, Client = clients[5], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 110, Name = "SupaStretch @ Home Model", RequiresNda = false, Client = clients[7], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 203, Name = "Ball dropping robot", RequiresNda = false, Client = clients[11], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 204, Name = "Robot in the gallery", RequiresNda = false, Client = clients[12], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 205, Name = "3D printing filament maker", RequiresNda = false, Client = clients[13], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 207, Name = "Spatial Micro-climates", RequiresNda = false, Client = clients[14], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 208, Name = "Energy Wall", RequiresNda = false, Client = clients[14], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 209, Name = "Heated jig for white tip forming", RequiresNda = true, Client = clients[6], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 210, Name = "Futsal goal solution", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 301, Name = "FEIT Rocketry: static fire test stand", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 302, Name = "FEIT Rocketry: filament winder", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 303, Name = "FEIT Rover: Field Operations Optimization", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 304, Name = "FEIT MSA: Autonomous Steeying Mechanism", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 305, Name = "FEIT MSE : Design and Manufacture of a Composite Seat", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 306, Name = "FEIT MSE : Ready to move light", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1 },
-    new ProjectModel { Id = 307, Name = "FEIT MSE : Diffuser", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 14 }
+    new ProjectModel { Id = 101, Name = "StevTech Docking Station", RequiresNda = true, Client = clients[0], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 102, Name = "StevTech Computer Vision", RequiresNda = true, Client = clients[0], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 103, Name = "SPYDER", RequiresNda = true, Client = clients[1], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 104, Name = "GIAGO Placement", RequiresNda = true, Client = clients[2], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 105, Name = "GIAGO Feeder", RequiresNda = true, Client = clients[2], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 106, Name = "Glebe Youth Services - Bash the Trash", RequiresNda = false, Client = clients[3], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 108, Name = "EWB", RequiresNda = false, Client = clients[4], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 109, Name = "Pura Link", RequiresNda = true, Client = clients[5], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 110, Name = "SupaStretch @ Home Model", RequiresNda = false, Client = clients[7], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 203, Name = "Ball dropping robot", RequiresNda = false, Client = clients[11], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 204, Name = "Robot in the gallery", RequiresNda = false, Client = clients[12], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 205, Name = "3D printing filament maker", RequiresNda = false, Client = clients[13], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 207, Name = "Spatial Micro-climates", RequiresNda = false, Client = clients[14], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 208, Name = "Energy Wall", RequiresNda = false, Client = clients[14], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 209, Name = "Heated jig for white tip forming", RequiresNda = true, Client = clients[6], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 210, Name = "Futsal goal solution", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 301, Name = "FEIT Rocketry: static fire test stand", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 302, Name = "FEIT Rocketry: filament winder", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 303, Name = "FEIT Rover: Field Operations Optimization", RequiresNda = false, Client = clients[10], MinStudents = 4, MaxStudents = 5, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 304, Name = "FEIT MSA: Autonomous Steeying Mechanism", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 305, Name = "FEIT MSE : Design and Manufacture of a Composite Seat", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 306, Name = "FEIT MSE : Ready to move light", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class },
+    new ProjectModel { Id = 307, Name = "FEIT MSE : Diffuser", RequiresNda = false, Client = clients[17], MinStudents = 4, MaxStudents = 4, MinInstances = 0, MaxInstances = 1, Class = @class }
 ];
 
 
@@ -374,20 +380,20 @@ int userIds = 1; //don't know what these ids are for but they are needed
 for (int i = 0; i < names.Count(); i++)
 {
 
-    UserModel currentUser = new UserModel
+    var currentUser = new UserModel
     {
         Id = userIds++,
         IsAdmin = false, //is admin will be false for all students
         Name = names[i],
         Email = $"{names[i]}@uts.edu.au", //emails don't really matter for testing
-		IsVerified = true //don't know what this is just made it true for everyone
     };
 
-    StudentModel currentStudent = new StudentModel 
+    var currentStudent = new StudentModel 
     {
         Id = studentIDs[i],
         WillSignContract = true, // all students in real life example were willing to sign contract
-        User = currentUser
+        User = currentUser,
+		Class = @class
     };
 	users.Add(currentUser);
     students.Add(currentStudent);
@@ -403,7 +409,7 @@ int preferenceIDs = 1;
 for (int i = 0; i < students.Count(); i++)
 {
 
-    float initialStrength = 1.0f;
+    var ordinal = 0;
 
     foreach (int projectId in individualPreferences[i])
     {
@@ -412,14 +418,14 @@ for (int i = 0; i < students.Count(); i++)
         PreferenceModel currentPreference = new PreferenceModel
         {
             Id = preferenceIDs++,
-            Strength = initialStrength,
+            Ordinal = ordinal,
             Student = students[i],
             Project = currentProject
         };
 
         preferences.Add(currentPreference);
 
-        initialStrength -= 0.1f; // the preferences are ordered from best to worst so just decrement strength each time we go to the next one
+		ordinal++;
  
     }
 
@@ -430,7 +436,7 @@ for (int i = 0; i < students.Count(); i++)
 //this prints student info and preferences
 //foreach (PreferenceModel preference in preferences)
 //{
-//    Console.WriteLine($"prefId: {preference.Id}|{preference.Student.Id}|{preference.Student.User.Name}|{preference.Project.Name}|{preference.Project.Id}|{preference.Strength}");
+//    Console.WriteLine($"prefId: {preference.Id}|{preference.Students.Id}|{preference.Students.User.Name}|{preference.Project.Name}|{preference.Project.Id}|{preference.Strength}");
 //}
 
 
@@ -441,10 +447,11 @@ var run = new SolveRunModel
 {
 	PreferenceExponent = 1,
 	Timestamp = DateTime.UtcNow,
+	Class = @class,
 };
 var manualAllocations = new List<AllocationDto>();
 var clientLimits = new List<ClientLimitsDto>();
-var assignments = solver.AssignStudentsToGroups(run, users, projects, clients, preferences, manualAllocations, clientLimits, 0.5).ToList();
+var assignments = solver.AssignStudentsToGroups(run, students, projects, clients, preferences, manualAllocations, clientLimits, 0.5).ToList();
 
 
 Dictionary<string, List<int>> groupsAndStudents = new Dictionary<string, List<int>>();
@@ -505,7 +512,7 @@ else
 
 	//	}
 
-	//	Console.WriteLine($"{studentCount++}: student:{assignment.Student.User.Name}_{assignment.Student.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id} project rank: {projectRank}");
+	//	Console.WriteLine($"{studentCount++}: student:{assignment.Students.User.Name}_{assignment.Students.Id} assigned to project:{assignment.Project.Name}_{assignment.Project.Id} project rank: {projectRank}");
 
 	//	rankTracker[projectRank] += 1;
 

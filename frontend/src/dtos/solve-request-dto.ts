@@ -10,4 +10,5 @@ export class SolveRequestDto {
     preAllocations: AllocationDto[];
     clientLimits: ClientLimitsDto[];
     preferenceExponent: number;
+    classId: number;
 }

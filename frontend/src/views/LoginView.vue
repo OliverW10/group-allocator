@@ -1,93 +1,149 @@
-<script setup lang="ts">
-import router from '../router';
-import { useAuthStore } from '../store/auth';
-import { getOidcUrl } from "../helpers/oauth";
-import { onMounted } from 'vue';
-import type { UserInfoDto } from '../dtos/user-info-dto';
-import ApiService from '../services/ApiService';
-
-const authStore = useAuthStore();
-const devName = defineModel<string>("name");
-const devEmail = defineModel<string>("email");
-const devIsAdmin = defineModel<boolean>("isAdmin")
-
-devName.value = `Dummy User ${crypto.randomUUID().slice(0, 2)}`
-devEmail.value = `email${crypto.randomUUID().slice(0, 6)}@domain.com`
-
-const is_dev = import.meta.env.DEV;
-
-const navigateToOidc = () => {
-	location.href = getOidcUrl();
-};
-
-onMounted(async () => {
-	if (window.location.hash) {
-		await loginWithGoogle();
-	}
-});
-
-
-async function loginWithGoogle() {
-	const id_token = new URLSearchParams(window.location.hash).get("id_token");
-	await login(`/auth/login-google?idToken=${id_token}`);
-}
-
-async function loginForDev() {
-	await login(`/auth/login-dev?name=${devName.value}&email=${devEmail.value}&isAdmin=${devIsAdmin.value}`);
-}
-
-async function login(url: string) {
-	authStore.userInfo = await ApiService.get<UserInfoDto>(url);
-	const isAdmin = authStore.userInfo?.isAdmin ?? false;
-	if (isAdmin) {
-		router.push('/admin/projects');
-	} else {
-		router.push('/form');
-	}
-}
-
-// can't access globals from template
-const _window = window;
-
-</script>
-
 <template>
-	<div class="flex flex-col justify-center h-screen">
-		<div class="flex flex-col items-center border-neutral-600 border-2 mx-auto p-8 rounded-lg shadow-lg min-w-lg">
-			<Message v-if="_window.location.hash" severity="contrast" icon="i-mdi-account-check" class="w-full">
+	<div class="min-h-screen flex flex-col">
+		<!-- Login Buttons Section -->
+		<div class="flex justify-end gap-4 p-4">
+			<Button class="flex items-center" icon="pi pi-user" label="Sign in as Teacher" @click="loginGoogle('teacher')" />
+			<Button class="flex items-center" icon="pi pi-users" label="Sign in as Student" @click="loginGoogle('student')" severity="success" />
+		</div>
+
+		<!-- Main Content -->
+		<div class="flex-grow flex flex-col items-center justify-center p-8">
+			<Message v-if="_window.location.hash" severity="contrast" icon="i-mdi-account-check" class="w-full max-w-md">
 				Login Successful, Redirecting...
 			</Message>
-			<div v-else>
-				<h1 class="heading py-4">Group Allocator</h1>
-				<div>
-					<button class="flex items-center w-max p-3 rounded-md m-3" @click="navigateToOidc">
-						Sign in with Google
-						<i class="i-logos-google-icon ml-2"></i>
-					</button>
+			<div v-else class="text-center">
+				<h1 class="text-4xl font-bold mb-6">Group Allocator</h1>
+				<div class="max-w-2xl mx-auto space-y-4">
+					<p class="text-xl">Streamline your group project management</p>
+					<ul class="text-lg space-y-2">
+						<li class="flex items-center justify-center">
+							<i class="i-mdi-check-circle text-green-500 mr-2"></i>
+							Collect student group preferences
+						</li>
+						<li class="flex items-center justify-center">
+							<i class="i-mdi-check-circle text-green-500 mr-2"></i>
+							Automatically group students and assign projects
+						</li>
+						<li class="flex items-center justify-center">
+							<i class="i-mdi-check-circle text-green-500 mr-2"></i>
+							Apply manual constraints and customize algorithm
+						</li>
+					</ul>
 				</div>
-				<div v-if="is_dev" class="flex flex-col gap-4">
-					<hr class="my-4" />
+			</div>
+		</div>
+
+		<!-- Dev Login Section -->
+		<div v-if="is_dev" class="p-4 border-t border-gray-200">
+			<div class="max-w-md mx-auto">
+				<h2 class="text-xl font-semibold mb-4">Development Login</h2>
+				<div class="space-y-4">
 					<div class="flex gap-2">
 						<label for="devNameInput">Name:</label>
-						<input id="devNameInput" v-model="devName" type="text" class="border">
+						<InputText id="devNameInput" v-model="devName" type="text" />
 					</div>
-	
 					<div class="flex gap-2">
 						<label for="devEmailInput">Email:</label>
-						<input id="devEmailInput" v-model="devEmail" type="email" class="border">
+						<InputText id="devEmailInput" v-model="devEmail" type="email" />
 					</div>
-	
-					<div class="flex gap-2">
-						<label for="devAdminInput">Admin:</label>
-						<input id="devAdminInput" v-model="devIsAdmin" type="checkbox">
+					<div class="flex gap-2 items-center">
+						<label for="devAdminInput">Role:</label>
+						<SelectButton v-model="devLoginType" name="selection" :options="devLoginOptions" />
 					</div>
-	
-					<button class="flex items-center w-max p-3 rounded-md" @click="loginForDev">
-						Development Test Login
-						<i class="i-mdi-robot ml-2"></i>
-					</button>
+					<Button class="flex items-center" icon="pi pi-cog" label="Development Test Login" @click="loginForDev" severity="secondary" />
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
+<script setup lang="ts">
+import router from '../router';
+import { useAuthStore } from '../store/auth';
+import { getOidcUrl } from "../helpers/oauth";
+import { onMounted, ref } from 'vue';
+import type { UserInfoDto } from '../dtos/user-info-dto';
+import ApiService from '../services/ApiService';
+import SelectButton from 'primevue/selectbutton';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Message from 'primevue/message';
+
+// Types
+type LoginType = "admin" | "student" | "teacher";
+
+const authStore = useAuthStore();
+const devName = ref(`Dummy User ${crypto.randomUUID().slice(0, 2)}`);
+const devEmail = ref(`email${crypto.randomUUID().slice(0, 6)}@domain.com`);
+const devLoginType = ref('student' as LoginType);
+const devLoginOptions = ref(["admin", "student", "teacher"] as LoginType[]);
+
+const is_dev = false; //import.meta.env.DEV;
+
+function getGoogleIdToken() {
+	const hash = window.location.hash;
+	if (!hash) return null;
+	const params = new URLSearchParams(hash.replace('#', '?'));
+	return params.get('id_token');
+}
+
+const loginGoogle = async (role: 'teacher' | 'student') => {
+	location.href = getOidcUrl(role);
+};
+
+function getOidcState() {
+	const hash = window.location.hash;
+	if (!hash) return null;
+	const params = new URLSearchParams(hash.replace('#', '?'));
+	const state = params.get('state');
+	if (!state) return null;
+	try {
+		return JSON.parse(state);
+	} catch {
+		return null;
+	}
+}
+
+onMounted(async () => {
+	const id_token = getGoogleIdToken();
+	const state = getOidcState();
+	if (id_token && state?.role) {
+		await loginWithGoogle(id_token, state.role);
+	}
+});
+
+async function loginWithGoogle(id_token: string, role: 'teacher' | 'student') {
+	let endpoint = '';
+	let redirect = '';
+	if (role === 'teacher') {
+		endpoint = `/auth/login-google-teacher?idToken=${id_token}`;
+		redirect = '/teacher';
+	} else {
+		endpoint = `/auth/login-google-student?idToken=${id_token}`;
+		redirect = '/class-select';
+	}
+	authStore.userInfo = await ApiService.get<UserInfoDto>(endpoint);
+	router.push(redirect);
+}
+
+async function loginForDev() {
+	let endpoint = '';
+	let redirect = '';
+	endpoint = `/auth/login-dev?name=${devName.value}&email=${devEmail.value}&role=${devLoginType.value}`;
+	switch (devLoginType.value) {
+		case 'teacher':
+			redirect = '/teacher';
+			break;
+		case 'student':
+			redirect = '/class-select';
+			break;
+		case 'admin':
+			redirect = '/admin';
+			break;
+	}
+	authStore.userInfo = await ApiService.get<UserInfoDto>(endpoint);
+	router.push(redirect);
+}
+
+// can't access globals from template
+const _window = window;
+</script>

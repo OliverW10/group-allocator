@@ -1,7 +1,6 @@
-
-
-export function getOidcUrl(): string {
+export function getOidcUrl(role: 'teacher' | 'student'): string {
     const my_url = window.location.href;
+    const state = JSON.stringify({ role });
     // https://developers.google.com/identity/openid-connect/openid-connect#authenticationuriparameters
     const search_params = new URLSearchParams({
       // TODO: read these from env variables or backend or something
@@ -14,7 +13,8 @@ export function getOidcUrl(): string {
       scope: "openid profile email",
       prompt: "select_account",
       nonce: crypto.randomUUID(),
-      hd: "uts.edu.au"
-    })
-    return `https://accounts.google.com/o/oauth2/v2/auth?${search_params}`
+      hd: "uts.edu.au",
+      state
+    });
+    return `https://accounts.google.com/o/oauth2/v2/auth?${search_params}`;
 }

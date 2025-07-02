@@ -6,21 +6,38 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./views/LoginView.vue')
     },
     {
-        path: '/form',
-        component: () => import('./views/FormView.vue')
+        path: '/form/:classId',
+        component: () => import('./views/student/FormView.vue')
     },
     {
-        path: '/admin/solver',
-        component: () => import('./views/admin/SolverView.vue'),
+        path: '/class-select',
+        component: () => import('./views/student/ClassSelect.vue')
+    },
+	{
+        path: '/teacher',
+        component: () => import('./views/teacher/TeacherDashboardView.vue'),
     },
     {
-        path: '/admin/projects',
-        component: () => import('./views/admin/ProjectsView.vue')
+        path: '/teacher/:classId/solver',
+        component: () => import('./views/teacher/SolverView.vue'),
     },
     {
-        path: '/admin/students',
-        component: () => import('./views/admin/StudentsView.vue'),
-    }
+        path: '/teacher/:classId/projects',
+        component: () => import('./views/teacher/ProjectsView.vue')
+    },
+    {
+        path: '/teacher/:classId/students',
+        component: () => import('./views/teacher/StudentsView.vue'),
+    },
+    {
+        path: '/teacher/:classId/purchase',
+        component: () => import('./views/teacher/Purchased.vue'),
+    },
+    {
+        path: '/teacher/:classId/code',
+        component: () => import('./views/teacher/CodeView.vue'),
+    },
+    
 ]
 
 export default createRouter({

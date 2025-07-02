@@ -1,5 +1,5 @@
 <template>
-    <AdminNavBar />
+    <AdminNavBar :class-id="classId" />
 	<Dialog :visible="fileModal != null" :modal="true" :closable="false" :draggable="false" :header="'Files for ' + students.find((student) => student.studentInfo.studentId == fileModal)?.studentInfo.name" :style="{ width: '50vw' }">
 		<DataTable :value="students.find((student) => student.studentInfo.studentId == fileModal)?.studentSubmission.files" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]">
 			<Column field="name" header="Name"></Column>
@@ -15,11 +15,14 @@
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <h1 class="heading">Students</h1>
         <Divider style="margin: 0;" />
-        <FileUploader label="Upload Allow List" @projects-changed="uploadStudents">
+        <FileUploader label="Upload Students List" @projects-changed="uploadStudents">
             <p>
-                Please upload a text (/csv) file with emails on each line.
+                You can upload a list of students to allow them to join the class without a code or to allocate them to a project group without them submitting preferences.
                 <br />
-                Students in yellow have not submitted any preferences yet
+                Please upload a text file with a single student email on each line.
+                <br />
+                <br />
+                Student rows highlighted in yellow have not submitted any preferences yet, students highlighted in green have submitted preferences and were part of the uploaded students list, students highlighted in red have submitted preferences but were not part of the uploaded students list.
             </p>
         </FileUploader>
         <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
@@ -44,12 +47,18 @@
 					</div>
                 </template>
             </Column>
+            <template #empty>
+                <div class="text-center p-4 text-gray-500">
+                  No students yet, either share the class code with students or upload a list of students.
+                </div>
+            </template>
         </DataTable>
     </div>
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import AdminNavBar from '../../components/AdminNavBar.vue';
+import { useRoute } from 'vue-router';
+import AdminNavBar from '../../components/TeacherNavBar.vue';
 import ApiService from '../../services/ApiService';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
@@ -65,6 +74,8 @@ const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const toast = useToast();
 const fileModal = ref(null as null | number);
+const route = useRoute();
+const classId = route.params.classId as string;
 
 const showFiles = (id: number) => {
 	fileModal.value = id;
@@ -79,8 +90,8 @@ const rowClass = (data: StudentInfoAndSubmission) => {
 onMounted(async () => {
     try {
         loading.value = true;
-        students.value = await ApiService.get<StudentInfoAndSubmission[]>("/students")
-        projects.value = await ApiService.get<ProjectDto[]>("/projects")
+        students.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`)
+        projects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`)
     } catch (error) {
         console.error(error);
     } finally {
@@ -89,12 +100,12 @@ onMounted(async () => {
 });
 
 const deleteFile = async (id: string) => {
-	await ApiService.delete(`/students/file/${id}`)
-	students.value = await ApiService.get<StudentInfoAndSubmission[]>("/students")
+	await ApiService.delete(`/students/file/${id}?classId=${classId}`)
+	students.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`)
 }
 
 const download = async (id: unknown, name: string) => {
-	const url = await ApiService.makeUrl(`/students/file/${id}`)
+	const url = await ApiService.makeUrl(`/students/file/${id}?classId=${classId}`)
 	const a = document.createElement('a')
 	a.href = url.toString()
 	a.download = name
@@ -108,7 +119,7 @@ const setStudents = (data: StudentInfoAndSubmission[]) => {
 }
 
 const remove = async (id: string) => {
-    const newProjects = await ApiService.delete<StudentInfoAndSubmission[]>(`/students/${id}`);
+    const newProjects = await ApiService.delete<StudentInfoAndSubmission[]>(`/students/${id}?classId=${classId}`);
     setStudents(newProjects);
 }
 
@@ -120,7 +131,7 @@ const uploadStudents = async (event: FileUploadSelectEvent) => {
     const formData = new FormData()
     formData.append('file', selectedFile)
     try {
-        const result = await ApiService.postRaw<StudentInfoAndSubmission[]>('students/whitelist', formData) // , 'multipart/form-data'
+        const result = await ApiService.postRaw<StudentInfoAndSubmission[]>(`students/whitelist?classId=${classId}`, formData)
         setStudents(result)
         if (result != undefined) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Students added to whitelist', life: 5000 });

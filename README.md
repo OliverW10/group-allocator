@@ -138,9 +138,11 @@ erDiagram
 2. In the Group-allocator/backend/group-allocator directory, run the following commands:
    1. `dotnet tool restore` 
    2. `dotnet run`
+1. Run `dotnet user-secrets init` then `dotnet user-secrets set "Stripe:SecretKey" "{key}"`
 
 ### Application - Mac/Linux
 
 1. Install [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 1. In `backend/GroupAllocator.Backend` run `dotnet run`
+1. Run `dotnet user-secrets init` then `dotnet user-secrets set "Stripe:SecretKey" "{key}"`
 ****

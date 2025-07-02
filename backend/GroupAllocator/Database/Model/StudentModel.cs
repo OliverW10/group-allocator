@@ -1,7 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using GroupAllocator.DTOs;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace GroupAllocator.Database.Model;
 
@@ -9,8 +6,12 @@ namespace GroupAllocator.Database.Model;
 public class StudentModel
 {
 	public int Id { get; set; }
-	public required bool WillSignContract { get; set; }
-	[ForeignKey(nameof(StudentModel.Id))]
 	public required UserModel User { get; set; }
+	public required ClassModel Class { get; set; }
+	public string Notes { get; set; } = "";
+	public bool? WillSignContract { get; set; }
+	public bool IsVerified { get; set; }
+
 	public ICollection<PreferenceModel> Preferences { get; } = new List<PreferenceModel>();
+	public ICollection<FileModel> Files { get; } = new List<FileModel>();
 }

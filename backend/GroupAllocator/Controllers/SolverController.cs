@@ -10,25 +10,27 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Authorize(Policy = "AdminOnly")]
-public class SolverController(IAllocationSolver solver, ApplicationDbContext db) : ControllerBase
+[Authorize(Policy = "TeacherOnly")]
+public class SolverController(IAllocationSolver solver, ApplicationDbContext db, PaymentService paymentService) : ControllerBase
 {
 	[HttpGet]
-	public async Task<IActionResult> GetLatest()
+	public async Task<ActionResult<SolveRunDto?>> GetLatest(int classId)
 	{
-		// this logic should really be in a service
 		var runs = await db.SolveRuns
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Student)
+					.ThenInclude(s => s.User)
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
+			.Include(r => r.Class)
+			.Where(r => r.Class.Id == classId)
 			.ToListAsync();
-		var allProjects = db.Projects.Include(p => p.Client).ToList();
+		var allProjects = await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(p => p.Class.Id == classId).ToListAsync();
 
 		var lastRun = runs.OrderByDescending(x => x.Timestamp).FirstOrDefault();
 		if (lastRun == null)
 		{
-			return NotFound();
+			return Ok(null);
 		}
 
 		var result = new SolveRunDto
@@ -37,7 +39,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 			RanAt = lastRun.Timestamp,
 			Projects = allProjects.SelectMany(ProjectGroupsForProject),
 		};
-		return Ok(result);
+		return result;
 
 		IEnumerable<AllocationDto> ProjectGroupsForProject(ProjectModel p)
 		{
@@ -57,16 +59,32 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Solve(SolveRequestDto solveConfig)
+	public async Task<ActionResult<SolveRunDto?>> Solve(SolveRequestDto solveConfig)
 	{
+		var @class = await db.Classes
+			.Include(c => c.Students)
+			.Include(c => c.Payments)
+			.FirstOrDefaultAsync(c => c.Id == solveConfig.ClassId);
+		if (@class == null)
+		{
+			return BadRequest("Class not found");
+		}
+
+		var plan = paymentService.GetPaymentPlanForClass(@class);
+		if (plan == PaymentPlan.None && @class.Students.Count > 20)
+		{
+			return StatusCode(402, "Upgrade required: Free plan classes are limited to 20 students for solver runs.");
+		}
+
 		var solveRun = new SolveRunModel
 		{
 			Timestamp = DateTime.UtcNow,
 			PreferenceExponent = solveConfig.PreferenceExponent,
+			Class = @class
 		};
 
 		var assignments = solver.AssignStudentsToGroups(solveRun,
-			db.Users.ToList(),
+			db.Students.ToList(),
 			db.Projects.ToList(),
 			db.Clients.ToList(),
 			db.Preferences.Include(p => p.Student).Include(p => p.Project).ToList(),
@@ -84,6 +102,6 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db)
 		db.SolveRuns.Add(solveRun);
 		db.StudentAssignments.AddRange(assignments);
 		await db.SaveChangesAsync();
-		return await GetLatest();
+		return await GetLatest(solveConfig.ClassId);
 	}
 }
