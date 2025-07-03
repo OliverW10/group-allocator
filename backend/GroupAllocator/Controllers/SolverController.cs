@@ -21,6 +21,9 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 				.ThenInclude(sa => sa.Student)
 					.ThenInclude(s => s.User)
 			.Include(r => r.StudentAssignments)
+				.ThenInclude(sa => sa.Student)
+					.ThenInclude(s => s.Preferences)
+			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
 			.Include(r => r.Class)
 			.Where(r => r.Class.Id == classId)
@@ -38,6 +41,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 			Id = lastRun.Id,
 			RanAt = lastRun.Timestamp,
 			Projects = allProjects.SelectMany(ProjectGroupsForProject),
+			Histogram = CalculateHistogram(lastRun.StudentAssignments),
 		};
 		return result;
 
@@ -56,6 +60,29 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 				}
 			);
 		};
+
+		IEnumerable<int> CalculateHistogram(IEnumerable<StudentAssignmentModel> assignments)
+		{
+			var histogram = new int[10]; // Assuming max 10 preferences
+			foreach (var assignment in assignments)
+			{
+				var student = assignment.Student;
+				var project = assignment.Project;
+				
+				// Find the student's preference rank for this project
+				var preference = student.Preferences.FirstOrDefault(p => p.Project.Id == project.Id);
+				if (preference != null)
+				{
+					// Preference rank is 1-based, convert to 0-based index
+					var rank = preference.Ordinal - 1;
+					if (rank >= 0 && rank < histogram.Length)
+					{
+						histogram[rank]++;
+					}
+				}
+			}
+			return histogram;
+		}
 	}
 
 	[HttpPost]
