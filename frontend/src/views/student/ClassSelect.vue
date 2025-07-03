@@ -1,39 +1,14 @@
 <template>
-	<div class="flex flex-col gap-4 p-4">
+	<div class="flex flex-col gap-4 p-4 min-h-screen">
 		<header class="flex justify-between items-center">
-			<h1 class="heading">Select a Class</h1>
-			<LogoutButton />
+			<h1 class="heading text-2xl sm:text-3xl pl6">Select Class</h1>
+			<!-- <LogoutButton class="hidden sm:block" /> -->
 		</header>
 
-		<div class="flex gap-8">
-			<!-- Left Panel: List of Classes -->
-			<div class="flex-1">
-				<Card>
-					<template #title>Your Classes</template>
-					<template #content>
-						<ProgressBar v-if="loading" mode="indeterminate" style="height: 6px" />
-						<div v-else-if="classes.length === 0" class="text-center p-4">
-							<p>You are not enrolled in any classes yet.</p>
-						</div>
-						<div v-else class="flex flex-col gap-2">
-							<div v-for="classItem in classes" 
-								:key="classItem.id" 
-								variant="text"
-								class="w-full text-left p-3 cursor-pointer hover:bg-gray-100 rounded-md border-1 border-gray-200"
-								@click="joinClass(classItem.id)">
-								<div class="flex flex-col">
-									<span class="font-bold">{{ classItem.name }}</span>
-									<span class="text-sm text-gray-600">Code: {{ classItem.code }}</span>
-								</div>
-							</div>
-						</div>
-					</template>
-				</Card>
-			</div>
-
-			<!-- Right Panel: Join with Code -->
-			<div class="flex-1">
-				<Card>
+		<div class="flex flex-col lg:flex-row gap-8 flex-1 lg:max-w-6xl lg:mx-auto lg:w-full lg:justify-start sm:justify-start">
+			<!-- Join with Code Panel (First on mobile) -->
+			<div class="lg:flex-1 order-1 lg:order-2 lg:max-h-96">
+				<Card class="">
 					<template #title>Join with Class Code</template>
 					<template #content>
 						<div class="flex flex-col gap-4">
@@ -49,6 +24,36 @@
 					</template>
 				</Card>
 			</div>
+
+			<!-- List of Classes Panel (Second on mobile) -->
+			<div class="lg:flex-1 order-2 lg:order-1 lg:max-h-96">
+				<Card class="">
+					<template #title>Your Classes</template>
+					<template #content>
+						<ProgressBar v-if="loading" mode="indeterminate" style="height: 6px" />
+						<div v-else-if="classes.length === 0" class="text-center p-4">
+							<p>You are not enrolled in any classes yet.</p>
+						</div>
+						<div v-else class="flex flex-col gap-2 overflow-y-auto max-h-64">
+							<div v-for="classItem in classes" 
+								:key="classItem.id" 
+								variant="text"
+								class="w-full text-left p-3 cursor-pointer hover:bg-gray-100 rounded-md border-1 border-gray-200"
+								@click="joinClass(classItem.id)">
+								<div class="flex flex-col">
+									<span class="font-bold">{{ classItem.name }}</span>
+									<span class="text-sm text-gray-600">Code: {{ classItem.code }}</span>
+								</div>
+							</div>
+						</div>
+					</template>
+				</Card>
+			</div>
+		</div>
+
+		<!-- Mobile Logout Button at Bottom -->
+		<div class="flex justify-center">
+			<LogoutButton />
 		</div>
 	</div>
 </template>

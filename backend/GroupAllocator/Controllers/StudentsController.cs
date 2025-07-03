@@ -61,6 +61,33 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 		return students;
 	}
 
+	[HttpPost("add")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<List<StudentInfoAndSubmission>>> AddStudent(int classId, string email)
+	{
+		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		
+		// Check if teacher has access to this class
+		var hasAccess = await db.ClassTeachers
+			.AnyAsync(t => t.Teacher.Id == userId && t.Class.Id == classId);
+			
+		if (!hasAccess)
+		{
+			return Forbid("You don't have access to this class");
+		}
+
+		if (string.IsNullOrWhiteSpace(email))
+		{
+			return BadRequest("Email is required.");
+		}
+
+		await userService.AddStudentToClass(classId, email);
+
+		var students = await GetStudents(classId);
+
+		return students;
+	}
+
 	async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
 	{
 		return await db.Students

@@ -9,4 +9,5 @@ export class SolveRunDto {
     id: number;
     ranAt: Date;
     projects: AllocationDto[];
+    histogram: number[];
 }

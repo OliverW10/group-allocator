@@ -8,7 +8,7 @@
 			<div v-if="showOutdatedWarning" class="mb-4 p-4 bg-orange-100 text-orange-800 rounded border border-orange-300">
 				⚠️ The latest solve result is outdated
 			</div>
-			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true"/>
+			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true" @allocations-cleared="onAllocationsCleared"/>
 			<div class="flex flex-col gap-2 mt-4">
 				<label for="preference-exponent" class="text-sm font-medium">Preference Exponent: {{ preferenceExponent.toFixed(2) }}</label>
 				<Slider 
@@ -49,6 +49,15 @@
 		</div>
 		<div class="flex flex-col gap-4">
 			<Button label="Run Solver" icon="i-mdi-cogs" class="w-fit" @click="solve"></Button>
+			<Button 
+			label="Download Solution"
+			icon="i-mdi-download" 
+			class="w-fit" 
+			@click="downloadReport"
+			:disabled="!solved"
+			></Button>
+			<!-- Histogram Chart -->
+			<PreferenceHistogram v-if="solved" :histogram="histogram" />
 		</div>
 	</div>
 </template>
@@ -63,6 +72,7 @@ import type { SolveRunDto } from '../../dtos/solve-run-dto';
 import { useToast } from "primevue/usetoast";
 import { SolveRequestDto } from '../../dtos/solve-request-dto';
 import AllocationsTable from '../../components/AllocationsTable.vue';
+import PreferenceHistogram from '../../components/PreferenceHistogram.vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import ProgressSpinner from 'primevue/progressspinner';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
@@ -72,10 +82,12 @@ import type { AllocatedStudentInfo, PartialAllocation } from '../../model/Partia
 import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import { removeAutoAllocated } from '../../services/AllocationsServices';
 import { useRoute } from 'vue-router';
+import SolverReportService from '../../services/SolverReportService';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
 const preferenceExponent = ref(0.85)
+const histogram = ref<number[]>([])
 
 const toast = useToast();
 const loading = ref(true)
@@ -118,6 +130,8 @@ const svgPoints = computed(() => {
 	return points.join(' ');
 });
 
+
+
 onMounted(async () => {
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);
 	allProjects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`);
@@ -126,6 +140,7 @@ onMounted(async () => {
 		loading.value = false
 		return;
 	}
+	solved.value = true
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	integrateResultToAllocations(solveResult)
 	loading.value = false
@@ -152,10 +167,43 @@ const solve = async () => {
 	solved.value = true
 }
 
+const downloadReport = async () => {
+	if (!solved.value) {
+		toast.add({ severity: 'warn', summary: 'Warning', detail: 'No solve result available to download', life: 3000 });
+		return;
+	}
+	
+	// Convert allocations back to SolveRunDto format
+	const solveRunDto: SolveRunDto = {
+		id: Date.now(), // Use timestamp as ID
+		ranAt: new Date(),
+		projects: allocations.value.map(allocation => ({
+			project: allocation.project!,
+			students: allocation.students.map(student => ({
+				studentId: student.studentId,
+				name: student.name,
+				email: student.email,
+				isVerified: student.isVerified
+			})),
+			instanceId: allocation.instanceId
+		})),
+		histogram: []
+	};
+	
+	try {
+		await SolverReportService.downloadFullCsvReport(solveRunDto);
+		toast.add({ severity: 'success', summary: 'Success', detail: 'Report downloaded successfully', life: 2000 });
+	} catch {
+		toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to download report', life: 3000 });
+	}
+}
+
 const integrateResultToAllocations = (solveResult: SolveRunDto) => {
 	if (solveResult == undefined) {
 		return
 	}
+	// Store histogram data
+	histogram.value = solveResult.histogram || []
 	for (const autoAllocation of solveResult.projects) {
 		const existingWithMatchingProjects = allocations.value.filter(x => x.project?.id == autoAllocation.project.id && x.instanceId == autoAllocation.instanceId);
 		// There was a manual allocation with a matching project
@@ -197,6 +245,11 @@ const studentInfoToAllocated = (i: StudentInfoDto) => {
 	const casted = i as AllocatedStudentInfo
 	casted.manuallyAllocated = false
 	return casted
+}
+
+const onAllocationsCleared = () => {
+	solved.value = false
+	histogram.value = []
 }
 
 </script>

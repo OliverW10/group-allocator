@@ -88,14 +88,20 @@ const maintainAllocationsList = () => {
     }
 }
 
+const emit = defineEmits<{
+	allocationsCleared: []
+}>()
+
 const clearAutoAllocated = () => {
 	removeAutoAllocated(allocations.value ?? []);
     maintainAllocationsList()
+	emit('allocationsCleared')
 }
 
 const clearAll = () => {
 	allocations.value = []
 	maintainAllocationsList()
+	emit('allocationsCleared')
 }
 
 const onProjectChange = (event: SelectChangeEvent) => {
