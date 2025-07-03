@@ -63,7 +63,8 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 
 		IEnumerable<int> CalculateHistogram(IEnumerable<StudentAssignmentModel> assignments)
 		{
-			var histogram = new int[10]; // Assuming max 10 preferences
+			var histogram = new int[11]; // Assuming max 10 preferences
+			
 			foreach (var assignment in assignments)
 			{
 				var student = assignment.Student;
@@ -73,14 +74,21 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 				var preference = student.Preferences.FirstOrDefault(p => p.Project.Id == project.Id);
 				if (preference != null)
 				{
-					// Preference rank is 1-based, convert to 0-based index
-					var rank = preference.Ordinal - 1;
+					// Preference rank is 0-based, use directly as index
+					var rank = preference.Ordinal;
 					if (rank >= 0 && rank < histogram.Length)
 					{
 						histogram[rank]++;
 					}
 				}
+				// Note: If no preference is found, the student was assigned to a project
+				// not in their top 10 preferences
+				if (student.Preferences.Count > 0)
+				{
+					histogram[10]++;
+				}
 			}
+			
 			return histogram;
 		}
 	}
