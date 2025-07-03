@@ -72,6 +72,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 				
 				// Find the student's preference rank for this project
 				var preference = student.Preferences.FirstOrDefault(p => p.Project.Id == project.Id);
+				var hadTop10Preferences = false;
 				if (preference != null)
 				{
 					// Preference rank is 0-based, use directly as index
@@ -79,11 +80,12 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 					if (rank >= 0 && rank < histogram.Length)
 					{
 						histogram[rank]++;
+						hadTop10Preferences = true;
 					}
 				}
 				// Note: If no preference is found, the student was assigned to a project
 				// not in their top 10 preferences
-				if (student.Preferences.Count > 0)
+				if (!hadTop10Preferences && student.Preferences.Count > 0)
 				{
 					histogram[10]++;
 				}

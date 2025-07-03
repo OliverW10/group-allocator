@@ -22,7 +22,7 @@ const router = useRouter()
 const route = useRoute()
 
 // Accept classId as a prop, fallback to route param
-const props = defineProps<{ classId?: string | number }>()
+const props = defineProps<{ classId?: string | number, disabled?: boolean }>()
 const classId = computed(() => props.classId ?? route.params.classId)
 
 const returnToDashboard = () => {
