@@ -14,10 +14,10 @@ export default class SolverReportService {
 	}
 
 	static async downloadFullCsvReport(solveRun: SolveRunDto): Promise<void> {
-		let csv = '"StudentName","StudentEmail","ProjectName","ProjectClient","ProjectNDA","ProjectMin","ProjectAlloc","ProjectMax"\n';
+		let csv = '"StudentName","StudentEmail","ProjectName","ProjectClient"\n';
 		solveRun.projects.forEach((allocation) => {
 			allocation.students.forEach((student) => {
-				csv += `"${student.name}","${student.email}","${allocation.project.name}","${allocation.project.client}","${allocation.project.requiresNda}","${allocation.project.minStudents}","${allocation.students.length}","${allocation.project.maxStudents}"\n`;
+				csv += `"${student.name}","${student.email}","${allocation.project.name}","${allocation.project.client}"\n`;
 			});
 		});
 		this.download(csv, "text/csv", "csv");
