@@ -90,8 +90,8 @@
                 />
                 <Button
                     label="Create"
-                    @click="handleSubmit"
                     :loading="creating"
+                    @click="handleSubmit"
                 />
             </div>
         </template>

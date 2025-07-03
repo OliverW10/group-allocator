@@ -193,7 +193,7 @@ const downloadReport = async () => {
 	try {
 		await SolverReportService.downloadFullCsvReport(solveRunDto);
 		toast.add({ severity: 'success', summary: 'Success', detail: 'Report downloaded successfully', life: 2000 });
-	} catch (error) {
+	} catch {
 		toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to download report', life: 3000 });
 	}
 }

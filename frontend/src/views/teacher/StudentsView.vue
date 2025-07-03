@@ -167,7 +167,7 @@ const error = () => {
 }
 
 const addStudent = async () => {
-    var email = newStudent.value.trim();
+    const email = newStudent.value.trim();
     if (!email) {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Email is required', life: 5000 });
         return;
