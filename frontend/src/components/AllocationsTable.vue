@@ -1,20 +1,33 @@
 <template>
-	<div>
-		<Button label="Clear all" class="mr-1" @click="clearAll"></Button>
-		<Button label="Clear auto-allocated" @click="clearAutoAllocated"></Button>
+	<div class="flex flex-col h-full">
+		<div class="flex-shrink-0 mb-4">
+			<Button label="Clear all" class="mr-1" @click="clearAll"></Button>
+			<Button label="Clear auto-allocated" @click="clearAutoAllocated"></Button>
+		</div>
+		<div class="flex-1 min-h-0">
+			<DataTable 
+				:value="allocations" 
+				:loading="false"
+				class="h-full"
+				scrollable
+				scroll-height="flex"
+				:rows="10"
+				:paginator="true"
+				:rows-per-page-options="[5, 10, 20, 50]"
+			>
+				<Column field="project" header="Project" style="min-width: 200px">
+					<template #body="slotProps">
+						<Select v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject, 'supressed' : slotProps.data.project == undefined}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
+					</template>
+				</Column>
+				<Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + (idx+1).toString()" style="min-width: 180px">
+					<template #body="slotProps">
+						<Select v-if="idx == 0 || slotProps.data.students[idx-1]" v-model="slotProps.data.students[idx]" :class="{'font-extrabold' : slotProps.data?.students?.[idx]?.manuallyAllocated ?? false, 'supressed' : slotProps.data.students[idx] == undefined}" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
+					</template>
+				</Column>
+			</DataTable>
+		</div>
 	</div>
-    <DataTable :value="allocations" :loading="false">
-        <Column field="project" header="Project">
-            <template #body="slotProps">
-                <Select v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject, 'supressed' : slotProps.data.project == undefined}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
-            </template>
-        </Column>
-        <Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + (idx+1).toString()">
-            <template #body="slotProps">
-                <Select v-if="idx == 0 || slotProps.data.students[idx-1]" v-model="slotProps.data.students[idx]" :class="{'font-extrabold' : slotProps.data?.students?.[idx]?.manuallyAllocated ?? false, 'supressed' : slotProps.data.students[idx] == undefined}" :options="[slotProps.data.students[idx], ...remainingStudents].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Student" @change="maintainAllocationsList"></Select>
-            </template>
-        </Column>
-    </DataTable>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue';
