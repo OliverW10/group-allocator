@@ -173,7 +173,6 @@
 <script setup lang="ts">
 import AdminNavBar from '../../components/TeacherNavBar.vue';
 import Button from 'primevue/button';
-import Divider from 'primevue/divider';
 import Slider from 'primevue/slider';
 import { computed, onMounted, ref } from 'vue';
 import ApiService from '../../services/ApiService';
