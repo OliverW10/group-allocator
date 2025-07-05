@@ -182,6 +182,36 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 		return Ok();
 	}
 
+	[HttpGet("populate/{classId:int}")]
+	public async Task<ActionResult> PopulateRandomPreferences(int classId)
+	{
+		var projects = await db.Projects.Where(p => p.Class.Id == classId).ToListAsync();
+		var students = await db.Students.Where(s => s.Class.Id == classId).ToListAsync();
+
+		foreach (var student in students)
+		{
+			var preferences = new List<PreferenceModel>();
+			for (int i = 0; i < 10; i++)
+			{
+				var preference = new PreferenceModel
+				{
+					Project = projects[i],
+					Student = student,
+					Ordinal = i
+				};
+
+				db.Add(preference);
+				preferences.Add(preference);
+			}
+
+			db.Students.Update(student);
+		}
+
+		await db.SaveChangesAsync();
+
+		return Ok("Successfully populated preferences");
+	}
+
 	[HttpPost("file")]
 	[Authorize(Policy = "StudentOnly")]
 	public async Task<ActionResult<FileDetailsDto>> PostFile(int classId, [FromForm] IFormFile file)

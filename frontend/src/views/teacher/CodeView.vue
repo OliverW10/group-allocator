@@ -58,6 +58,13 @@
                             {{ classInfo.studentCount === 1 ? 'student' : 'students' }} submitted preferences
                         </p>
                     </div>
+                    <!-- Add the link below the card -->
+                    <div class="mt-8">
+                        <a href="https://group-allocator.pages.dev" target="_blank" rel="noopener" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-semibold text-lg">
+                            group-allocator.pages.dev
+                        </a>
+                    </div>
+                    <img src="../../assets/qr.png" alt="Group Allocator" class="w-1/2 mx-auto">
                 </div>
             </div>
         </div>

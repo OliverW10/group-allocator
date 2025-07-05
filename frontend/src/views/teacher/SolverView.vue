@@ -1,70 +1,178 @@
 <template>
 	<AdminNavBar :class-id="classId" />
-	<div class="flex flex-row flex-justify-between gap-4 p-4">
-		<div v-if="!loading">
-			<div v-if="!allProjects || allProjects.length === 0" class="mb-4 p-4 bg-yellow-100 text-yellow-800 rounded border border-yellow-300">
-				⚠️ No projects found for this class. Please add projects before running the solver.
+	<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+		<div class="max-w-7xl mx-auto">
+			<!-- Header Section -->
+			<div class="mb-8">
+				<h1 class="text-3xl font-bold text-gray-900 mb-2">Group Allocation Solver</h1>
+				<p class="text-gray-600">Configure and run the allocation algorithm for your class</p>
 			</div>
-			<div v-if="showOutdatedWarning" class="mb-4 p-4 bg-orange-100 text-orange-800 rounded border border-orange-300">
-				⚠️ The latest solve result is outdated
+
+			<div class="flex flex-row gap-8">
+				<!-- Main Content Area -->
+				<div class="flex-1">
+					<div v-if="!loading">
+						<!-- Warning Messages -->
+						<div v-if="!allProjects || allProjects.length === 0" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl shadow-sm">
+							<div class="flex items-center gap-3">
+								<div class="flex-shrink-0">
+									<svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+									</svg>
+								</div>
+								<div>
+									<h3 class="text-sm font-medium text-amber-800">No Projects Found</h3>
+									<p class="text-sm text-amber-700 mt-1">Please add projects before running the solver.</p>
+								</div>
+							</div>
+						</div>
+
+						<div v-if="showOutdatedWarning" class="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl shadow-sm">
+							<div class="flex items-center gap-3">
+								<div class="flex-shrink-0">
+									<svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+									</svg>
+								</div>
+								<div>
+									<h3 class="text-sm font-medium text-orange-800">Outdated Results</h3>
+									<p class="text-sm text-orange-700 mt-1">The latest solve result is outdated.</p>
+								</div>
+							</div>
+						</div>
+
+						<!-- Allocations Table Card -->
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+							<h2 class="text-xl font-semibold text-gray-900 mb-4">Current Allocations</h2>
+							<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true" @allocations-cleared="onAllocationsCleared"/>
+						</div>
+
+						<!-- Preference Configuration Card -->
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+							<h2 class="text-xl font-semibold text-gray-900 mb-4">Preference Configuration</h2>
+							<div class="flex flex-col gap-4">
+								<div>
+									<label for="preference-exponent" class="block text-sm font-medium text-gray-700 mb-2">
+										Preference Exponent: <span class="text-blue-600 font-semibold">{{ preferenceExponent.toFixed(2) }}</span>
+									</label>
+									<Slider 
+										id="preference-exponent"
+										v-model="preferenceExponent" 
+										:min="0.6" 
+										:max="0.99" 
+										:step="0.01"
+										class="w-full max-w-md"
+									/>
+								</div>
+								
+								<!-- Preference Curve Visualization -->
+								<div class="mt-4">
+									<h3 class="text-sm font-medium text-gray-700 mb-3">Preference Curve Preview</h3>
+									<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+										<svg :width="280" :height="140" class="mx-auto">
+											<!-- Background grid -->
+											<defs>
+												<pattern id="grid" width="17" height="18" patternUnits="userSpaceOnUse">
+													<path d="M 17 0 L 0 0 0 18" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+												</pattern>
+											</defs>
+											<rect width="100%" height="100%" fill="url(#grid)" />
+											
+											<!-- Axes -->
+											<line x1="40" y1="20" x2="40" y2="120" stroke="#9ca3af" stroke-width="2" />
+											<line x1="40" y1="120" x2="260" y2="120" stroke="#9ca3af" stroke-width="2" />
+											
+											<!-- X axis labels -->
+											<g v-for="x in 10" :key="x">
+												<text :x="40 + (x-1)*22" y="135" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="500">{{ x }}</text>
+											</g>
+											
+											<!-- Y axis labels -->
+											<text x="15" y="120" font-size="11" fill="#6b7280" font-weight="500">0</text>
+											<text x="15" y="70" font-size="11" fill="#6b7280" font-weight="500">0.5</text>
+											<text x="15" y="25" font-size="11" fill="#6b7280" font-weight="500">1</text>
+											
+											<!-- Curve -->
+											<polyline
+												:points="svgPoints"
+												fill="none"
+												stroke="#3b82f6"
+												stroke-width="3"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+											/>
+											
+											<!-- Curve gradient effect -->
+											<defs>
+												<linearGradient id="curveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+													<stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+													<stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:0.6" />
+												</linearGradient>
+											</defs>
+										</svg>
+									</div>
+									<p class="text-xs text-gray-500 mt-2 text-center">
+										Higher values give more weight to student preferences
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Loading State -->
+					<div v-else class="flex items-center justify-center py-12">
+						<div class="text-center">
+							<ProgressSpinner class="mb-4" />
+							<p class="text-gray-600">Loading solver configuration...</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Sidebar -->
+				<div class="w-80 flex-shrink-0">
+					<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+						<h2 class="text-xl font-semibold text-gray-900 mb-6">Solver Actions</h2>
+						
+						<div class="space-y-4">
+							<Button 
+								label="Run Solver" 
+								icon="i-mdi-cogs" 
+								class="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700"
+								@click="solve"
+								:loading="loading"
+							/>
+							
+							<Button 
+								label="Download Solution"
+								icon="i-mdi-download" 
+								class="w-full h-12 text-base font-medium bg-green-600 hover:bg-green-700 border-green-600 hover:border-green-700"
+								@click="downloadReport"
+								:disabled="!solved"
+							/>
+						</div>
+
+						<!-- Status Indicator -->
+						<div v-if="solved" class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+							<div class="flex items-center gap-2">
+								<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+								<span class="text-sm font-medium text-green-800">Solver completed successfully</span>
+							</div>
+						</div>
+
+						<!-- Histogram Chart -->
+						<div v-if="solved" class="mt-6">
+							<h3 class="text-lg font-semibold text-gray-900 mb-4">Preference Distribution</h3>
+							<PreferenceHistogram :histogram="histogram" />
+						</div>
+					</div>
+				</div>
 			</div>
-			<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true" @allocations-cleared="onAllocationsCleared"/>
-			<div class="flex flex-col gap-2 mt-4">
-				<label for="preference-exponent" class="text-sm font-medium">Preference Exponent: {{ preferenceExponent.toFixed(2) }}</label>
-				<Slider 
-					id="preference-exponent"
-					v-model="preferenceExponent" 
-					:min="0.6" 
-					:max="0.99" 
-					:step="0.01"
-					class="w-64"
-				/>
-				<svg :width="220" :height="120" class="mt-2 primevue-svg bg-opacity-50">
-					<!-- Axes -->
-					<line x1="30" y1="10" x2="30" y2="100" stroke="var(--p-surface-400, #888)" stroke-width="1" />
-					<line x1="30" y1="100" x2="200" y2="100" stroke="var(--p-surface-400, #888)" stroke-width="1" />
-					<!-- X axis labels -->
-					<g v-for="x in 10" :key="x">
-						<text :x="30 + (x-1)*17" y="115" font-size="10" text-anchor="middle" fill="var(--p-text-color-secondary, #888)">{{ x }}</text>
-					</g>
-					<!-- Y axis labels (0, 1, max) -->
-					<text x="5" y="100" font-size="10" fill="var(--p-text-color-secondary, #888)">0</text>
-					<text x="5" y="60" font-size="10" fill="var(--p-text-color-secondary, #888)">0.5</text>
-					<text x="5" y="15" font-size="10" fill="var(--p-text-color-secondary, #888)">1</text>
-					<!-- Curve -->
-					<polyline
-						:points="svgPoints"
-						fill="none"
-						stroke="var(--p-primary-color, #1976d2)"
-						stroke-width="2"
-					/>
-				</svg>
-			</div>
-		</div>
-		<div v-else>
-			<ProgressSpinner />
-		</div>
-		<div class="p-8">
-			<Divider layout="vertical" />
-		</div>
-		<div class="flex flex-col gap-4">
-			<Button label="Run Solver" icon="i-mdi-cogs" class="w-fit" @click="solve"></Button>
-			<Button 
-			label="Download Solution"
-			icon="i-mdi-download" 
-			class="w-fit" 
-			@click="downloadReport"
-			:disabled="!solved"
-			></Button>
-			<!-- Histogram Chart -->
-			<PreferenceHistogram v-if="solved" :histogram="histogram" />
 		</div>
 	</div>
 </template>
 <script setup lang="ts">
 import AdminNavBar from '../../components/TeacherNavBar.vue';
 import Button from 'primevue/button';
-import Divider from 'primevue/divider';
 import Slider from 'primevue/slider';
 import { computed, onMounted, ref } from 'vue';
 import ApiService from '../../services/ApiService';
@@ -122,9 +230,9 @@ const svgPoints = computed(() => {
 	for (let x = 0; x <= 10 * substeps; x++) {
 		// Calculate y = m^x, clamp to [0,1] for display
 		const y = Math.pow(m, x);
-		// Map x to [30, 200], y to [100, 10] (invert y for SVG)
-		const svgX = 30 + x * 17 / substeps;
-		const svgY = 100 - y * 90;
+		// Map x to [40, 260], y to [120, 20] (invert y for SVG)
+		const svgX = 40 + x * 22 / substeps;
+		const svgY = 120 - y * 100;
 		points.push(`${svgX},${svgY}`);
 	}
 	return points.join(' ');
@@ -254,11 +362,4 @@ const onAllocationsCleared = () => {
 
 </script>
 
-<style scoped>
-.primevue-svg {
-	background: var(--p-surface-0, #fff);
-	border: 1px solid var(--p-surface-border, #d1d5db);
-	border-radius: 0.375rem;
-	display: block;
-}
-</style>
+
