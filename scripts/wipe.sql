@@ -1,0 +1,11 @@
+drop table if exists "Classes" cascade;
+drop table if exists "Clients" cascade;
+drop table if exists "SolveRuns" cascade;
+drop table if exists "ClassTeachers" cascade;
+drop table if exists "Users" cascade;
+drop table if exists "Payments" cascade;
+drop table if exists "Students" cascade;
+drop table if exists "Projects" cascade;
+drop table if exists "Files" cascade;
+drop table if exists "Preferences" cascade;
+drop table if exists "StudentAssignments" cascade;

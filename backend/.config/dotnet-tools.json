@@ -4,7 +4,17 @@
   "tools": {
     "dotnet-typegen": {
       "version": "6.0.2",
-      "commands": ["dotnet-typegen"]
+      "commands": [
+        "dotnet-typegen"
+      ],
+      "rollForward": false
+    },
+    "dotnet-ef": {
+      "version": "9.0.7",
+      "commands": [
+        "dotnet-ef"
+      ],
+      "rollForward": false
     }
   }
 }
