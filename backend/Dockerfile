@@ -2,16 +2,16 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0@sha256:1025bed126a7b85c56b960215ab42a99db9
 WORKDIR /App
 
 # Copy everything
-COPY . ./
+COPY . ./src
 # Restore as distinct layers
-RUN dotnet restore
+RUN dotnet restore src
 # Build and publish a release
-RUN dotnet publish -o out
+RUN dotnet publish src/GroupAllocator -o .
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine@sha256:36b581c9812089fa977395f6951cd08064b10da98b45653ea43e75b8e247e8fa
-WORKDIR /App
-COPY --from=build /App/out .
+#FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:36b581c9812089fa977395f6951cd08064b10da98b45653ea43e75b8e247e8fa
+# WORKDIR /App
+# COPY /App/out .
 ENTRYPOINT ["dotnet", "GroupAllocator.dll"]
 
 # Base aspnet image sets ASPNETCORE_HTTP_PORTS=8080
