@@ -63,7 +63,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options
 	// .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
 );
 builder.Services.RegisterApplicationServices();
-StripeConfiguration.ApiKey = builder.Configuration.GetValue<string>("Stripe:SecretKey") ?? throw new InvalidOperationException("Stripe secret key not found");
+var stripeKey = builder.Configuration.GetValue<string>("Stripe:SecretKey");
+if (stripeKey == null){
+	Console.ForegroundColor = ConsoleColor.Red;
+	Console.WriteLine("Stripe secret key not found");
+	Console.ResetColor();
+}
+StripeConfiguration.ApiKey = stripeKey;
 
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");

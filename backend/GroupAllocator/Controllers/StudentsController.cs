@@ -141,8 +141,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 			return BadRequest("Class not found");
 		}
 
-		await using var transaction = await db.Database.BeginTransactionAsync();
-		await db.Students.Where(s => s.Id == userId && s.Class.Id == preferences.ClassId).ExecuteDeleteAsync();
+		await db.Students.Where(s => s.User.Email == user.Email && s.Class.Id == preferences.ClassId).ExecuteDeleteAsync();
+		await db.SaveChangesAsync();
+		
 		var student = new StudentModel()
 		{
 			User = user,
@@ -177,7 +178,6 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 		db.Students.Add(student);
 
 		await db.SaveChangesAsync();
-		await transaction.CommitAsync();
 
 		return Ok();
 	}

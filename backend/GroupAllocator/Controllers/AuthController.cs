@@ -21,7 +21,7 @@ public class AuthController(IUserService userService, ApplicationDbContext db) :
 	public ActionResult<UserInfoDto> GetCurrentUser()
 	{
 		var claims = HttpContext.User.Claims.ToList();
-		if ((HttpContext.User.Identity is null || !claims.Any()))
+		if (HttpContext.User.Identity is null || !claims.Any())
 		{
 			return Unauthorized();
 		}
