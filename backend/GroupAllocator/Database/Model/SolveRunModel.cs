@@ -8,4 +8,5 @@ public class SolveRunModel
 	public required ClassModel Class { get; set; }
 
 	public ICollection<StudentAssignmentModel> StudentAssignments { get; set; } = new List<StudentAssignmentModel>();
+	public ICollection<ClientLimitModel> ClientLimits { get; set; } = new List<ClientLimitModel>();
 }

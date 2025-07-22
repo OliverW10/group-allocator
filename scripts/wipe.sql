@@ -6,6 +6,7 @@ drop table if exists "Users" cascade;
 drop table if exists "Payments" cascade;
 drop table if exists "Students" cascade;
 drop table if exists "Projects" cascade;
+drop table if exists "ClientLimits" cascade;
 drop table if exists "Files" cascade;
 drop table if exists "Preferences" cascade;
 drop table if exists "StudentAssignments" cascade;

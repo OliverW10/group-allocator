@@ -39,6 +39,7 @@
                 </p>
             </FileUploader>
             <Button label="Add Student" icon="i-mdi-plus" @click="addStudentModal = true" />
+            <Button label="Download Students JSON" icon="i-mdi-download" @click="downloadStudentsJson" />
         </div>
         <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
             <Column field="studentInfo.name" header="Name"></Column>
@@ -84,6 +85,7 @@ import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
+import { downloadData } from '../../helpers/download';
 
 const students = ref([] as StudentInfoAndSubmission[]);
 const projects = ref([] as ProjectDto[])
@@ -187,4 +189,8 @@ const addStudent = async () => {
         addingStudent.value = false;
     }
 }
+
+const downloadStudentsJson = () => {
+    downloadData(JSON.stringify(students.value, null, 2), 'application/json', 'json', 'students');
+};
 </script>
