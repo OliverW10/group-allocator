@@ -309,6 +309,8 @@ onMounted(async () => {
 	solved.value = true
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	integrateResultToAllocations(solveResult)
+	preferenceExponent.value = solveResult.preferenceExponent
+	clientLimits.value = solveResult.clientLimits
 	loading.value = false
 })
 
@@ -353,7 +355,9 @@ const downloadReport = async () => {
 			})),
 			instanceId: allocation.instanceId
 		})),
-		histogram: []
+		preferenceExponent: preferenceExponent.value,
+		clientLimits: clientLimits.value,
+		histogram: histogram.value,
 	};
 	
 	try {

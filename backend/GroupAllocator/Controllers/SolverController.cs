@@ -26,6 +26,8 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 			.Include(r => r.StudentAssignments)
 				.ThenInclude(sa => sa.Project)
 			.Include(r => r.Class)
+			.Include(r => r.ClientLimits)
+				.ThenInclude(cl => cl.Client)
 			.Where(r => r.Class.Id == classId)
 			.ToListAsync();
 		var allProjects = await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(p => p.Class.Id == classId).ToListAsync();
