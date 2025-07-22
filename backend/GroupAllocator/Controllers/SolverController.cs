@@ -42,6 +42,12 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 			RanAt = lastRun.Timestamp,
 			Projects = allProjects.SelectMany(ProjectGroupsForProject),
 			Histogram = CalculateHistogram(lastRun.StudentAssignments),
+			PreferenceExponent = lastRun.PreferenceExponent,
+			ClientLimits = lastRun.ClientLimits.Select(cl => new ClientLimitsDto {
+				ClientId = cl.Client.Id,
+				MinProjects = cl.MinProjects,
+				MaxProjects = cl.MaxProjects,
+			}).ToList(),
 		};
 		return result;
 
@@ -108,7 +114,8 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 		}
 
 		var plan = paymentService.GetPaymentPlanForClass(@class);
-		if (plan == PaymentPlan.None && @class.Students.Count > 20)
+		var paymentEnabled = false;
+		if (paymentEnabled && plan == PaymentPlan.None && @class.Students.Count > 20)
 		{
 			return StatusCode(402, "Upgrade required: Free plan classes are limited to 20 students for solver runs.");
 		}
@@ -138,6 +145,12 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 		solveRun.StudentAssignments = assignments;
 		db.SolveRuns.Add(solveRun);
 		db.StudentAssignments.AddRange(assignments);
+		db.ClientLimits.AddRange(solveConfig.ClientLimits.Select(cl => new ClientLimitModel {
+			Client = db.Clients.First(c => c.Id == cl.ClientId),
+			MinProjects = cl.MinProjects,
+			MaxProjects = cl.MaxProjects,
+			SolveRun = solveRun,
+		}));
 		await db.SaveChangesAsync();
 		return await GetLatest(solveConfig.ClassId);
 	}

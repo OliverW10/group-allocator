@@ -117,6 +117,41 @@
 								</div>
 							</div>
 						</div>
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+							<h2 class="text-xl font-semibold text-gray-900 mb-4">Client Limits</h2>
+							<DataTable :value="clientLimits" class="w-full" :rows="10" editMode="cell" :rowClass="rowClassForClientLimit">
+								<Column field="clientId" header="Client" style="min-width: 200px">
+									<template #body="slotProps">
+										<Dropdown v-model="slotProps.data.clientId" :options="allClients" option-label="name" option-value="id" placeholder="Select Client" class="w-full" />
+									</template>
+								</Column>
+								<Column field="minProjects" header="Min Projects" style="min-width: 120px">
+									<template #body="slotProps">
+										<InputNumber v-model="slotProps.data.minProjects" :min="0" class="w-full" />
+									</template>
+								</Column>
+								<Column field="maxProjects" header="Max Projects" style="min-width: 120px">
+									<template #body="slotProps">
+										<InputNumber v-model="slotProps.data.maxProjects" :min="0" class="w-full" />
+									</template>
+								</Column>
+								<Column header="Actions" style="min-width: 80px">
+									<template #body="slotProps">
+										<Button icon="i-mdi-delete" severity="danger" text @click="removeClientLimit(slotProps.index)" />
+									</template>
+								</Column>
+								<template #footer>
+									<Button label="Add Client Limit" icon="i-mdi-plus" class="mt-2" @click="addClientLimit" />
+								</template>
+							</DataTable>
+							<div v-if="invalidClientLimits.length > 0" class="mt-2 text-red-600 text-sm">
+								<ul>
+									<li v-for="(lim, idx) in invalidClientLimits" :key="idx">
+										Client {{ allClients.find(c => c.id === lim.clientId)?.name || lim.clientId }}: Max Projects must be greater than or equal to Min Projects.
+									</li>
+								</ul>
+							</div>
+						</div>
 					</div>
 					
 					<!-- Loading State -->
@@ -191,6 +226,11 @@ import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import { removeAutoAllocated } from '../../services/AllocationsServices';
 import { useRoute } from 'vue-router';
 import SolverReportService from '../../services/SolverReportService';
+import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import type { ClientDto } from '../../dtos/client-dto';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -210,6 +250,23 @@ const allStudentInfos = computed(() => {
 		return casted
 	}) ?? []
 })
+
+const allClients = ref<{ id: number, name: string }[]>([]);
+
+const addClientLimit = () => {
+	clientLimits.value.push({ clientId: allClients.value[0]?.id ?? 0, minProjects: 0, maxProjects: 1 });
+};
+const removeClientLimit = (idx: number) => {
+	clientLimits.value.splice(idx, 1);
+};
+
+const invalidClientLimits = computed(() =>
+  clientLimits.value.filter(lim => lim.maxProjects < lim.minProjects)
+);
+
+const rowClassForClientLimit = (data: ClientLimitsDto) => {
+  return { 'bg-red-100': data.maxProjects < data.minProjects };
+};
 
 const route = useRoute();
 const classId = route.params.classId as string;
@@ -243,6 +300,7 @@ const svgPoints = computed(() => {
 onMounted(async () => {
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);
 	allProjects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`);
+	allClients.value = await ApiService.get<ClientDto[]>(`/projects/clients?classId=${classId}`);
 	const solveResult = await ApiService.get<SolveRunDto>(`/solver?classId=${classId}`)
 	if (!solveResult) {
 		loading.value = false

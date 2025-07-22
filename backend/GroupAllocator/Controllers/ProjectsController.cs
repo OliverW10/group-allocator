@@ -144,6 +144,17 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 		return await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(x => x.Class.Id == classId).Select(x => x.ToDto()).ToListAsync();
 	}
 
+	[HttpGet("clients")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<List<ClientDto>>> GetClients([FromQuery, BindRequired] int classId)
+	{
+		var clients = await db.Clients
+			.Where(c => c.Class.Id == classId)
+			.Select(c => new ClientDto { Id = c.Id, Name = c.Name })
+			.ToListAsync();
+		return clients;
+	}
+
 	[HttpPut]
 	[Route("update/{id}")]
 	[Authorize(Policy = "TeacherOnly")]

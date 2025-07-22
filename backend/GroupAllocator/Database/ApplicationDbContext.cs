@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<PreferenceModel> Preferences { get; set; } = null!;
 	public DbSet<ProjectModel> Projects { get; set; } = null!;
 	public DbSet<SolveRunModel> SolveRuns { get; set; } = null!;
+	public DbSet<ClientLimitModel> ClientLimits { get; set; } = null!;
 	public DbSet<StudentAssignmentModel> StudentAssignments { get; set; } = null!;
 	public DbSet<StudentModel> Students { get; set; } = null!;
 	public DbSet<UserModel> Users { get; set; } = null!;
