@@ -199,6 +199,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 	}
 
 	[HttpGet("join-code/{code}")]
+	[Authorize(Policy = "StudentOnly")]
 	public async Task<ActionResult<int>> JoinClassFromCode(string code)
 	{
 		var classId = db.Classes.First(x => x.Code == code).Id;
@@ -206,6 +207,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 	}
 
 	[HttpGet("join/{id}")]
+	[Authorize(Policy = "StudentOnly")]
 	public async Task<ActionResult<int>> JoinClass(int id)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));

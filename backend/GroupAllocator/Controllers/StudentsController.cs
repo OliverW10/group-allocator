@@ -183,6 +183,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	}
 
 	[HttpGet("populate/{classId:int}")]
+	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult> PopulateRandomPreferences(int classId)
 	{
 		var projects = await db.Projects.Where(p => p.Class.Id == classId).ToListAsync();
