@@ -11,7 +11,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ClassController(ApplicationDbContext db, PaymentService paymentService) : ControllerBase
+public class ClassController(ApplicationDbContext db, PaymentService paymentService, IUserService userService) : ControllerBase
 {
 	[HttpGet("list-teacher")]
 	[Authorize(Policy = "TeacherOnly")]
@@ -69,26 +69,17 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<ClassInfoDto>> GetClassInfo(int id)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
 		
 		var @class = await db.Classes
 			.Include(c => c.Teachers)
 				.ThenInclude(t => t.Teacher)
 			.Include(c => c.Students)
 				.ThenInclude(s => s.Preferences)
-			.FirstOrDefaultAsync(c => c.Id == id);
-
-		if (@class == null)
-		{
-			return NotFound("Class not found");
-		}
-
-		// Check if the teacher is in the class
-		var teacherInClass = @class.Teachers.Any(t => t.Teacher.Id == userId);
-		if (!teacherInClass)
-		{
-			return Forbid("Teacher is not in this class");
-		}
+			.FirstAsync(c => c.Id == id);
 
 		var studentsWithPreferences = @class.Students.Count(s => s.Preferences.Any());
 
@@ -159,28 +150,17 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<ClassResponseDto>> UpdateClass(int id, ClassDto classDto)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
 		var @class = await db.Classes
 			.Include(c => c.Teachers)
 				.ThenInclude(t => t.Teacher)
 			.Include(c => c.Students)
 			.Include(c => c.Payments)
-			.FirstOrDefaultAsync(c => c.Id == id);
-
-		if (@class == null)
-		{
-			return NotFound("Class not found");
-		}
-
-		// Check if the teacher is the owner of the class
-		var teacherRole = @class.Teachers
-			.FirstOrDefault(t => t.Teacher.Id == userId)?.Role;
-
-		if (teacherRole != ClassTeacherRole.Owner)
-		{
-			return Forbid("Only the class owner can update the class");
-		}
+			.FirstAsync(c => c.Id == id);
 
 		@class.Name = classDto.Name;
 
@@ -202,7 +182,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 	[Authorize(Policy = "StudentOnly")]
 	public async Task<ActionResult<int>> JoinClassFromCode(string code)
 	{
-		var classId = db.Classes.First(x => x.Code == code).Id;
+		var classId = (await db.Classes.FirstAsync(x => x.Code == code)).Id;
 		return await JoinClass(classId);
 	}
 
@@ -227,5 +207,87 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 		await db.SaveChangesAsync();
 
 		return Ok(@class.Id);
+	}
+
+	[HttpPost("{id}/add-teacher/{teacherId}")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult> AddTeacherToClass(int id, string teacherEmail)
+	{
+		// Check if current teacher is part of the class
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
+		var @class = await db.Classes.FindAsync(id) ?? throw new InvalidOperationException("Class not found");
+		var teacherToAdd = await db.Users.FirstOrDefaultAsync(u => u.Email == teacherEmail) ?? await userService.GetOrCreateUserAsync(teacherEmail.Split("@").First(), teacherEmail);
+
+		// Check if teacher is already in the class
+		if (await db.ClassTeachers.AnyAsync(ct => ct.Class.Id == id && ct.Teacher.Id == teacherToAdd.Id))
+		{
+			return BadRequest("Teacher is already in this class");
+		}
+
+		// Add teacher to class as NonOwner
+		db.ClassTeachers.Add(new ClassTeacherModel
+		{
+			Teacher = teacherToAdd,
+			Class = @class,
+			Role = ClassTeacherRole.NonOwner
+		});
+		await db.SaveChangesAsync();
+
+		return Ok();
+	}
+
+	[HttpDelete("{id}/remove-teacher/{teacherId}")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult> RemoveTeacherFromClass(int id, string teacherEmail)
+	{
+		// Check if current teacher is the owner of the class
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User, isOwner: true))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
+		// Check if trying to remove the owner
+		var teacherToRemove = await db.ClassTeachers
+			.Include(ct => ct.Teacher)
+			.FirstOrDefaultAsync(ct => ct.Class.Id == id && ct.Teacher.Email == teacherEmail);
+
+		if (teacherToRemove == null)
+		{
+			return BadRequest("Teacher is not in this class");
+		}
+
+		if (teacherToRemove.Role == ClassTeacherRole.Owner)
+		{
+			return BadRequest("Cannot remove the owner from the class");
+		}
+
+		// Remove teacher from class
+		db.ClassTeachers.Remove(teacherToRemove);
+		await db.SaveChangesAsync();
+
+		return Ok();
+	}
+
+	[HttpGet("{id}/teachers")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult<string[]>> GetTeachersForClass(int id)
+	{
+		// Check if current teacher is part of the class
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
+		var teachers = await db.ClassTeachers
+			.Include(ct => ct.Teacher)
+			.Where(ct => ct.Class.Id == id)
+			.Select(ct => ct.Teacher.Email)
+			.ToListAsync();
+
+		return Ok(teachers);
 	}
 }

@@ -50,6 +50,11 @@ const items = ref([
     icon: 'i-mdi-link',
     command: () => router.push(`/teacher/${classId.value}/code`)
 },
+{
+    label: 'Teachers',
+    icon: 'i-mdi-account-group',
+    command: () => router.push(`/teacher/${classId.value}/teachers`)
+},
 ])
 
 </script>

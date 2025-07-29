@@ -12,12 +12,17 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProjectsController(ApplicationDbContext db) : ControllerBase
+public class ProjectsController(ApplicationDbContext db, IUserService userService) : ControllerBase
 {
 	[HttpPost("upload")]
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<List<ProjectDto>>> UploadProjects(int classId, [FromForm] IFormFile file)
 	{
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
 		if (file == null || file.Length == 0)
 		{
 			return BadRequest("No file uploaded.");
@@ -98,13 +103,6 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 			return NotFound($"No class with id {classId}");
 		}
 
-		// Check if the teacher is the owner of the class
-		var isTeacher = @class.Teachers.Any(t => t.Teacher.Id == userId);
-		if (!isTeacher)
-		{
-			return Forbid("Only the class owner can create projects");
-		}
-
 		// Get or create client
 		var client = await db.Clients.FirstOrDefaultAsync(c => c.Name == createProjectDto.Client && c.Class.Id == classId);
 		if (client == null)
@@ -160,6 +158,7 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<ProjectDto>> UpdateProject(int id, [FromBody] ProjectDto projectDto)
 	{
+
 		var project = await db.Projects
 			.Include(p => p.Client)
 			.Include(p => p.Class)
@@ -168,6 +167,11 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 		if (project == null)
 		{
 			return NotFound();
+		}
+		
+		if (!await userService.IsCurrentTeacherPartOfClass(project.Class.Id, User))
+		{
+			return Forbid("Teacher is not in this class");
 		}
 
 		// Update project properties
@@ -211,6 +215,11 @@ public class ProjectsController(ApplicationDbContext db) : ControllerBase
 			return NotFound();
 		}
 		
+		if (!await userService.IsCurrentTeacherPartOfClass(project.Class.Id, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
 		db.Projects.Remove(project);
 		await db.SaveChangesAsync();
 		return await GetProjects(project.Class.Id);

@@ -1,5 +1,5 @@
 <template>
-	<AdminNavBar :class-id="classId" />
+	<TeacherNavBar :class-id="classId" />
 	<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
 		<div class="max-w-7xl mx-auto">
 			<!-- Header Section -->
@@ -92,7 +92,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-import AdminNavBar from '../../components/TeacherNavBar.vue';
+import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import Button from 'primevue/button';
 import { computed, onMounted, ref } from 'vue';
 import ApiService from '../../services/ApiService';
@@ -138,8 +138,6 @@ const allStudentInfos = computed(() => {
 
 const allClients = ref<{ id: number, name: string }[]>([]);
 
-
-
 const route = useRoute();
 const classId = route.params.classId as string;
 
@@ -151,10 +149,6 @@ const showOutdatedWarning = computed(() => {
 	);
 	return allStudentIds.size > allocatedStudentIds.size;
 });
-
-
-
-
 
 onMounted(async () => {
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);
