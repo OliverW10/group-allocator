@@ -4,10 +4,13 @@
  */
 
 import { AllocationDto } from "./allocation-dto";
+import { ClientLimitsDto } from "./client-limits-dto";
 
 export class SolveRunDto {
     id: number;
     ranAt: Date;
     projects: AllocationDto[];
+    preferenceExponent: number;
+    clientLimits: ClientLimitsDto[];
     histogram: number[];
 }

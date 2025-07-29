@@ -60,11 +60,35 @@
                     </div>
                     <!-- Add the link below the card -->
                     <div class="mt-8">
-                        <a href="https://group-allocator.pages.dev" target="_blank" rel="noopener" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-semibold text-lg">
+                        <a href="https://group-allocator.pages.dev" target="_blank" rel="noopener" variant="outlined">
                             group-allocator.pages.dev
                         </a>
                     </div>
-                    <img src="../../assets/qr.png" alt="Group Allocator" class="w-1/2 mx-auto">
+                    <img 
+                        src="../../assets/qr.png" 
+                        alt="Group Allocator" 
+                        class="w-1/2 mx-auto cursor-pointer hover:opacity-60 transition-opacity"
+                        @click="showQRFullscreen = true"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen QR Code Modal -->
+        <div 
+            v-if="showQRFullscreen" 
+            class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+            @click="showQRFullscreen = false"
+        >
+            <div class="relative bg-white rounded-lg p-8 max-w-md mx-auto" @click.stop>
+                <!-- QR Code -->
+                <div class="text-center">
+                    <img 
+                        src="../../assets/qr.png" 
+                        alt="Group Allocator QR Code" 
+                        class="w-200 mx-auto"
+                    >
+                    <p class="text-gray-600 mt-4">Scan this QR code to access the student form</p>
                 </div>
             </div>
         </div>
@@ -87,6 +111,7 @@ const classInfo = ref<ClassInfoDto | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const intervalId = ref<number | null>(null);
+const showQRFullscreen = ref(false);
 
 const fetchClassInfo = async () => {
     try {

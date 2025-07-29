@@ -8,14 +8,14 @@
 				<p class="text-gray-600">Configure and run the allocation algorithm for your class</p>
 			</div>
 
-			<div class="flex flex-row gap-8">
+			<div class="flex gap-8">
 				<!-- Main Content Area -->
 				<div class="flex-1">
 					<div v-if="!loading">
 						<!-- Warning Messages -->
 						<div v-if="!allProjects || allProjects.length === 0" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl shadow-sm">
 							<div class="flex items-center gap-3">
-								<div class="flex-shrink-0">
+								<div>
 									<svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
 									</svg>
@@ -29,7 +29,7 @@
 
 						<div v-if="showOutdatedWarning" class="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl shadow-sm">
 							<div class="flex items-center gap-3">
-								<div class="flex-shrink-0">
+								<div>
 									<svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
 									</svg>
@@ -61,13 +61,12 @@
 										:min="0.6" 
 										:max="0.99" 
 										:step="0.01"
-										class="w-full max-w-md"
+										class="w-full"
 									/>
 								</div>
 								
 								<!-- Preference Curve Visualization -->
 								<div class="mt-4">
-									<h3 class="text-sm font-medium text-gray-700 mb-3">Preference Curve Preview</h3>
 									<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
 										<svg :width="280" :height="140" class="mx-auto">
 											<!-- Background grid -->
@@ -89,7 +88,6 @@
 											
 											<!-- Y axis labels -->
 											<text x="15" y="120" font-size="11" fill="#6b7280" font-weight="500">0</text>
-											<text x="15" y="70" font-size="11" fill="#6b7280" font-weight="500">0.5</text>
 											<text x="15" y="25" font-size="11" fill="#6b7280" font-weight="500">1</text>
 											
 											<!-- Curve -->
@@ -101,20 +99,47 @@
 												stroke-linecap="round"
 												stroke-linejoin="round"
 											/>
-											
-											<!-- Curve gradient effect -->
-											<defs>
-												<linearGradient id="curveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-													<stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.8" />
-													<stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:0.6" />
-												</linearGradient>
-											</defs>
 										</svg>
 									</div>
 									<p class="text-xs text-gray-500 mt-2 text-center">
 										Higher values give more weight to student preferences
 									</p>
 								</div>
+							</div>
+						</div>
+						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+							<h2 class="text-xl font-semibold text-gray-900 mb-4">Client Limits</h2>
+							<DataTable :value="clientLimits" class="w-full" :rows="10" edit-mode="cell" :row-class="rowClassForClientLimit">
+								<Column field="clientId" header="Client">
+									<template #body="slotProps">
+										<Dropdown v-model="slotProps.data.clientId" :options="allClients" option-label="name" option-value="id" placeholder="Select Client" class="w-full" />
+									</template>
+								</Column>
+								<Column field="minProjects" header="Min Projects">
+									<template #body="slotProps">
+										<InputNumber v-model="slotProps.data.minProjects" :min="0" class="w-full" />
+									</template>
+								</Column>
+								<Column field="maxProjects" header="Max Projects">
+									<template #body="slotProps">
+										<InputNumber v-model="slotProps.data.maxProjects" :min="0" class="w-full" />
+									</template>
+								</Column>
+								<Column header="Actions">
+									<template #body="slotProps">
+										<Button icon="i-mdi-delete" severity="danger" text @click="removeClientLimit(slotProps.index)" />
+									</template>
+								</Column>
+								<template #footer>
+									<Button label="Add Client Limit" icon="i-mdi-plus" class="mt-2" @click="addClientLimit" />
+								</template>
+							</DataTable>
+							<div v-if="invalidClientLimits.length > 0" class="mt-2 text-red-600 text-sm">
+								<ul>
+									<li v-for="(lim, idx) in invalidClientLimits" :key="idx">
+										Client {{ allClients.find(c => c.id === lim.clientId)?.name || lim.clientId }}: Max Projects must be greater than or equal to Min Projects.
+									</li>
+								</ul>
 							</div>
 						</div>
 					</div>
@@ -129,7 +154,7 @@
 				</div>
 
 				<!-- Sidebar -->
-				<div class="w-80 flex-shrink-0">
+				<div class="w-80">
 					<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
 						<h2 class="text-xl font-semibold text-gray-900 mb-6">Solver Actions</h2>
 						
@@ -137,17 +162,17 @@
 							<Button 
 								label="Run Solver" 
 								icon="i-mdi-cogs" 
-								class="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700"
-								@click="solve"
+								class="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700"
 								:loading="loading"
+								@click="solve"
 							/>
 							
 							<Button 
 								label="Download Solution"
 								icon="i-mdi-download" 
-								class="w-full h-12 text-base font-medium bg-green-600 hover:bg-green-700 border-green-600 hover:border-green-700"
-								@click="downloadReport"
+								class="w-full h-12 text-base font-medium bg-green-600 hover:bg-green-700"
 								:disabled="!solved"
+								@click="downloadReport"
 							/>
 						</div>
 
@@ -191,6 +216,11 @@ import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import { removeAutoAllocated } from '../../services/AllocationsServices';
 import { useRoute } from 'vue-router';
 import SolverReportService from '../../services/SolverReportService';
+import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import type { ClientDto } from '../../dtos/client-dto';
 
 const clientLimits = ref([] as ClientLimitsDto[])
 const allocations = ref([] as PartialAllocation[])
@@ -210,6 +240,23 @@ const allStudentInfos = computed(() => {
 		return casted
 	}) ?? []
 })
+
+const allClients = ref<{ id: number, name: string }[]>([]);
+
+const addClientLimit = () => {
+	clientLimits.value.push({ clientId: allClients.value[0]?.id ?? 0, minProjects: 0, maxProjects: 1 });
+};
+const removeClientLimit = (idx: number) => {
+	clientLimits.value.splice(idx, 1);
+};
+
+const invalidClientLimits = computed(() =>
+  clientLimits.value.filter(lim => lim.maxProjects < lim.minProjects)
+);
+
+const rowClassForClientLimit = (data: ClientLimitsDto) => {
+  return { 'bg-red-100': data.maxProjects < data.minProjects };
+};
 
 const route = useRoute();
 const classId = route.params.classId as string;
@@ -243,6 +290,7 @@ const svgPoints = computed(() => {
 onMounted(async () => {
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);
 	allProjects.value = await ApiService.get<ProjectDto[]>(`/projects?classId=${classId}`);
+	allClients.value = await ApiService.get<ClientDto[]>(`/projects/clients?classId=${classId}`);
 	const solveResult = await ApiService.get<SolveRunDto>(`/solver?classId=${classId}`)
 	if (!solveResult) {
 		loading.value = false
@@ -251,6 +299,8 @@ onMounted(async () => {
 	solved.value = true
 	toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	integrateResultToAllocations(solveResult)
+	preferenceExponent.value = solveResult.preferenceExponent
+	clientLimits.value = solveResult.clientLimits
 	loading.value = false
 })
 
@@ -295,7 +345,9 @@ const downloadReport = async () => {
 			})),
 			instanceId: allocation.instanceId
 		})),
-		histogram: []
+		preferenceExponent: preferenceExponent.value,
+		clientLimits: clientLimits.value,
+		histogram: histogram.value,
 	};
 	
 	try {

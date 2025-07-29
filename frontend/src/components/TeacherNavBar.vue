@@ -44,7 +44,12 @@ const items = ref([
     label: 'Solver',
     icon: 'i-mdi-cogs',
     command: () => router.push(`/teacher/${classId.value}/solver`)
-}
+},
+{
+    label: 'Join Code',
+    icon: 'i-mdi-link',
+    command: () => router.push(`/teacher/${classId.value}/code`)
+},
 ])
 
 </script>
