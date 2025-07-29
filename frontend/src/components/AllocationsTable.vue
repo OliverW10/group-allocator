@@ -17,7 +17,7 @@
 			>
 				<Column field="project" header="Project" style="min-width: 200px">
 					<template #body="slotProps">
-						<Select v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject, 'supressed' : slotProps.data.project == undefined}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
+						<Select v-tooltip.top="'Client: ' + slotProps.data.project?.client" v-model="slotProps.data.project" :class="{'font-extrabold' : slotProps.data.manuallyAllocatedProject, 'supressed' : slotProps.data.project == undefined}" :options="[slotProps.data.project, ...remainingProjects].filter(x=>x)" option-label="name" filter show-clear placeholder="Select Project" @change="onProjectChange"></Select>
 					</template>
 				</Column>
 				<Column v-for="idx of [...Array(numStudents).keys()]" :key="idx" :field="students[idx]?.name ?? 'asdf'" :header="'Student ' + (idx+1).toString()" style="min-width: 180px">
