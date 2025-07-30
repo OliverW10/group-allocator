@@ -15,7 +15,7 @@ const routes: RouteRecordRaw[] = [
     },
 	{
         path: '/teacher',
-        component: () => import('./views/teacher/TeacherDashboardView.vue'),
+        component: () => import('./views/teacher/TeacherClassesView.vue'),
     },
     {
         path: '/teacher/:classId/solver',
@@ -41,7 +41,6 @@ const routes: RouteRecordRaw[] = [
         path: '/teacher/:classId/teachers',
         component: () => import('./views/teacher/TeachersAdminPage.vue'),
     },
-    
 ]
 
 export default createRouter({

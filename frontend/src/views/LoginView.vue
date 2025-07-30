@@ -130,7 +130,7 @@
 					</div>
 					
 					<!-- Pro Tier Card -->
-					<!-- <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+					<div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
 						<div class="text-center">
 							<h3 class="text-2xl font-bold mb-2">Paid</h3>
 							<div class="text-4xl font-bold mb-6">$5<span class="text-xl">/class</span></div>
@@ -145,7 +145,7 @@
 								</li>
 							</ul>
 						</div>
-					</div> -->
+					</div>
 				</div>
 			</div>
 		</div>
@@ -172,7 +172,7 @@ const devEmail = ref(`email${crypto.randomUUID().slice(0, 6)}@domain.com`);
 const devLoginType = ref('student' as LoginType);
 const devLoginOptions = ref(["admin", "student", "teacher"] as LoginType[]);
 
-const is_dev = false; //import.meta.env.DEV;
+const is_dev = true; //import.meta.env.DEV;
 
 function getGoogleIdToken() {
 	const hash = window.location.hash;

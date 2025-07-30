@@ -209,7 +209,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 		return Ok(@class.Id);
 	}
 
-	[HttpPost("{id}/add-teacher/{teacherId}")]
+	[HttpPost("{id}/add-teacher/{teacherEmail}")]
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult> AddTeacherToClass(int id, string teacherEmail)
 	{
@@ -240,7 +240,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 		return Ok();
 	}
 
-	[HttpDelete("{id}/remove-teacher/{teacherId}")]
+	[HttpDelete("{id}/remove-teacher/{teacherEmail}")]
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult> RemoveTeacherFromClass(int id, string teacherEmail)
 	{
@@ -274,7 +274,7 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 
 	[HttpGet("{id}/teachers")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<ActionResult<string[]>> GetTeachersForClass(int id)
+	public async Task<ActionResult<TeacherDto[]>> GetTeachersForClass(int id)
 	{
 		// Check if current teacher is part of the class
 		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
@@ -285,7 +285,11 @@ public class ClassController(ApplicationDbContext db, PaymentService paymentServ
 		var teachers = await db.ClassTeachers
 			.Include(ct => ct.Teacher)
 			.Where(ct => ct.Class.Id == id)
-			.Select(ct => ct.Teacher.Email)
+			.Select(ct => new TeacherDto
+			{
+				Email = ct.Teacher.Email,
+				IsOwner = ct.Role == ClassTeacherRole.Owner
+			})
 			.ToListAsync();
 
 		return Ok(teachers);

@@ -7,7 +7,7 @@
 
 		<div class="flex gap-2 ml-4">
 			<InputText v-model="newTeacherEmail" placeholder="Teacher Email" />
-			<Button @click="addTeacher" :loading="isLoading" :disabled="!newTeacherEmail.trim().includes('@')" label="Add Teacher" v-tooltip.top="'Add Teacher'" />
+			<Button @click="addTeacher" :loading="isLoading" :disabled="!hasValidEmail" label="Add Teacher" v-tooltip.top="!hasValidEmail ? 'Enter email to add teacher' : 'Add Teacher'" />
 		</div>
 
 		<!-- Teachers Table -->
@@ -23,16 +23,16 @@
 					</template>
 				</Column>
 
-				<!-- <Column field="isAdmin" header="Admin">
+				<Column field="isOwner" header="Role">
 					<template #body="{ data }">
-						<Tag :value="data.isAdmin ? 'Yes' : 'No'" :severity="data.isAdmin ? 'success' : 'secondary'" />
+						<span>{{ data.isOwner ? 'Owner' : 'Non-Owner' }}</span>
 					</template>
-				</Column> -->
+				</Column>
 
 				<Column header="Actions" style="width: 100px; white-space: nowrap;">
 					<template #body="{ data }">
-						<Button @click="deleteTeacher(data)" :loading="isLoading" icon="i-mdi-delete"
-							severity="danger" text v-tooltip.top="'Delete Teacher'" />
+						<Button v-if="!data.isOwner" @click="deleteTeacher(data.email)" :loading="isLoading" icon="i-mdi-delete"
+							severity="danger" text v-tooltip.top="!isCurrentTeacherOwner ? 'Only the owner can delete teachers' : 'Delete Teacher'" :disabled="!isCurrentTeacherOwner" />
 					</template>
 				</Column>
 			</DataTable>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ApiService from '../../services/ApiService'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -50,27 +50,31 @@ import InputText from 'primevue/inputtext'
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import TeacherNavBar from '../../components/TeacherNavBar.vue';
+import type { TeacherDto } from '../../dtos/teacher-dto'
+import { useAuthStore } from '../../store/auth'
+import Tooltip from 'primevue/tooltip'
 
-interface Teacher {
-	email: string;
-	isAdmin: boolean;
-}
-
-const teachers = ref<Teacher[]>([])
+const teachers = ref<TeacherDto[]>([])
 const newTeacherEmail = ref('')
 const isLoading = ref(false)
 
 const toast = useToast();
 const route = useRoute();
 const classId = route.params.classId as string;
-
+const authStore = useAuthStore()
+const isCurrentTeacherOwner = computed(() => {
+	return teachers.value.some(t => t.email === authStore.userInfo?.email && t.isOwner)
+})
+const hasValidEmail = computed(() => {
+	return newTeacherEmail.value.trim().includes('@')
+})
 
 const loadTeachers = async () => {
 	isLoading.value = true
 	try {
-		const response = await ApiService.get<string[]>(`/class/${classId}/teachers`)
+		const response = await ApiService.get<TeacherDto[]>(`/class/${classId}/teachers`)
 		if (response) {
-			teachers.value = response.map(email => ({ email, isAdmin: false }))
+			teachers.value = response
 		}
 	} catch (error) {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to get teachers`, life: 3000 });
@@ -87,9 +91,8 @@ const addTeacher = async () => {
 	try {
 		await ApiService.post<string>(`/class/${classId}/add-teacher/${encodeURIComponent(newTeacherEmail.value.trim())}`, {})
 
-		teachers.value.push({ email: newTeacherEmail.value.trim(), isAdmin: false })
+		teachers.value.push({ email: newTeacherEmail.value.trim(), isOwner: false })
 		newTeacherEmail.value = ''
-		toast.add({ severity: 'success', summary: 'Success', detail: 'Got previous result', life: 1000 });
 	} catch (error) {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to add teacher`, life: 3000 });
 	} finally {
