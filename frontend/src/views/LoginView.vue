@@ -172,7 +172,7 @@ const devEmail = ref(`email${crypto.randomUUID().slice(0, 6)}@domain.com`);
 const devLoginType = ref('student' as LoginType);
 const devLoginOptions = ref(["admin", "student", "teacher"] as LoginType[]);
 
-const is_dev = true; //import.meta.env.DEV;
+const is_dev = false; //import.meta.env.DEV;
 
 function getGoogleIdToken() {
 	const hash = window.location.hash;
