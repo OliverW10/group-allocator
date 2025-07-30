@@ -1,5 +1,5 @@
 <template>
-    <TeacherNavBar :classId="classId" />
+    <TeacherNavBar :class-id="classId" />
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <div class="flex justify-between items-center">
             <h1 class="heading">Projects</h1>

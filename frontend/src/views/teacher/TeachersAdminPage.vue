@@ -52,7 +52,6 @@ import { useToast } from 'primevue/usetoast';
 import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import type { TeacherDto } from '../../dtos/teacher-dto'
 import { useAuthStore } from '../../store/auth'
-import Tooltip from 'primevue/tooltip'
 
 const teachers = ref<TeacherDto[]>([])
 const newTeacherEmail = ref('')
