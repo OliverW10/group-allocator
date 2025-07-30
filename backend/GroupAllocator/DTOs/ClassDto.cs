@@ -20,3 +20,5 @@ public class ClassResponseDto
     public required bool Payed { get; set; }
     public required int StudentCount { get; set; }
 }
+
+

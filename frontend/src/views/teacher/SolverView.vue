@@ -1,5 +1,5 @@
 <template>
-	<AdminNavBar :class-id="classId" />
+	<TeacherNavBar :class-id="classId" />
 	<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
 		<div class="max-w-7xl mx-auto">
 			<!-- Header Section -->
@@ -13,33 +13,19 @@
 				<div class="flex-1">
 					<div v-if="!loading">
 						<!-- Warning Messages -->
-						<div v-if="!allProjects || allProjects.length === 0" class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl shadow-sm">
-							<div class="flex items-center gap-3">
-								<div>
-									<svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-sm font-medium text-amber-800">No Projects Found</h3>
-									<p class="text-sm text-amber-700 mt-1">Please add projects before running the solver.</p>
-								</div>
-							</div>
-						</div>
+						<WarningMessage 
+							:show="!allProjects || allProjects.length === 0"
+							severity="warning"
+							title="No Projects Found"
+							message="Please add projects before running the solver."
+						/>
 
-						<div v-if="showOutdatedWarning" class="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl shadow-sm">
-							<div class="flex items-center gap-3">
-								<div>
-									<svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-sm font-medium text-orange-800">Outdated Results</h3>
-									<p class="text-sm text-orange-700 mt-1">The latest solve result is outdated.</p>
-								</div>
-							</div>
-						</div>
+						<WarningMessage 
+							:show="showOutdatedWarning"
+							severity="warning"
+							title="Outdated Results"
+							message="The latest solve result is outdated."
+						/>
 
 						<!-- Allocations Table Card -->
 						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -48,100 +34,10 @@
 						</div>
 
 						<!-- Preference Configuration Card -->
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-							<h2 class="text-xl font-semibold text-gray-900 mb-4">Preference Configuration</h2>
-							<div class="flex flex-col gap-4">
-								<div>
-									<label for="preference-exponent" class="block text-sm font-medium text-gray-700 mb-2">
-										Preference Exponent: <span class="text-blue-600 font-semibold">{{ preferenceExponent.toFixed(2) }}</span>
-									</label>
-									<Slider 
-										id="preference-exponent"
-										v-model="preferenceExponent" 
-										:min="0.6" 
-										:max="0.99" 
-										:step="0.01"
-										class="w-full"
-									/>
-								</div>
-								
-								<!-- Preference Curve Visualization -->
-								<div class="mt-4">
-									<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-										<svg :width="280" :height="140" class="mx-auto">
-											<!-- Background grid -->
-											<defs>
-												<pattern id="grid" width="17" height="18" patternUnits="userSpaceOnUse">
-													<path d="M 17 0 L 0 0 0 18" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
-												</pattern>
-											</defs>
-											<rect width="100%" height="100%" fill="url(#grid)" />
-											
-											<!-- Axes -->
-											<line x1="40" y1="20" x2="40" y2="120" stroke="#9ca3af" stroke-width="2" />
-											<line x1="40" y1="120" x2="260" y2="120" stroke="#9ca3af" stroke-width="2" />
-											
-											<!-- X axis labels -->
-											<g v-for="x in 10" :key="x">
-												<text :x="40 + (x-1)*22" y="135" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="500">{{ x }}</text>
-											</g>
-											
-											<!-- Y axis labels -->
-											<text x="15" y="120" font-size="11" fill="#6b7280" font-weight="500">0</text>
-											<text x="15" y="25" font-size="11" fill="#6b7280" font-weight="500">1</text>
-											
-											<!-- Curve -->
-											<polyline
-												:points="svgPoints"
-												fill="none"
-												stroke="#3b82f6"
-												stroke-width="3"
-												stroke-linecap="round"
-												stroke-linejoin="round"
-											/>
-										</svg>
-									</div>
-									<p class="text-xs text-gray-500 mt-2 text-center">
-										Higher values give more weight to student preferences
-									</p>
-								</div>
-							</div>
-						</div>
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
-							<h2 class="text-xl font-semibold text-gray-900 mb-4">Client Limits</h2>
-							<DataTable :value="clientLimits" class="w-full" :rows="10" edit-mode="cell" :row-class="rowClassForClientLimit">
-								<Column field="clientId" header="Client">
-									<template #body="slotProps">
-										<Dropdown v-model="slotProps.data.clientId" :options="allClients" option-label="name" option-value="id" placeholder="Select Client" class="w-full" />
-									</template>
-								</Column>
-								<Column field="minProjects" header="Min Projects">
-									<template #body="slotProps">
-										<InputNumber v-model="slotProps.data.minProjects" :min="0" class="w-full" />
-									</template>
-								</Column>
-								<Column field="maxProjects" header="Max Projects">
-									<template #body="slotProps">
-										<InputNumber v-model="slotProps.data.maxProjects" :min="0" class="w-full" />
-									</template>
-								</Column>
-								<Column header="Actions">
-									<template #body="slotProps">
-										<Button icon="i-mdi-delete" severity="danger" text @click="removeClientLimit(slotProps.index)" />
-									</template>
-								</Column>
-								<template #footer>
-									<Button label="Add Client Limit" icon="i-mdi-plus" class="mt-2" @click="addClientLimit" />
-								</template>
-							</DataTable>
-							<div v-if="invalidClientLimits.length > 0" class="mt-2 text-red-600 text-sm">
-								<ul>
-									<li v-for="(lim, idx) in invalidClientLimits" :key="idx">
-										Client {{ allClients.find(c => c.id === lim.clientId)?.name || lim.clientId }}: Max Projects must be greater than or equal to Min Projects.
-									</li>
-								</ul>
-							</div>
-						</div>
+						<PreferenceCurve v-model="preferenceExponent" />
+
+						<!-- Client Limits Card -->
+						<ClientLimits v-model="clientLimits" :all-clients="allClients" />
 					</div>
 					
 					<!-- Loading State -->
@@ -196,9 +92,8 @@
 	</div>
 </template>
 <script setup lang="ts">
-import AdminNavBar from '../../components/TeacherNavBar.vue';
+import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import Button from 'primevue/button';
-import Slider from 'primevue/slider';
 import { computed, onMounted, ref } from 'vue';
 import ApiService from '../../services/ApiService';
 import type { SolveRunDto } from '../../dtos/solve-run-dto';
@@ -206,6 +101,9 @@ import { useToast } from "primevue/usetoast";
 import { SolveRequestDto } from '../../dtos/solve-request-dto';
 import AllocationsTable from '../../components/AllocationsTable.vue';
 import PreferenceHistogram from '../../components/PreferenceHistogram.vue';
+import PreferenceCurve from '../../components/PreferenceCurve.vue';
+import WarningMessage from '../../components/WarningMessage.vue';
+import ClientLimits from '../../components/ClientLimits.vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import ProgressSpinner from 'primevue/progressspinner';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
@@ -216,10 +114,7 @@ import type { StudentInfoDto } from '../../dtos/student-info-dto';
 import { removeAutoAllocated } from '../../services/AllocationsServices';
 import { useRoute } from 'vue-router';
 import SolverReportService from '../../services/SolverReportService';
-import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
+
 import type { ClientDto } from '../../dtos/client-dto';
 
 const clientLimits = ref([] as ClientLimitsDto[])
@@ -243,21 +138,6 @@ const allStudentInfos = computed(() => {
 
 const allClients = ref<{ id: number, name: string }[]>([]);
 
-const addClientLimit = () => {
-	clientLimits.value.push({ clientId: allClients.value[0]?.id ?? 0, minProjects: 0, maxProjects: 1 });
-};
-const removeClientLimit = (idx: number) => {
-	clientLimits.value.splice(idx, 1);
-};
-
-const invalidClientLimits = computed(() =>
-  clientLimits.value.filter(lim => lim.maxProjects < lim.minProjects)
-);
-
-const rowClassForClientLimit = (data: ClientLimitsDto) => {
-  return { 'bg-red-100': data.maxProjects < data.minProjects };
-};
-
 const route = useRoute();
 const classId = route.params.classId as string;
 
@@ -269,23 +149,6 @@ const showOutdatedWarning = computed(() => {
 	);
 	return allStudentIds.size > allocatedStudentIds.size;
 });
-
-const svgPoints = computed(() => {
-	const m = preferenceExponent.value;
-	const points: string[] = [];
-	const substeps = 5;
-	for (let x = 0; x <= 10 * substeps; x++) {
-		// Calculate y = m^x, clamp to [0,1] for display
-		const y = Math.pow(m, x);
-		// Map x to [40, 260], y to [120, 20] (invert y for SVG)
-		const svgX = 40 + x * 22 / substeps;
-		const svgY = 120 - y * 100;
-		points.push(`${svgX},${svgY}`);
-	}
-	return points.join(' ');
-});
-
-
 
 onMounted(async () => {
 	allStudents.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`);

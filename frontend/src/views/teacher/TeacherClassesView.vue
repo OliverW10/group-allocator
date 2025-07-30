@@ -7,6 +7,12 @@
           label="Create New Class"
           @click="showCreateModal = true"
         />
+        <Button 
+          v-if="authStore.userInfo?.isAdmin"
+          label="Manage Teachers"
+          @click="navigateToTeachers"
+          severity="secondary"
+        />
         <LogoutButton />
       </div>
     </div>
@@ -176,8 +182,10 @@ import Dialog from 'primevue/dialog'
 import ApiService from '../../services/ApiService'
 import LogoutButton from '../../components/LogoutButton.vue'
 import { ClassResponseDto } from '../../dtos/class-response-dto'
+import { useAuthStore } from '../../store/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const classes = ref<ClassResponseDto[]>([])
 const showCreateModal = ref(false)
 const newClass = ref({ name: '' })
@@ -230,6 +238,10 @@ const navigateToSolver = (classId: number) => {
 
 const navigateToCode = (classId: number) => {
   router.push(`/teacher/${classId}/code/`)
+}
+
+const navigateToTeachers = () => {
+  router.push('/teachers')
 }
 
 const formatRelativeDate = (date: Date) => {

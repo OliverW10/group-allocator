@@ -17,15 +17,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<List<StudentInfoAndSubmission>>> GetAll(int classId)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-
-		// Check if teacher has access to this class
-		var hasAccess = await db.ClassTeachers
-			.AnyAsync(t => t.Teacher.Id == userId && t.Class.Id == classId);
-
-		if (!hasAccess)
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
 		{
-			return Forbid("You don't have access to this class");
+			return Forbid("Teacher is not in this class");
 		}
 
 		var students = await GetStudents(classId);
@@ -37,15 +31,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<List<StudentInfoAndSubmission>>> PostWhitelist(int classId, [FromForm] IFormFile file)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
-		// Check if teacher has access to this class
-		var hasAccess = await db.ClassTeachers
-			.AnyAsync(t => t.Teacher.Id == userId && t.Class.Id == classId);
-			
-		if (!hasAccess)
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
 		{
-			return Forbid("You don't have access to this class");
+			return Forbid("Teacher is not in this class");
 		}
 
 		if (file == null || file.Length == 0)
@@ -65,15 +53,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<List<StudentInfoAndSubmission>>> AddStudent(int classId, string email)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
-		// Check if teacher has access to this class
-		var hasAccess = await db.ClassTeachers
-			.AnyAsync(t => t.Teacher.Id == userId && t.Class.Id == classId);
-			
-		if (!hasAccess)
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
 		{
-			return Forbid("You don't have access to this class");
+			return Forbid("Teacher is not in this class");
 		}
 
 		if (string.IsNullOrWhiteSpace(email))
@@ -182,10 +164,40 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 		return Ok();
 	}
 
+	[HttpPost("import")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ActionResult> ImportStudents(int classId, [FromBody] IEnumerable<StudentInfoAndSubmission> preferences)
+	{
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
+		foreach (var preference in preferences)
+		{
+			var student = await db.Students.FirstOrDefaultAsync(s => s.Id == preference.StudentInfo.StudentId && s.Class.Id == classId);
+			if (student == null)
+			{
+				await Post(preference.StudentSubmission);
+				continue;
+			}
+
+			// TODO: given the use case of the export/import is if we lose the database, it should not use the project id's to record preferences
+			// this means we need to record the project name in the export/import, and maybe include the projects in the export as well
+		}
+
+		return Ok();
+	}
+
 	[HttpGet("populate/{classId:int}")]
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult> PopulateRandomPreferences(int classId)
 	{
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
 		var projects = await db.Projects.Where(p => p.Class.Id == classId).ToListAsync();
 		var students = await db.Students.Where(s => s.Class.Id == classId).ToListAsync();
 
@@ -225,20 +237,14 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 				return BadRequest("File is too large (>10MB)");
 		}
 
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		var user = await db.Users.FindAsync(userId);
-		if (user == null)
-		{
-			return Unauthorized("Not logged in.");
-		}
-
 		var fileBytes = new byte[file.Length];
 		await using (var stream = file.OpenReadStream())
 		{
 			await stream.ReadExactlyAsync(fileBytes);
 		}
 
-		var student = await db.Students.FirstOrDefaultAsync(s => s.Id == userId && s.Class.Id == classId);
+		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		var student = await db.Students.FirstOrDefaultAsync(s => s.User.Id == userId && s.Class.Id == classId);
 		if (student == null)
 		{
 			return BadRequest("Student not found");
@@ -350,15 +356,9 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<List<StudentInfoAndSubmission>>> DeleteStudent(int id, int classId)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
-		// Check if teacher has access to this class
-		var hasAccess = await db.ClassTeachers
-			.AnyAsync(t => t.Teacher.Id == userId && t.Class.Id == classId);
-			
-		if (!hasAccess)
+		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
 		{
-			return Forbid("You don't have access to this class");
+			return Forbid("Teacher is not in this class");
 		}
 
 		await db.Students.Where(s => s.Id == id && s.Class.Id == classId).ExecuteDeleteAsync();

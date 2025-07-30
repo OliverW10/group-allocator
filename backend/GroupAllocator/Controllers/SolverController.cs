@@ -11,7 +11,7 @@ namespace GroupAllocator.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(Policy = "TeacherOnly")]
-public class SolverController(IAllocationSolver solver, ApplicationDbContext db, PaymentService paymentService) : ControllerBase
+public class SolverController(IAllocationSolver solver, ApplicationDbContext db, PaymentService paymentService, IUserService userService) : ControllerBase
 {
 	[HttpGet]
 	public async Task<ActionResult<SolveRunDto?>> GetLatest(int classId)
@@ -106,6 +106,11 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 	[HttpPost]
 	public async Task<ActionResult<SolveRunDto?>> Solve(SolveRequestDto solveConfig)
 	{
+		if (!await userService.IsCurrentTeacherPartOfClass(solveConfig.ClassId, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
 		var @class = await db.Classes
 			.Include(c => c.Students)
 			.Include(c => c.Payments)
@@ -126,7 +131,7 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 		{
 			Timestamp = DateTime.UtcNow,
 			PreferenceExponent = solveConfig.PreferenceExponent,
-			Class = @class
+			Class = @class,
 		};
 
 		var assignments = solver.AssignStudentsToGroups(solveRun,

@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +11,14 @@ public interface IUserService
 	Task<UserModel> GetOrCreateUserAsync(string name, string email);
 	Task CreateStudentAllowlist(int classId, StreamReader reader);
 	Task AddStudentToClass(int classId, string email);
+	Task<bool> IsCurrentTeacherPartOfClass(int classId, ClaimsPrincipal user, bool isOwner = false);
 }
 
 public class UserService(ApplicationDbContext db, IConfiguration configuration) : IUserService
 {
 	public async Task<UserModel> GetOrCreateUserAsync(string name, string email)
 	{
+		email = email.ToLowerInvariant();
 		var existingUser = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
 
 		if (existingUser is null)
@@ -30,6 +34,7 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 	}
 	async Task<UserModel> CreateNewUser(string name, string email)
 	{
+		email = email.ToLowerInvariant();
 		var newUser = new UserModel { Email = email, Name = name, IsAdmin = IsPredeterminedAdmin(email) };
 		db.Users.Add(newUser);
 		await db.SaveChangesAsync();
@@ -49,17 +54,11 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 
 	private async Task<UserModel> GetOrCreateUserByEmail(string email)
 	{
+		email = email.ToLowerInvariant();
 		var existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
 		if (existingUser == null)
 		{
-			existingUser = new UserModel
-			{
-				Email = email,
-				Name = email.Split("@").First(),
-				IsAdmin = IsPredeterminedAdmin(email),
-			};
-			db.Users.Add(existingUser);
-			await db.SaveChangesAsync();
+			existingUser = await CreateNewUser(email.Split("@").First(), email);
 		}
 		return existingUser;
 	}
@@ -104,5 +103,11 @@ public class UserService(ApplicationDbContext db, IConfiguration configuration) 
 		var user = await GetOrCreateUserByEmail(email);
 		await AddStudentToClassIfNotExists(user, @class);
 		await db.SaveChangesAsync();
+	}
+
+	public Task<bool> IsCurrentTeacherPartOfClass(int classId, ClaimsPrincipal user, bool isOwner = false)
+	{
+		var userId = int.Parse(user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		return db.ClassTeachers.AnyAsync(ct => ct.Teacher.Id == userId && ct.Class.Id == classId && (isOwner ? ct.Role == ClassTeacherRole.Owner : true));
 	}
 }

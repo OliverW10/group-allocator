@@ -1,9 +1,8 @@
 <template>
-    <AdminNavBar :classId="classId" />
+    <TeacherNavBar :class-id="classId" />
     <div class="px-4 py-2 mt-4 flex flex-col gap-4">
         <div class="flex justify-between items-center">
             <h1 class="heading">Projects</h1>
-            
         </div>
         <Divider style="margin: 0;" />
         <div class="flex justify-between items-end">
@@ -132,7 +131,7 @@ import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
-import AdminNavBar from '../../components/TeacherNavBar.vue';
+import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import FileUploader from '../../components/FileUploader.vue';
 import type { FileUploadSelectEvent } from 'primevue/fileupload';
 import ApiService from '../../services/ApiService';

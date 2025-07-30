@@ -71,6 +71,11 @@ if (stripeKey == null){
 }
 StripeConfiguration.ApiKey = stripeKey;
 
+if (!builder.Environment.IsDevelopment())
+{
+	builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+}
+
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();

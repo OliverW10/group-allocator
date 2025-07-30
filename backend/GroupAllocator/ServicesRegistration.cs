@@ -1,4 +1,3 @@
-using GroupAllocator.Database;
 using GroupAllocator.Services;
 
 namespace GroupAllocator;
