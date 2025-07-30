@@ -75,7 +75,7 @@ const loadTeachers = async () => {
 		if (response) {
 			teachers.value = response
 		}
-	} catch (error) {
+	} catch {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to get teachers`, life: 3000 });
 	} finally {
 		isLoading.value = false
@@ -92,7 +92,7 @@ const addTeacher = async () => {
 
 		teachers.value.push({ email: newTeacherEmail.value.trim(), isOwner: false })
 		newTeacherEmail.value = ''
-	} catch (error) {
+	} catch {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to add teacher`, life: 3000 });
 	} finally {
 		isLoading.value = false
@@ -107,7 +107,7 @@ const deleteTeacher = async (teacherEmail: string) => {
 	try {
 		await ApiService.delete(`/class/${classId}/remove-teacher/${encodeURIComponent(teacherEmail)}`)
 		teachers.value = teachers.value.filter(t => t.email !== teacherEmail)
-	} catch (error) {
+	} catch {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to remove teacher ${teacherEmail}`, life: 3000 });
 	} finally {
 		isLoading.value = false
