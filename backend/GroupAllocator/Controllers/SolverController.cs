@@ -113,6 +113,8 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 
 		var @class = await db.Classes
 			.Include(c => c.Students)
+			.Include(c => c.Projects)
+			.Include(c => c.Clients)
 			.Include(c => c.Payments)
 			.FirstOrDefaultAsync(c => c.Id == solveConfig.ClassId);
 		if (@class == null)
@@ -135,10 +137,10 @@ public class SolverController(IAllocationSolver solver, ApplicationDbContext db,
 		};
 
 		var assignments = solver.AssignStudentsToGroups(solveRun,
-			db.Students.ToList(),
-			db.Projects.ToList(),
-			db.Clients.ToList(),
-			db.Preferences.Include(p => p.Student).Include(p => p.Project).ToList(),
+			@class.Students.ToList(),
+			@class.Projects.ToList(),
+			@class.Clients.ToList(),
+			db.Preferences.Include(p => p.Student).Include(p => p.Project).Where(p => p.Project.Class.Id == solveConfig.ClassId).ToList(),
 			solveConfig.PreAllocations.ToList(),
 			solveConfig.ClientLimits.ToList(),
 			solveConfig.PreferenceExponent

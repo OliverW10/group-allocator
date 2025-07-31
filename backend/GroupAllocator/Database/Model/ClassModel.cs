@@ -9,5 +9,7 @@ public class ClassModel
 
 	public ICollection<ClassTeacherModel> Teachers { get; set; } = null!;
 	public ICollection<StudentModel> Students { get; set; } = null!;
+	public ICollection<ProjectModel> Projects { get; set; } = null!;
+	public ICollection<ClientModel> Clients{ get; set; } = null!;
 	public ICollection<PaymentModel> Payments { get; set; } = null!;
 }
