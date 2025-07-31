@@ -30,7 +30,7 @@ public class ProjectsController(ApplicationDbContext db, IUserService userServic
 
 		using var reader = new StreamReader(file.OpenReadStream());
 		var @class = db.Classes.Find(classId) ?? throw new InvalidOperationException($"No class with id {classId}");
-		var allClients = db.Clients.ToList();
+		var allClients = db.Clients.Include(c => c.Class).ToList();
 		string? line;
 		var header = "project_name,client,min_students,max_students,requires_nda,min_instances,max_instances";
 		var expectedCols = header.Split(',').Length;
@@ -49,7 +49,7 @@ public class ProjectsController(ApplicationDbContext db, IUserService userServic
 
 			var clientName = fields[1];
 			var client = GetOrAddClient(clientName);
-
+			
 			db.Projects.Add(new ProjectModel()
 			{
 				Name = fields[0],
@@ -67,7 +67,7 @@ public class ProjectsController(ApplicationDbContext db, IUserService userServic
 
 		ClientModel GetOrAddClient(string name)
 		{
-			var existingClient = allClients.FirstOrDefault(x => x.Name == name);
+			var existingClient = allClients.FirstOrDefault(x => x.Name == name && x.Class.Id == classId);
 			if (existingClient is not null)
 			{
 				return existingClient;
