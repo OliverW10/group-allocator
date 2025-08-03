@@ -207,7 +207,7 @@ const addStudent = async () => {
 }
 
 const downloadStudentsJson = () => {
-    var studentsWithProjects = students.value.map(s => {
+    const studentsWithProjects = students.value.map(s => {
         return {
             id: s.studentInfo.studentId,
             email: s.studentInfo.email,
