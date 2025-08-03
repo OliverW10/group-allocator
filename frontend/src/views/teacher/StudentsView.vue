@@ -12,6 +12,12 @@
 		</DataTable>
 		<Button label="Done" severity="secondary" class="mt-4" @click="fileModal = null" />
 	</Dialog>
+    <Dialog :visible="noteModal != null" :modal="true" :closable="false" :draggable="false" :header="'Notes ' + students.find((student) => student.studentInfo.studentId == fileModal)?.studentInfo.name" :style="{ width: '50vw' }">
+        <ScrollPanel>
+            <p>{{ students.find(s => s.studentInfo.studentId == noteModal)?.studentSubmission.notes }}</p>
+        </ScrollPanel>
+		<Button label="Done" severity="secondary" class="mt-4" @click="noteModal = null" />
+	</Dialog>
 	<Dialog :visible="addStudentModal" :modal="true" :closable="false" :draggable="false" header="Add Student" :style="{ width: '30vw' }">
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
@@ -41,34 +47,42 @@
             <Button label="Add Student" icon="i-mdi-plus" @click="addStudentModal = true" />
             <Button label="Download Students JSON" icon="i-mdi-download" @click="downloadStudentsJson" />
         </div>
-        <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
-            <Column field="studentInfo.name" header="Name"></Column>
-            <Column field="studentInfo.email" header="Email"></Column>
-            <Column field="willSignContract" header="NDA?">
-                <template #body="slotProps">
-                    {{ slotProps.data.studentSubmission.willSignContract ? '✔️' : '❌' }}
+        <div>
+            <p class="text-gray-500 pb-3">{{ students.length }} Students</p>
+            <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
+                <Column field="studentInfo.name" header="Name"></Column>
+                <Column field="studentInfo.email" header="Email"></Column>
+                <Column field="willSignContract" header="NDA?">
+                    <template #body="slotProps">
+                        {{ slotProps.data.studentSubmission.willSignContract ? '✔️' : '❌' }}
+                    </template>
+                </Column>
+                <Column field="orderedPreferences" header="Preferences">
+                    <template #body="slotProps">
+                        {{slotProps.data.studentSubmission.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
+                            projId == proj.id)?.name).join(', ')}}
+                    </template>
+                </Column>
+                <Column field="notes" header="Statement">
+                    <template #body="slotProps">
+                        <Button :label=truncate(slotProps.data.studentSubmission.notes) variant="text" iconPos="right" severity="contrast" class="min-w-3xs" icon="i-mdi-eye" @click="() => noteModal = slotProps.data.studentInfo.studentId"></Button>
+                    </template>
+                </Column>
+                <Column field="actions" header="Actions">
+                    <template #body="slotProps">
+                        <div class="flex">
+                            <Button severity="info" class="i-mdi-files" @click="showFiles(slotProps.data.studentInfo.studentId)" />
+                            <Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.studentInfo.studentId)" />
+                        </div>
+                    </template>
+                </Column>
+                <template #empty>
+                    <div class="text-center p-4 text-gray-500">
+                    No students yet, either share the class code with students or upload a list of students.
+                    </div>
                 </template>
-            </Column>
-            <Column field="orderedPreferences" header="Preferences">
-                <template #body="slotProps">
-                    {{slotProps.data.studentSubmission.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
-                        projId == proj.id)?.name).join(', ')}}
-                </template>
-            </Column>
-            <Column field="actions" header="Actions">
-                <template #body="slotProps">
-					<div class="flex">
-						<Button severity="info" class="i-mdi-files" @click="showFiles(slotProps.data.studentInfo.studentId)" />
-						<Button severity="danger" class="i-mdi-delete" @click="remove(slotProps.data.studentInfo.studentId)" />
-					</div>
-                </template>
-            </Column>
-            <template #empty>
-                <div class="text-center p-4 text-gray-500">
-                  No students yet, either share the class code with students or upload a list of students.
-                </div>
-            </template>
-        </DataTable>
+            </DataTable>
+        </div>
     </div>
 </template>
 <script setup lang="ts">
@@ -81,6 +95,7 @@ import Button from 'primevue/button';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import InputText from 'primevue/inputtext';
+import ScrollPanel from 'primevue/scrollpanel';
 import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
@@ -92,6 +107,7 @@ const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const toast = useToast();
 const fileModal = ref(null as null | number);
+const noteModal = ref(null as null | number);
 const addStudentModal = ref(false);
 const addingStudent = ref(false);
 const newStudent = ref('');
@@ -191,6 +207,24 @@ const addStudent = async () => {
 }
 
 const downloadStudentsJson = () => {
-    downloadData(JSON.stringify(students.value, null, 2), 'application/json', 'json', 'students');
+    const studentsWithProjects = students.value.map(s => {
+        return {
+            id: s.studentInfo.studentId,
+            email: s.studentInfo.email,
+            name: s.studentInfo.name,
+            notes: s.studentSubmission.notes,
+            willSignContract: s.studentSubmission.willSignContract,
+            preferences: s.studentSubmission.orderedPreferences.map(prefId => projects.value.find(p => p.id == prefId)),
+        }
+    })
+    downloadData(JSON.stringify(studentsWithProjects, null, 2), 'application/json', 'json', 'students');
 };
+
+const truncate = (s: string, len: number = 15) => {
+    if (s.length > len){
+        return s.slice(0, len-1) + "…";
+    } else {
+        return s;
+    }
+}
 </script>
