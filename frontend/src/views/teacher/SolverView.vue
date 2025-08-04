@@ -44,7 +44,7 @@
 					<div v-else class="flex items-center justify-center py-12">
 						<div class="text-center">
 							<ProgressSpinner class="mb-4" />
-							<p class="text-gray-600">Loading solver configuration...</p>
+							<p class="text-gray-600">Running solver...</p>
 						</div>
 					</div>
 				</div>
