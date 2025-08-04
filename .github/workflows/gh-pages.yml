@@ -52,6 +52,8 @@ jobs:
       
       - name: Build frontend
         working-directory: ./frontend
+        env:
+          VITE_USE_HASH_ROUTER: true
         run: pnpm run build-pages
       
       - name: Setup Pages

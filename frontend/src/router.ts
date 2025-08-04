@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
     {
@@ -42,8 +42,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./views/teacher/TeachersAdminPage.vue'),
     },
 ]
-
 export default createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: import.meta.env.VITE_USE_HASH_ROUTER ? createWebHashHistory(import.meta.env.BASE_URL) : createWebHistory(import.meta.env.BASE_URL),
     routes
 })
