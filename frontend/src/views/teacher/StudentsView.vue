@@ -214,7 +214,7 @@ const downloadStudentsJson = () => {
             name: s.studentInfo.name,
             notes: s.studentSubmission.notes,
             willSignContract: s.studentSubmission.willSignContract,
-            preferences: s.studentSubmission.orderedPreferences.map(prefId => projects.value.find(p => p.id == prefId)),
+            preferences: s.studentSubmission.orderedPreferences.map(prefId => projects.value.find(p => p.id == prefId)?.name),
         }
     })
     downloadData(JSON.stringify(studentsWithProjects, null, 2), 'application/json', 'json', 'students');

@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
 		{
 			policy
 				.AllowCredentials()
-				.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://group-allocator.pages.dev", "https://*.group-allocator.pages.dev")
+				.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://group-allocator.pages.dev", "https://*.group-allocator.pages.dev", "https://oliverw10.github.io")
 				.AllowAnyMethod()
 				.AllowAnyHeader();
 		});
