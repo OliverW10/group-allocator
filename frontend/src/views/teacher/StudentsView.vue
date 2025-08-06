@@ -49,21 +49,37 @@
         </div>
         <div>
             <p class="text-gray-500 pb-3">{{ students.length }} Students</p>
-            <DataTable :value="students" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
-                <Column field="studentInfo.name" header="Name"></Column>
-                <Column field="studentInfo.email" header="Email"></Column>
-                <Column field="willSignContract" header="NDA?">
+            <DataTable v-model:filters="filters" filterDisplay="row" :value="studentsWithPreferences" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
+                <Column field="studentInfo.name" header="Name">
+                    <template #body="{ data }">
+                        {{ data.studentInfo.name }}
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by name" />
+                    </template>
+                </Column>
+                <Column field="studentInfo.email" header="Email">
+                    <template #body="{ data }">
+                        {{ data.studentInfo.email }}
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by email" />
+                    </template>
+                </Column>
+                <Column field="studentSubmission.willSignContract" header="NDA?">
                     <template #body="slotProps">
                         {{ slotProps.data.studentSubmission.willSignContract ? '✔️' : '❌' }}
                     </template>
                 </Column>
-                <Column field="orderedPreferences" header="Preferences">
+                <Column field="preferencesCombined" header="Preferences">
                     <template #body="slotProps">
-                        {{slotProps.data.studentSubmission.orderedPreferences.map((projId: number) => projects.find((proj: ProjectDto) =>
-                            projId == proj.id)?.name).join(', ')}}
+                        {{slotProps.data.preferencesCombined}}
+                    </template>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by preferences" class="w-full" />
                     </template>
                 </Column>
-                <Column field="notes" header="Statement">
+                <Column field="studentSubmission.notes" header="Statement">
                     <template #body="slotProps">
                         <Button :label=truncate(slotProps.data.studentSubmission.notes) variant="text" iconPos="right" severity="contrast" class="min-w-3xs" icon="i-mdi-eye" @click="() => noteModal = slotProps.data.studentInfo.studentId"></Button>
                     </template>
@@ -86,7 +102,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import ApiService from '../../services/ApiService';
@@ -101,8 +117,22 @@ import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
 import { downloadData } from '../../helpers/download';
+import { FilterMatchMode } from '@primevue/core/api';
+
+interface StudentTableRow extends StudentInfoAndSubmission {
+    preferencesCombined: string;
+}
 
 const students = ref([] as StudentInfoAndSubmission[]);
+const studentsWithPreferences = computed(() => {
+    return students.value.map(s => {
+        return {
+            ...s,
+            preferencesCombined: s.studentSubmission.orderedPreferences.map((projId: number) => projects.value.find((proj: ProjectDto) =>
+                projId == proj.id)?.name).join(', ')
+        } as StudentTableRow;
+    })
+})
 const projects = ref([] as ProjectDto[])
 const loading = ref(false);
 const toast = useToast();
@@ -113,6 +143,11 @@ const addingStudent = ref(false);
 const newStudent = ref('');
 const route = useRoute();
 const classId = route.params.classId as string;
+const filters = ref({
+    'studentInfo.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'studentInfo.email': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'preferencesCombined': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+});
 
 const showFiles = (id: number) => {
 	fileModal.value = id;
