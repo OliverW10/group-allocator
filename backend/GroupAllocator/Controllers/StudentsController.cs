@@ -4,6 +4,7 @@ using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 
@@ -85,13 +86,14 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpGet("me")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<ActionResult<StudentSubmissionDto>> Get(int classId)
+	public async Task<ActionResult<StudentSubmissionDto>> Get([BindRequired] int classId)
 	{
 		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
+		Console.WriteLine($"userId: {userId}, classId: {classId}");
 		var student = await db.Students
 			.Include(s => s.User)
 			.Include(s => s.Files)
+			.Include(s => s.Class)
 			.Include(s => s!.Preferences)
 				.ThenInclude(p => p.Project)
 			.Where(s => s.User.Id == userId && s.Class.Id == classId)

@@ -92,6 +92,7 @@ const addTeacher = async () => {
 
 		teachers.value.push({ email: newTeacherEmail.value.trim(), isOwner: false })
 		newTeacherEmail.value = ''
+		toast.add({ severity: 'success', summary: 'Success', detail: `Teacher ${newTeacherEmail.value.trim()} added successfully`, life: 3000 });
 	} catch {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to add teacher`, life: 3000 });
 	} finally {
@@ -107,6 +108,7 @@ const deleteTeacher = async (teacherEmail: string) => {
 	try {
 		await ApiService.delete(`/class/${classId}/remove-teacher/${encodeURIComponent(teacherEmail)}`)
 		teachers.value = teachers.value.filter(t => t.email !== teacherEmail)
+		toast.add({ severity: 'success', summary: 'Success', detail: `Teacher ${teacherEmail} removed successfully`, life: 3000 });
 	} catch {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to remove teacher ${teacherEmail}`, life: 3000 });
 	} finally {

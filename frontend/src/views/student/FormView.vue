@@ -113,6 +113,28 @@
 			</template>
 		</Card>
 		<LogoutButton />
+		
+		<!-- Success Dialog -->
+		<Dialog 
+			v-model:visible="showSuccessDialog" 
+			modal 
+			header="Success"
+			:closable="true"
+			:close-on-escape="true"
+			:style="{ width: '90vw', maxWidth: '500px' }"
+		>
+			<p class="text-base mb-2">Your project preferences have been successfully submitted.</p>
+			<p class="text-base mb-4">You can return to this page anytime to update your preferences.</p>
+			
+			<div class="flex flex-col sm:flex-row gap-2 justify-center">
+				<Button 
+					label="Close" 
+					@click="showSuccessDialog = false"
+					class="flex-1 sm:flex-none"
+					severity="secondary"
+				/>
+			</div>
+		</Dialog>
 	</div>
 </template>
 
@@ -135,6 +157,7 @@ import type { FileDetailsDto } from "../../dtos/file-details-dto";
 import type { StudentSubmissionDto } from "../../dtos/student-submission-dto";
 import { Column, DataTable } from "primevue";
 import { useRoute } from 'vue-router';
+import Dialog from "primevue/dialog";
 
 const toast = useToast();
 const route = useRoute();
@@ -147,6 +170,7 @@ const maxNumberOfPreferences = 10;
 const warningMessage = "A maximum of " + maxNumberOfPreferences + " preferences has been selected. Anything more than the top " + maxNumberOfPreferences + " preferences will not be saved";
 let exceededPreferenceLimit = false
 const loading = ref(false)
+const showSuccessDialog = ref(false)
 
 const projectsRaw = ref([] as ProjectDto[]);
 const projects = ref([[], []] as ProjectDto[][]);
@@ -166,7 +190,7 @@ onMounted(async () => {
 	loading.value = true
 	try{
 		await loadProjects()
-		const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>("/students/me")
+		const maybeStudent = await ApiService.get<StudentSubmissionDto | undefined>(`/students/me?classId=${classId}`)
 		if (maybeStudent) {
 			console.log(maybeStudent)
 			files.value = maybeStudent.files ?? []
@@ -241,7 +265,7 @@ const submitForm = async () => {
 	if (result == null) {
 		toast.add({ severity: 'error', summary: 'Failed', detail: 'Submission failed. If the issue persists contact developers', life: 5000 });
 	} else {
-		toast.add({ severity: 'success', summary: 'Success', detail: 'Submitted preferences', life: 5000 });
+		showSuccessDialog.value = true;
 	}
 };
 
