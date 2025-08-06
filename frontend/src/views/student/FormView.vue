@@ -274,12 +274,12 @@ const onUpload = async (event: FileUploadUploaderEvent) => {
 		for (let i = 0; i < event.files.length; i++) {
 			const formData = new FormData()
 			formData.append('file', event.files[i])
-			await ApiService.postRaw('students/file', formData)
+			await ApiService.postRaw(`students/file?classId=${classId}`, formData)
 		}
 	} else { // File
 		const formData = new FormData()
 		formData.append('file', event.files)
-		await ApiService.postRaw('students/file', formData)
+		await ApiService.postRaw(`students/file?classId=${classId}`, formData)
 	}
 
 	files.value = await ApiService.get<FileDetailsDto[]>(`/students/files?classId=${classId}`)

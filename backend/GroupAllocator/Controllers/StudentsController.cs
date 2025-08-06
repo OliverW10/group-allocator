@@ -229,7 +229,7 @@ public class StudentsController(ApplicationDbContext db, IUserService userServic
 
 	[HttpPost("file")]
 	[Authorize(Policy = "StudentOnly")]
-	public async Task<ActionResult<FileDetailsDto>> PostFile(int classId, [FromForm] IFormFile file)
+	public async Task<ActionResult<FileDetailsDto>> PostFile([BindRequired] int classId, [FromForm] IFormFile file)
 	{
 		switch (file.Length)
 		{
