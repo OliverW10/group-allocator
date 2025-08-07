@@ -1,7 +1,7 @@
 <template>
 	<TeacherNavBar :class-id="classId" />
 	<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-		<div class="max-w-7xl mx-auto">
+		<div class="mx-auto">
 			<!-- Header Section -->
 			<div class="mb-8">
 				<h1 class="text-3xl font-bold text-gray-900 mb-2">Group Allocation Solver</h1>
