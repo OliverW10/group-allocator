@@ -65,10 +65,12 @@ builder.Services.AddAuthorization(options =>
 	options.AddPolicy("TeacherOnly", policy => policy.RequireClaim(AuthRolesConstants.RoleClaimName, AuthRolesConstants.Teacher));
 	options.AddPolicy("StudentOnly", policy => policy.RequireClaim(AuthRolesConstants.RoleClaimName, AuthRolesConstants.Student));
 });
+var dbConnectionString = builder.Configuration.GetConnectionString("MainDb");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options
-	.UseNpgsql(builder.Configuration.GetConnectionString("MainDb"))
-	// .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
+	.UseNpgsql(dbConnectionString)
+// .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
 );
+Console.WriteLine($"Using database: '{dbConnectionString}'");
 builder.Services.RegisterApplicationServices();
 var stripeKey = builder.Configuration.GetValue<string>("Stripe:SecretKey");
 if (stripeKey == null){
