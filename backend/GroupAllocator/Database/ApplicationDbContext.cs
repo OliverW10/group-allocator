@@ -16,5 +16,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<ClientLimitModel> ClientLimits { get; set; } = null!;
 	public DbSet<StudentAssignmentModel> StudentAssignments { get; set; } = null!;
 	public DbSet<StudentModel> Students { get; set; } = null!;
+	public DbSet<StudentFriendModel> StudentFriends { get; set; } = null!;
 	public DbSet<UserModel> Users { get; set; } = null!;
 }
