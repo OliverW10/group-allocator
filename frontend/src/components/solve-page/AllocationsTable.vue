@@ -31,13 +31,13 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue';
-import { ProjectDto } from '../dtos/project-dto';
+import { ProjectDto } from '../../dtos/project-dto';
 import Select, { type SelectChangeEvent } from 'primevue/select';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import type { AllocatedStudentInfo, PartialAllocation } from '../model/PartialAllocation';
-import { removeAutoAllocated } from '../services/AllocationsServices';
+import type { AllocatedStudentInfo, PartialAllocation } from '../../model/PartialAllocation';
+import { removeAutoAllocated } from '../../services/AllocationsServices';
 
 const props = defineProps<{
     students: AllocatedStudentInfo[],

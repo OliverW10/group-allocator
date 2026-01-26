@@ -1,9 +1,9 @@
 <template>
-    <div class="flex items-center gap-1 sm:gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 sm:px-3 sm:py-2">
-        <span class="hidden sm:inline text-gray-700">
+    <div class="flex items-center bg-gray-50 dark:bg-gray-700 border rounded-lg px-2 py-1 sm:px-3 sm:py-2 border-gray-200 dark:border-gray-600">
+        <span class="sm:inline text-gray-700 dark:text-gray-50">
             Logged in as: {{ authStore.userInfo?.email.split('@')[0] }}
         </span>
-        <span class="sm:hidden text-gray-700 text-sm">
+        <span class="sm:hidden text-gray-700 dark:text-gray-50 text-sm">
             {{ authStore.userInfo?.email.split('@')[0] }}
         </span>
         <Button severity="danger" label="Logout" icon="i-mdi-logout" class="p-button-text text-sm sm:text-base" :loading="loading" @click="logout" />

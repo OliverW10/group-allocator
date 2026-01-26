@@ -148,7 +148,7 @@ const copyCode = async () => {
 };
 
 const goBack = () => {
-    router.push(`/teacher`);
+    router.back();
 };
 
 onMounted(() => {

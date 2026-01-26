@@ -102,6 +102,10 @@
 						/>
 					</div>
 
+					<div>
+						Friend selector
+					</div>
+
 					<Button 
 						label="Save Preferences" 
 						class="mt-4 w-full sm:w-auto" 

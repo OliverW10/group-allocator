@@ -7,6 +7,15 @@
 	<link rel="icon" href="data:," />
 	<title>Group Allocator</title>
 	<script type="text/javascript">
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.toggle('dark')
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        const incoming = event.matches ? "dark" : "light";
+        const outgoing = event.matches ? "light" : "dark";
+        document.documentElement.classList.remove(outgoing)
+        document.documentElement.classList.add(incoming)
+      });
       // Single Page Apps for GitHub Pages
       // MIT License
       // https://github.com/rafgraph/spa-github-pages

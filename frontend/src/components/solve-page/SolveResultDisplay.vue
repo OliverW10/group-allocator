@@ -3,8 +3,8 @@
     :model="downloadOptions" @click="SolverReportService.downloadFullCsvReport(solveResult!)" />
 </template>
 <script setup lang="ts">
-import { SolveRunDto } from '../dtos/solve-run-dto';
-import SolverReportService from '../services/SolverReportService';
+import { SolveRunDto } from '../../dtos/solve-run-dto';
+import SolverReportService from '../../services/SolverReportService';
 import type { MenuItem } from 'primevue/menuitem';
 import SplitButton from 'primevue/splitbutton'
 

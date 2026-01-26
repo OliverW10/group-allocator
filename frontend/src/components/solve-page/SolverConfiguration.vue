@@ -16,7 +16,7 @@
     <h2>Weightings</h2>
 </template>
 <script setup lang="ts">
-import type { SolveRequestDto } from '../dtos/solve-request-dto';
+import type { SolveRequestDto } from '../../dtos/solve-request-dto';
 
 const solveRequest = defineModel<SolveRequestDto>();
 

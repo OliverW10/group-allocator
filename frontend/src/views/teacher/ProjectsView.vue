@@ -7,14 +7,18 @@
         <Divider style="margin: 0;" />
         <div class="flex justify-between items-end">
             <FileUploader label="Import Projects" @projects-changed="uploadProjects">
-                <p>
                     Please upload a csv file with the following format and no header
-                    <br />
-                    <code>project_name, client, min_students, max_students, requires_nda, min_instances, max_instances</code>
-                    <br />
-                    New projects will be added in addition to existing ones.<br>
-                    To modify a project, delete it from the table and upload a file with just the new values for that project.
-                </p>
+                    <table>
+                        <thead>
+                            <tr class="">
+                                <th
+                                    v-for="col of ['project_name', 'client', 'min_students', 'max_students', 'requires_nda', 'min_instances', 'max_instances']"
+                                    class="border border-black p-2"
+                                >{{ col }}</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    New projects will be added in addition to existing ones.
             </FileUploader>
             <Button 
                 label="Create Project" 

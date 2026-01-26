@@ -74,7 +74,7 @@
 			</div>
 
 			<!-- Right Background Section (1/3 width) - Hidden on mobile -->
-			<div class="hidden md:block w-1/3 bg-blue-600 relative">
+			<div class="hidden md:block w-1/3 bg-blue-600 relative dark:bg-blue-800">
 				<!-- Login Buttons Section - Positioned on top of blue section -->
 				<div class="absolute top-4 right-4 z-10 flex gap-2">
 					<Button class="flex items-center text-sm" label="Sign in Teacher" @click="loginGoogle('teacher')" />

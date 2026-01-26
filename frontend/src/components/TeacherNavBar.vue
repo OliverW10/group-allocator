@@ -46,7 +46,7 @@ const items = ref([
     command: () => router.push(`/teacher/${classId.value}/solver`)
 },
 {
-    label: 'Teachers',
+    label: 'Admin',
     icon: 'i-mdi-account-group',
     command: () => router.push(`/teacher/${classId.value}/teachers`)
 },

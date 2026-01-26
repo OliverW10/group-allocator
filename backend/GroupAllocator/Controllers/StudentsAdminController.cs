@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 namespace GroupAllocator.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("students")]
 public class StudentsAdminController(ApplicationDbContext db, IUserService userService) : ControllerBase
 {
     [HttpGet]

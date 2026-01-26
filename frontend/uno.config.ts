@@ -12,4 +12,5 @@ export default defineConfig({
 		}),
 		presetMini(),
 	],
+	darkMode: 'class',
 })

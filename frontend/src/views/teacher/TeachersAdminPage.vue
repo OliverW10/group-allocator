@@ -1,9 +1,7 @@
 <template>
 	<TeacherNavBar :class-id="classId" />
-	<div class="px-4 py-2 mt-4 flex flex-col gap-4 ml-4">
-        <div class="flex justify-between items-center">
-            <h1 class="heading">Teachers</h1>
-        </div>
+	<div class="px-4 py-2 flex flex-col gap-4 ml-4">
+		<h1 class="heading">Manage Teachers</h1>
 
 		<div class="flex gap-2 ml-4">
 			<InputText v-model="newTeacherEmail" placeholder="Teacher Email" />
@@ -37,6 +35,12 @@
 				</Column>
 			</DataTable>
 		</div>
+
+		<h1 class="heading">Configure Student Form</h1>
+		<div class="flex">
+			<Checkbox name="friends-checkbox" v-model="friendsEnabled" binary class="mx-2" />
+			<label for="friends-checkbox">Enable Selecting Partner Preferences</label>
+		</div>
 	</div>
 </template>
 
@@ -52,10 +56,12 @@ import { useToast } from 'primevue/usetoast';
 import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import type { TeacherDto } from '../../dtos/teacher-dto'
 import { useAuthStore } from '../../store/auth'
+import Checkbox from 'primevue/checkbox';
 
 const teachers = ref<TeacherDto[]>([])
 const newTeacherEmail = ref('')
 const isLoading = ref(false)
+const friendsEnabled = ref(false)
 
 const toast = useToast();
 const route = useRoute();
