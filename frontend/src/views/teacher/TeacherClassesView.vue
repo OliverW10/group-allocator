@@ -10,8 +10,8 @@
         <Button 
           v-if="authStore.userInfo?.isAdmin"
           label="Manage Teachers"
-          @click="navigateToTeachers"
           severity="secondary"
+          @click="navigateToTeachers"
         />
         <LogoutButton />
       </div>
@@ -152,17 +152,17 @@
       <template #footer>
         <div class="flex justify-end gap-2">
           <Button
-            @click="showPurchaseModal = false"
             label="Cancel"
             severity="secondary"
             text
             :disabled="isPurchaseLoading"
+            @click="showPurchaseModal = false"
           />
           <Button
-            @click="handlePurchase"
             label="Proceed to Purchase"
             icon="i-mdi-check"
             :loading="isPurchaseLoading"
+            @click="handlePurchase"
           />
         </div>
       </template>

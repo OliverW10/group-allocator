@@ -26,7 +26,7 @@
 			</div>
 			<div class="flex gap-2 justify-end">
 				<Button label="Cancel" severity="secondary" @click="addStudentModal = false" />
-				<Button label="Add Student" severity="success" @click="addStudent" :loading="addingStudent" />
+				<Button label="Add Student" severity="success" :loading="addingStudent" @click="addStudent" />
 			</div>
 		</div>
 	</Dialog>
@@ -49,13 +49,13 @@
         </div>
         <div>
             <p class="text-gray-500 pb-3">{{ students.length }} Students</p>
-            <DataTable v-model:filters="filters" filterDisplay="row" :value="studentsWithPreferences" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
+            <DataTable v-model:filters="filters" filter-display="row" :value="studentsWithPreferences" :loading="loading" :paginator="true" :rows="10" :rows-per-page-options="[5, 10, 20, 50]" :row-class="rowClass">
                 <Column field="studentInfo.name" header="Name">
                     <template #body="{ data }">
                         {{ data.studentInfo.name }}
                     </template>
                     <template #filter="{ filterModel, filterCallback }">
-                        <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by name" />
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by name" @input="filterCallback()" />
                     </template>
                 </Column>
                 <Column field="studentInfo.email" header="Email">
@@ -63,7 +63,7 @@
                         {{ data.studentInfo.email }}
                     </template>
                     <template #filter="{ filterModel, filterCallback }">
-                        <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by email" />
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by email" @input="filterCallback()" />
                     </template>
                 </Column>
                 <Column field="studentSubmission.willSignContract" header="NDA?">
@@ -76,12 +76,12 @@
                         {{slotProps.data.preferencesCombined}}
                     </template>
                     <template #filter="{ filterModel, filterCallback }">
-                        <InputText v-model="filterModel.value" type="text" @input="filterCallback()" placeholder="Search by preferences" class="w-full" />
+                        <InputText v-model="filterModel.value" type="text" placeholder="Search by preferences" class="w-full" @input="filterCallback()" />
                     </template>
                 </Column>
                 <Column field="studentSubmission.notes" header="Statement">
                     <template #body="slotProps">
-                        <Button :label=truncate(slotProps.data.studentSubmission.notes) variant="text" iconPos="right" severity="contrast" class="min-w-3xs" icon="i-mdi-eye" @click="() => noteModal = slotProps.data.studentInfo.studentId"></Button>
+                        <Button :label=truncate(slotProps.data.studentSubmission.notes) variant="text" icon-pos="right" severity="contrast" class="min-w-3xs" icon="i-mdi-eye" @click="() => noteModal = slotProps.data.studentInfo.studentId"></Button>
                     </template>
                 </Column>
                 <Column field="actions" header="Actions">

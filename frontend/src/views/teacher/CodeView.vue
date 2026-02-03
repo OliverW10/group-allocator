@@ -28,8 +28,8 @@
                     <h2 class="text-2xl font-semibold text-gray-800 mb-2">Error Loading Class</h2>
                     <p class="text-gray-600 mb-4">{{ error }}</p>
                     <button 
-                        @click="fetchClassInfo" 
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" 
+                        @click="fetchClassInfo"
                     >
                         Try Again
                     </button>
@@ -40,8 +40,8 @@
                     <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
                         <h1 class="text-4xl font-bold text-gray-800 mb-2">Class Code</h1>
                         <div 
-                            @click="copyCode"
                             class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6 cursor-pointer hover:bg-blue-100 hover:border-blue-300 transition-colors relative group"
+                            @click="copyCode"
                         >
                             <div class="text-6xl font-mono font-bold text-blue-600 tracking-wider">
                                 {{ classInfo.code }}

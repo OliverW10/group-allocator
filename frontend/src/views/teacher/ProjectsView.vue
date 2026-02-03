@@ -13,6 +13,7 @@
                             <tr class="">
                                 <th
                                     v-for="col of ['project_name', 'client', 'min_students', 'max_students', 'requires_nda', 'min_instances', 'max_instances']"
+                                    :key="col"
                                     class="border border-black p-2"
                                 >{{ col }}</th>
                             </tr>
@@ -30,8 +31,8 @@
                 <template #body="slotProps">
                     <InputText 
                         v-model="slotProps.data.name" 
-                        @input="markAsChanged(slotProps.data.id)"
                         class="w-full editable-input"
+                        @input="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -39,8 +40,8 @@
                 <template #body="slotProps">
                     <InputText 
                         v-model="slotProps.data.client" 
-                        @input="markAsChanged(slotProps.data.id)"
                         class="w-full editable-input"
+                        @input="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -49,8 +50,8 @@
                     <Checkbox 
                         v-model="slotProps.data.requiresNda" 
                         :binary="true"
-                        @change="markAsChanged(slotProps.data.id)"
                         class="editable-checkbox"
+                        @change="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -58,9 +59,9 @@
                 <template #body="slotProps">
                     <InputNumber 
                         v-model="slotProps.data.minStudents" 
-                        @input="markAsChanged(slotProps.data.id)"
                         :min="1"
                         class="w-full editable-input"
+                        @input="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -68,9 +69,9 @@
                 <template #body="slotProps">
                     <InputNumber 
                         v-model="slotProps.data.maxStudents" 
-                        @input="markAsChanged(slotProps.data.id)"
                         :min="1"
                         class="w-full editable-input"
+                        @input="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -78,9 +79,9 @@
                 <template #body="slotProps">
                     <InputNumber 
                         v-model="slotProps.data.minInstances" 
-                        @input="markAsChanged(slotProps.data.id)"
                         :min="0"
                         class="w-full editable-input"
+                        @input="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -88,9 +89,9 @@
                 <template #body="slotProps">
                     <InputNumber 
                         v-model="slotProps.data.maxInstances" 
-                        @input="markAsChanged(slotProps.data.id)"
                         :min="1"
                         class="w-full editable-input"
+                        @input="markAsChanged(slotProps.data.id)"
                     />
                 </template>
             </Column>
@@ -111,15 +112,15 @@
             <Button 
                 label="Save Changes" 
                 severity="success"
-                @click="saveChanges"
                 :loading="saving"
+                @click="saveChanges"
             />
         </div>
 
         <!-- Create Project Form Component -->
         <CreateProjectForm
             v-model:visible="showCreateModal"
-            :classId="classId"
+            :class-id="classId"
             @created="(newProject) => setProjects([...projects, newProject])"
         />
     </div>

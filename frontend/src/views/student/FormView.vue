@@ -16,8 +16,8 @@
 						:dragdrop="!isMobile" 
 						:meta-key-selection="true" 
 						:show-source-controls="false" 
-						v-on:update:model-value="warnIfExceededPreferenceLimit"
 						class="mobile-picklist"
+						@update:model-value="warnIfExceededPreferenceLimit"
 
 					>
 						<template #sourceheader><b class="text-base sm:text-lg">Available Projects</b></template>
@@ -57,8 +57,8 @@
 						:multiple="true" 
 						:max-file-size="10000000"
 						custom-upload 
-						@uploader="onUpload($event)"
 						class="mobile-fileupload"
+						@uploader="onUpload($event)"
 					>
 						<template #empty>
 							<span class="text-sm">Drag and drop files to here to upload.</span>
@@ -83,8 +83,8 @@
 								<Button 
 									severity="danger" 
 									class="i-mdi-delete p-2" 
-									@click="deleteFile(slotProps.data.id)"
 									size="small"
+									@click="deleteFile(slotProps.data.id)"
 								/>
 							</template>
 						</Column>
@@ -110,8 +110,8 @@
 						label="Save Preferences" 
 						class="mt-4 w-full sm:w-auto" 
 						icon="i-mdi-upload" 
-						@click="submitForm"
 						size="large"
+						@click="submitForm"
 					/>
 				</div>
 			</template>
@@ -133,9 +133,9 @@
 			<div class="flex flex-col sm:flex-row gap-2 justify-center">
 				<Button 
 					label="Close" 
-					@click="showSuccessDialog = false"
 					class="flex-1 sm:flex-none"
 					severity="secondary"
+					@click="showSuccessDialog = false"
 				/>
 			</div>
 		</Dialog>

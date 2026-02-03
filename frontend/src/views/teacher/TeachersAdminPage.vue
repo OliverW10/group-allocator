@@ -5,7 +5,7 @@
 
 		<div class="flex gap-2 ml-4">
 			<InputText v-model="newTeacherEmail" placeholder="Teacher Email" />
-			<Button @click="addTeacher" :loading="isLoading" :disabled="!hasValidEmail" label="Add Teacher" v-tooltip.top="!hasValidEmail ? 'Enter email to add teacher' : 'Add Teacher'" />
+			<Button v-tooltip.top="!hasValidEmail ? 'Enter email to add teacher' : 'Add Teacher'" :loading="isLoading" :disabled="!hasValidEmail" label="Add Teacher" @click="addTeacher" />
 		</div>
 
 		<!-- Teachers Table -->
@@ -29,8 +29,8 @@
 
 				<Column header="Actions" style="width: 100px; white-space: nowrap;">
 					<template #body="{ data }">
-						<Button v-if="!data.isOwner" @click="deleteTeacher(data.email)" :loading="isLoading" icon="i-mdi-delete"
-							severity="danger" text v-tooltip.top="!isCurrentTeacherOwner ? 'Only the owner can delete teachers' : 'Delete Teacher'" :disabled="!isCurrentTeacherOwner" />
+						<Button v-if="!data.isOwner" v-tooltip.top="!isCurrentTeacherOwner ? 'Only the owner can delete teachers' : 'Delete Teacher'" :loading="isLoading" icon="i-mdi-delete"
+							severity="danger" text :disabled="!isCurrentTeacherOwner" @click="deleteTeacher(data.email)" />
 					</template>
 				</Column>
 			</DataTable>
@@ -38,7 +38,7 @@
 
 		<h1 class="heading">Configure Student Form</h1>
 		<div class="flex">
-			<Checkbox name="friends-checkbox" v-model="friendsEnabled" binary class="mx-2" />
+			<Checkbox v-model="friendsEnabled" name="friends-checkbox" binary class="mx-2" />
 			<label for="friends-checkbox">Enable Selecting Partner Preferences</label>
 		</div>
 	</div>

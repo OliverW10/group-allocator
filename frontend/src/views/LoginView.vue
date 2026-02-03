@@ -67,7 +67,7 @@
 								<label for="devAdminInput">Role:</label>
 								<SelectButton v-model="devLoginType" name="selection" :options="devLoginOptions" />
 							</div>
-							<Button class="flex items-center" icon="pi pi-cog" label="Development Test Login" @click="loginForDev" severity="secondary" />
+							<Button class="flex items-center" icon="pi pi-cog" label="Development Test Login" severity="secondary" @click="loginForDev" />
 						</div>
 					</div>
 				</div>

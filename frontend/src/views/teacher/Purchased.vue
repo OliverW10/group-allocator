@@ -3,7 +3,7 @@
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
             <div class="flex justify-between items-center mb-8">
                 <div class="flex items-center gap-4">
-                    <Button @click="goBack" icon="pi pi-arrow-left" label="Back" class="p-button-text mr-4" />
+                    <Button icon="pi pi-arrow-left" label="Back" class="p-button-text mr-4" @click="goBack" />
                     <h1 class="text-2xl font-bold">Payment Finished for class: <span class="text-primary">{{ classInfo?.name || 'Loading...' }}</span></h1>
                 </div>
                 <div class="flex items-center gap-4">
@@ -20,11 +20,11 @@
                 <div v-if="recieved === true" class="bg-blue-50 border border-blue-200 rounded p-6 text-center">
                     <h2 class="text-xl font-semibold mb-2 text-blue-800">Payment verified by Group Allocator</h2>
                     <p class="mb-4">Class is now upgraded to a paid plan</p>
-                    <Button @click="goToClass" label="Return to classes page" class="p-button-success" />
+                    <Button label="Return to classes page" class="p-button-success" @click="goToClass" />
                 </div>
                 <div v-else-if="recieved === false" class="bg-yellow-100 text-yellow-800 rounded p-4 text-center">
                     <p class="mb-2">Payment was not verified by Group Allocator</p>
-                    <Button @click="validatePayment" label="Retry Payment" class="p-button-warning" />
+                    <Button label="Retry Payment" class="p-button-warning" @click="validatePayment" />
                 </div>
                 <div v-if="recieved === null" class="flex items-center justify-center gap-2 text-gray-500">
                     <span class="pi pi-spin pi-spinner"></span>
