@@ -103,7 +103,7 @@ import AllocationsTable from '../../components/solve-page/AllocationsTable.vue';
 import PreferenceHistogram from '../../components/solve-page/PreferenceHistogram.vue';
 import PreferenceCurve from '../../components/solve-page/PreferenceCurve.vue';
 import WarningMessage from '../../components/WarningMessage.vue';
-import ClientLimits from '../../components/ClientLimits.vue';
+import ClientLimits from '../../components/solve-page/ClientLimits.vue';
 import type { ProjectDto } from '../../dtos/project-dto';
 import ProgressSpinner from 'primevue/progressspinner';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';

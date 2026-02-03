@@ -50,8 +50,8 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
-import type { ClientLimitsDto } from '../dtos/client-limits-dto';
-import type { ClientDto } from '../dtos/client-dto';
+import type { ClientLimitsDto } from '../../dtos/client-limits-dto';
+import type { ClientDto } from '../../dtos/client-dto';
 
 interface Props {
   modelValue: ClientLimitsDto[];
