@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Client Limits</h2>
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mt-6">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Client Limits</h2>
     <DataTable :value="clientLimits" class="w-full" :rows="10" edit-mode="cell" :row-class="rowClassForClientLimit">
       <Column field="clientId" header="Client">
         <template #body="slotProps">
@@ -33,7 +33,7 @@
         <Button label="Add Client Limit" icon="i-mdi-plus" class="mt-2" @click="addClientLimit" />
       </template>
     </DataTable>
-    <div v-if="invalidClientLimits.length > 0" class="mt-2 text-red-600 text-sm">
+    <div v-if="invalidClientLimits.length > 0" class="mt-2 text-red-600 dark:text-red-400 text-sm">
       <ul>
         <li v-for="(lim, idx) in invalidClientLimits" :key="idx">
           Client {{ allClients.find(c => c.id === lim.clientId)?.name || lim.clientId }}: Max Projects must be greater than or equal to Min Projects.
@@ -94,6 +94,6 @@ const invalidClientLimits = computed(() =>
 );
 
 const rowClassForClientLimit = (data: ClientLimitsDto) => {
-  return { 'bg-red-100': data.maxProjects < data.minProjects };
+  return { 'bg-red-100 dark:bg-red-900/20': data.maxProjects < data.minProjects };
 };
 </script> 

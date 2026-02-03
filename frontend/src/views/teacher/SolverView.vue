@@ -1,11 +1,11 @@
 <template>
 	<TeacherNavBar :class-id="classId" />
-	<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+	<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6">
 		<div class="mx-auto">
 			<!-- Header Section -->
 			<div class="mb-8">
-				<h1 class="text-3xl font-bold text-gray-900 mb-2">Group Allocation Solver</h1>
-				<p class="text-gray-600">Configure and run the allocation algorithm for your class</p>
+				<h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Group Allocation Solver</h1>
+				<p class="text-gray-600 dark:text-gray-300">Configure and run the allocation algorithm for your class</p>
 			</div>
 
 			<div class="flex gap-8">
@@ -28,8 +28,8 @@
 						/>
 
 						<!-- Allocations Table Card -->
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h2 class="text-xl font-semibold text-gray-900 mb-4">Current Allocations</h2>
+						<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-6">
+							<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Current Allocations</h2>
 							<AllocationsTable v-model="allocations" :projects="allProjects ?? []" :students="allStudentInfos" :allow-additions="true" @allocations-cleared="onAllocationsCleared"/>
 						</div>
 
@@ -44,21 +44,21 @@
 					<div v-else class="flex items-center justify-center py-12">
 						<div class="text-center">
 							<ProgressSpinner class="mb-4" />
-							<p class="text-gray-600">Running solver...</p>
+							<p class="text-gray-600 dark:text-gray-300">Running solver...</p>
 						</div>
 					</div>
 				</div>
 
 				<!-- Sidebar -->
 				<div class="w-80">
-					<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
-						<h2 class="text-xl font-semibold text-gray-900 mb-6">Solver Actions</h2>
+					<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 sticky top-6">
+						<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Solver Actions</h2>
 						
 						<div class="space-y-4">
 							<Button 
 								label="Run Solver" 
 								icon="i-mdi-cogs" 
-								class="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700"
+								class="w-full h-12 text-base font-medium bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600"
 								:loading="loading"
 								@click="solve"
 							/>
@@ -66,23 +66,23 @@
 							<Button 
 								label="Download Solution"
 								icon="i-mdi-download" 
-								class="w-full h-12 text-base font-medium bg-green-600 hover:bg-green-700"
+								class="w-full h-12 text-base font-medium bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
 								:disabled="!solved"
 								@click="downloadReport"
 							/>
 						</div>
 
 						<!-- Status Indicator -->
-						<div v-if="solved" class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+						<div v-if="solved" class="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
 							<div class="flex items-center gap-2">
 								<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-								<span class="text-sm font-medium text-green-800">Solver completed successfully</span>
+								<span class="text-sm font-medium text-green-800 dark:text-green-300">Solver completed successfully</span>
 							</div>
 						</div>
 
 						<!-- Histogram Chart -->
 						<div v-if="solved" class="mt-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">Preference Distribution</h3>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Preference Distribution</h3>
 							<PreferenceHistogram :histogram="histogram" />
 						</div>
 					</div>

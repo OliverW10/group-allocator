@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Preference Configuration</h2>
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Preference Configuration</h2>
     <div class="flex flex-col gap-4">
       <div>
-        <label for="preference-exponent" class="block text-sm font-medium text-gray-700 mb-2">
-          Preference Exponent: <span class="text-blue-600 font-semibold">{{ preferenceExponent.toFixed(2) }}</span>
+        <label for="preference-exponent" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Preference Exponent: <span class="text-slate-600 dark:text-slate-300 font-semibold">{{ preferenceExponent.toFixed(2) }}</span>
         </label>
         <Slider 
           id="preference-exponent"
@@ -19,7 +19,7 @@
       
       <!-- Preference Curve Visualization -->
       <div class="mt-4">
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div class="bg-gray-50 dark:bg-slate-900 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
           <svg :width="280" :height="140" class="mx-auto">
             <!-- Background grid -->
             <defs>
@@ -46,14 +46,14 @@
             <polyline
               :points="svgPoints"
               fill="none"
-              stroke="#3b82f6"
+              :stroke="isDarkMode ? '#cbd5e1' : '#64748b'"
               stroke-width="3"
               stroke-linecap="round"
               stroke-linejoin="round"
             />
           </svg>
         </div>
-        <p class="text-xs text-gray-500 mt-2 text-center">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
           Higher values give more weight to student preferences
         </p>
       </div>
@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import Slider from 'primevue/slider';
 
 interface Props {
@@ -80,6 +80,11 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 const preferenceExponent = ref(props.modelValue);
+const isDarkMode = ref(false);
+
+onMounted(() => {
+  isDarkMode.value = document.documentElement.classList.contains('dark');
+});
 
 // Watch for external changes to the prop
 watch(() => props.modelValue, (newValue) => {
