@@ -12,8 +12,8 @@ using Microsoft.IdentityModel.JsonWebTokens;
 namespace GroupAllocator.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class StudentsController(ApplicationDbContext db) : ControllerBase
+[Route("student")]
+public class SubmissionController(ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet("me")]
 	[Authorize(Policy = "StudentOnly")]

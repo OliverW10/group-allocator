@@ -12,11 +12,11 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("students")]
-public class StudentsAdminController(ApplicationDbContext db, IUserService userService) : ControllerBase
+public class StudentsForTeacherController(ApplicationDbContext db, IUserService userService) : ControllerBase
 {
     [HttpGet]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<ActionResult<List<StudentInfoAndSubmission>>> GetAll(int classId)
+	public async Task<ActionResult<List<StudentInfoAndSubmission>>> GetAllStudentsInClass(int classId)
 	{
 		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
 		{
