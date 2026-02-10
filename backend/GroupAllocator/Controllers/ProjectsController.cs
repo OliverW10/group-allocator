@@ -139,7 +139,7 @@ public class ProjectsController(ApplicationDbContext db, IUserService userServic
 	[Authorize]
 	public async Task<ActionResult<List<ProjectDto>>> GetProjects([FromQuery, BindRequired] int classId)
 	{
-		return await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(x => x.Class.Id == classId).Select(x => x.ToDto()).ToListAsync();
+		return await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(x => x.Class.Id == classId).OrderBy(x => x.Name).Select(x => x.ToDto()).ToListAsync();
 	}
 
 	[HttpGet("clients")]

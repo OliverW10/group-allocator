@@ -58,7 +58,7 @@
 							<Button 
 								label="Run Solver" 
 								icon="i-mdi-cogs" 
-								class="w-full h-12 text-base font-medium bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600"
+								class="w-full h-12 text-base font-medium"
 								:loading="loading"
 								@click="solve"
 							/>
@@ -66,7 +66,7 @@
 							<Button 
 								label="Download Solution"
 								icon="i-mdi-download" 
-								class="w-full h-12 text-base font-medium bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+								class="w-full h-12 text-base font-medium"
 								:disabled="!solved"
 								@click="downloadReport"
 							/>

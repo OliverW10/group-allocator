@@ -1,7 +1,7 @@
 <template>
     <div class="flex justify-center">
         <div class="flex">
-            <FileUpload mode="basic" name="file" :auto="false" accept=".csv,.txt" :choose-label=props.label
+            <FileUpload mode="basic" name="file" auto accept=".csv,.txt" :choose-label=props.label
                 @select="onSelect" />
             <Button icon="i-mdi-help-circle" label="Help" class="p-button-text" severity="info"
                 @click="showHelp = true" />

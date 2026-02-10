@@ -46,6 +46,7 @@
             </FileUploader>
             <Button label="Add Student" icon="i-mdi-plus" @click="addStudentModal = true" />
             <Button label="Download Students JSON" icon="i-mdi-download" @click="downloadStudentsJson" />
+            <Button label="Import Students JSON (TODO)" icon="i-mdi-download" @click="downloadStudentsJson" />
         </div>
         <div>
             <p class="text-gray-500 pb-3">{{ students.length }} Students</p>

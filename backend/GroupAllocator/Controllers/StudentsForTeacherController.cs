@@ -99,7 +99,7 @@ public class StudentsForTeacherController(ApplicationDbContext db, IUserService 
 			var student = await db.Students.FirstOrDefaultAsync(s => s.Id == preference.StudentInfo.StudentId && s.Class.Id == classId);
 			if (student == null)
 			{
-				await StudentsController.SubmitPreferences(preference.StudentSubmission, db, User);
+				await SubmissionController.SubmitPreferences(preference.StudentSubmission, db, User);
 				continue;
 			}
 
@@ -213,6 +213,6 @@ public class StudentsForTeacherController(ApplicationDbContext db, IUserService 
 
 		await db.Students.Where(s => s.Id == id && s.Class.Id == classId).ExecuteDeleteAsync();
 		await db.SaveChangesAsync();
-		return await GetAll(classId);
+		return await GetAllStudentsInClass(classId);
 	}
 }

@@ -37,9 +37,9 @@
 		</div>
 
 		<h1 class="heading">Configure Student Form</h1>
-		<div class="flex">
-			<Checkbox v-model="friendsEnabled" name="friends-checkbox" binary class="mx-2" />
-			<label for="friends-checkbox">Enable Selecting Partner Preferences</label>
+		<div v-for="(value, key) of formConfigFlags" :key="key" class="flex">
+			<Checkbox v-model="value.value" :name="key + '-checkbox'" binary class="mx-2" />
+			<label :for="key + '-checkbox'">{{ value.label }}</label>
 		</div>
 	</div>
 </template>
@@ -61,7 +61,24 @@ import Checkbox from 'primevue/checkbox';
 const teachers = ref<TeacherDto[]>([])
 const newTeacherEmail = ref('')
 const isLoading = ref(false)
-const friendsEnabled = ref(false)
+const formConfigFlags = ref({
+	friendsEnabled: {
+		label: 'Enable Selecting Partner Preferences',
+		value: false,
+	},
+	fileUploadEnabled: {
+		label: 'Enable File Upload',
+		value: false,
+	},
+	freeTextEnabled: {
+		label: 'Enable Free Text Input',
+		value: false,
+	},
+	ndaEnabled: {
+		label: 'Enable NDA Agreement Selection',
+		value: false,
+	},
+});
 
 const toast = useToast();
 const route = useRoute();

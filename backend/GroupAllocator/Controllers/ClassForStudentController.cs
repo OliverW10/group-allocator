@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
+using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,9 +11,9 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("class")]
-public class ClassForStudentController(ApplicationDbContext db) : ControllerBase
+public class ClassForStudentController(ApplicationDbContext db, PaymentService paymentService) : ControllerBase
 {
-	[HttpGet("list")]
+	[HttpGet("list-student")]
 	[Authorize(Policy = "StudentOnly")]
 	public async Task<ActionResult<List<ClassResponseDto>>> GetClassesForStudent()
 	{
@@ -30,12 +31,13 @@ public class ClassForStudentController(ApplicationDbContext db) : ControllerBase
 				StudentCount = c.Students.Count,
 				CreatedAt = c.CreatedAt,
 				TeacherRole = null,
-				Payed = c.Payments.Any(p => p.Status == PaymentStatus.Valid)
+				Payed = paymentService.GetPaymentPlanForClass(c) != PaymentPlan.None
 			})
 			.ToListAsync();
 
 		return classes;
 	}
+
 
 	[HttpGet("join-code/{code}")]
 	[Authorize(Policy = "StudentOnly")]
