@@ -22,11 +22,6 @@
                         </table>
                         New projects will be added in addition to existing ones.
                 </FileUploader>
-
-                <Button
-                    label="Export Projects (TODO)"
-                    @click="showCreateModal = true"
-                />
             </div>
             <Button 
                 label="Create Project" 

@@ -11,7 +11,8 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("class")]
-public class ClassForTeacherController(ApplicationDbContext db, PaymentService paymentService, IUserService userService) : ControllerBase
+public class ClassForTeacherController(ApplicationDbContext db, PaymentService paymentService, IUserService userService,
+	ProjectsController projectsController, StudentsForTeacherController studentsForTeacherController) : ControllerBase
 {
 	[HttpGet("list")]
 	[Authorize(Policy = "TeacherOnly")]
@@ -237,5 +238,17 @@ public class ClassForTeacherController(ApplicationDbContext db, PaymentService p
 			.ToListAsync();
 
 		return Ok(teachers);
+	}
+
+	[HttpGet("{id}/download")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<ExportDto> GetClassBackup(int id)
+	{
+		return new ExportDto()
+		{
+			ClassInfo = (await GetClassInfo(id)).Value ?? throw new InvalidOperationException("Failed to get class info"),
+			Projects = (await projectsController.GetProjects(id)).Value ?? throw new InvalidOperationException("Failed to get projects"),
+			Students = await studentsForTeacherController.GetStudents(id)
+		}
 	}
 }

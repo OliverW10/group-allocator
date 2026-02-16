@@ -5,7 +5,7 @@
 			<Column field="name" header="Name"></Column>
 			<Column field="actions" header="Actions">
 				<template #body="slotProps">
-					<Button severity="info" class="i-mdi-download" @click="download(slotProps.data.studentInfo.studentId, slotProps.data.studentInfo.name)" />
+					<Button severity="info" class="i-mdi-download" @click="downloadStudentFile(slotProps.data.studentInfo.studentId, slotProps.data.studentInfo.name)" />
 					<Button severity="danger" class="i-mdi-delete" @click="deleteFile(slotProps.data.studentInfo.studentId)" />
 				</template>
 			</Column>
@@ -45,8 +45,6 @@
                 </p>
             </FileUploader>
             <Button label="Add Student" icon="i-mdi-plus" @click="addStudentModal = true" />
-            <Button label="Download Students JSON" icon="i-mdi-download" @click="downloadStudentsJson" />
-            <Button label="Import Students JSON (TODO)" icon="i-mdi-download" @click="downloadStudentsJson" />
         </div>
         <div>
             <p class="text-gray-500 pb-3">{{ students.length }} Students</p>
@@ -117,7 +115,7 @@ import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
-import { downloadData } from '../../helpers/download';
+import { downloadData, downloadFromUrl } from '../../helpers/download';
 import { FilterMatchMode } from '@primevue/core/api';
 
 interface StudentTableRow extends StudentInfoAndSubmission {
@@ -177,14 +175,8 @@ const deleteFile = async (id: string) => {
 	students.value = await ApiService.get<StudentInfoAndSubmission[]>(`/students?classId=${classId}`)
 }
 
-const download = async (id: unknown, name: string) => {
-	const url = await ApiService.makeUrl(`/students/file/${id}?classId=${classId}`)
-	const a = document.createElement('a')
-	a.href = url.toString()
-	a.download = name
-	document.body.appendChild(a)
-	a.click()
-	document.body.removeChild(a)
+const downloadStudentFile = (id: string, filename: string) => {
+    downloadFromUrl(`/students/file/${id}?classId=${classId}`, filename)
 }
 
 const setStudents = (data: StudentInfoAndSubmission[]) => {

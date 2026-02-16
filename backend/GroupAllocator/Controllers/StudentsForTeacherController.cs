@@ -71,7 +71,7 @@ public class StudentsForTeacherController(ApplicationDbContext db, IUserService 
 		return students;
 	}
 
-    async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
+    public async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
     {
         return await db.Students
             .Include(s => s.Files)

@@ -36,10 +36,18 @@
 			</DataTable>
 		</div>
 
+		<h1 class="heading">Export/Import</h1>
+		
+		<div class="flex justify-start gap-3">
+			<FileUpload mode="basic" name="file" auto accept=".csv,.txt" choose-label="Upload JSON"
+					@select="uploadBackupJson" />
+			<Button label="Download JSON" icon="i-mdi-download" @click="downloadBackupJson" />
+		</div>
+
 		<h1 class="heading">Configure Student Form</h1>
 		<div v-for="(value, key) of formConfigFlags" :key="key" class="flex">
-			<Checkbox v-model="value.value" :name="key + '-checkbox'" binary class="mx-2" />
-			<label :for="key + '-checkbox'">{{ value.label }}</label>
+			<Checkbox v-model="value.value" :name="key + '-checkbox'" binary class="mx-2" :disabled="!value.enabled" :input-id="key+'-checkbox'" />
+			<label :for="key + '-checkbox'">{{ value.label }}{{ !value.enabled ? " (Coming Soon)" : "" }}</label>
 		</div>
 	</div>
 </template>
@@ -57,26 +65,32 @@ import TeacherNavBar from '../../components/TeacherNavBar.vue';
 import type { TeacherDto } from '../../dtos/teacher-dto'
 import { useAuthStore } from '../../store/auth'
 import Checkbox from 'primevue/checkbox';
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
+import { downloadFromUrl } from '../../helpers/download'
 
 const teachers = ref<TeacherDto[]>([])
 const newTeacherEmail = ref('')
 const isLoading = ref(false)
 const formConfigFlags = ref({
-	friendsEnabled: {
-		label: 'Enable Selecting Partner Preferences',
-		value: false,
-	},
 	fileUploadEnabled: {
 		label: 'Enable File Upload',
 		value: false,
+		enabled: true,
 	},
 	freeTextEnabled: {
 		label: 'Enable Free Text Input',
 		value: false,
+		enabled: true,
 	},
 	ndaEnabled: {
 		label: 'Enable NDA Agreement Selection',
 		value: false,
+		enabled: true,
+	},
+	friendsEnabled: {
+		label: 'Enable Selecting Partner Preferences',
+		value: false,
+		enabled: false,
 	},
 });
 
@@ -137,6 +151,14 @@ const deleteTeacher = async (teacherEmail: string) => {
 	} finally {
 		isLoading.value = false
 	}
+}
+
+const downloadBackupJson = () => {
+	downloadFromUrl("")
+}
+
+const uploadBackupJson = async (event: FileUploadSelectEvent) => {
+	// call endpoint with json
 }
 
 onMounted(() => {
