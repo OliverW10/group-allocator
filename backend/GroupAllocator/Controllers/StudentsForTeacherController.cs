@@ -12,7 +12,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("students")]
-public class StudentsForTeacherController(ApplicationDbContext db, IUserService userService) : ControllerBase
+public class StudentsForTeacherController(ApplicationDbContext db, IUserService userService, StudentsService studentsService) : ControllerBase
 {
     [HttpGet]
 	[Authorize(Policy = "TeacherOnly")]
@@ -23,9 +23,7 @@ public class StudentsForTeacherController(ApplicationDbContext db, IUserService 
 			return Forbid("Teacher is not in this class");
 		}
 
-		var students = await GetStudents(classId);
-
-		return students;
+		return await studentsService.GetStudents(classId);
 	}
 
 	[HttpPost("whitelist")]
@@ -45,9 +43,7 @@ public class StudentsForTeacherController(ApplicationDbContext db, IUserService 
 		using var reader = new StreamReader(file.OpenReadStream());
 		await userService.CreateStudentAllowlist(classId, reader);
 
-		var students = await GetStudents(classId);
-
-		return students;
+		return await studentsService.GetStudents(classId);
 	}
 
 	[HttpPost("add")]
@@ -66,48 +62,7 @@ public class StudentsForTeacherController(ApplicationDbContext db, IUserService 
 
 		await userService.AddStudentToClass(classId, email);
 
-		var students = await GetStudents(classId);
-
-		return students;
-	}
-
-    public async Task<List<StudentInfoAndSubmission>> GetStudents(int classId)
-    {
-        return await db.Students
-            .Include(s => s.Files)
-            .Include(s => s.User)
-            .Include(s => s.Preferences)
-                .ThenInclude(p => p.Project)
-            .Include(s => s.Class)
-            .Where(s => s.Class.Id == classId)
-            .Select(s => s.ToDto())
-            .ToListAsync();
-    }
-    
-
-	[HttpPost("import")]
-	[Authorize(Policy = "TeacherOnly")]
-	public async Task<ActionResult> ImportStudents(int classId, [FromBody] IEnumerable<StudentInfoAndSubmission> preferences)
-	{
-		if (!await userService.IsCurrentTeacherPartOfClass(classId, User))
-		{
-			return Forbid("Teacher is not in this class");
-		}
-
-		foreach (var preference in preferences)
-		{
-			var student = await db.Students.FirstOrDefaultAsync(s => s.Id == preference.StudentInfo.StudentId && s.Class.Id == classId);
-			if (student == null)
-			{
-				await SubmissionController.SubmitPreferences(preference.StudentSubmission, db, User);
-				continue;
-			}
-
-			// TODO: given the use case of the export/import is if we lose the database, it should not use the project id's to record preferences
-			// this means we need to record the project name in the export/import, and maybe include the projects in the export as well
-		}
-
-		return Ok();
+		return await studentsService.GetStudents(classId);
 	}
 
     [HttpGet("populate/{classId:int}")]

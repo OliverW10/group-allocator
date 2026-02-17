@@ -1,5 +1,8 @@
+using TypeGen.Core.TypeAnnotations;
+
 namespace GroupAllocator.DTOs;
 
+[ExportTsClass]
 public class ExportDto
 {
     public required ClassInfoDto ClassInfo { get; set; }

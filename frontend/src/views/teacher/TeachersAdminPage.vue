@@ -39,9 +39,10 @@
 		<h1 class="heading">Export/Import</h1>
 		
 		<div class="flex justify-start gap-3">
-			<FileUpload mode="basic" name="file" auto accept=".csv,.txt" choose-label="Upload JSON"
+			<FileUpload mode="basic" name="file" auto accept=".json" choose-label="Upload JSON"
 					@select="uploadBackupJson" />
 			<Button label="Download JSON" icon="i-mdi-download" @click="downloadBackupJson" />
+			<p v-if="processingUpload">Uploading</p>
 		</div>
 
 		<h1 class="heading">Configure Student Form</h1>
@@ -67,6 +68,7 @@ import { useAuthStore } from '../../store/auth'
 import Checkbox from 'primevue/checkbox';
 import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
 import { downloadFromUrl } from '../../helpers/download'
+import { ClassInfoDto } from '../../dtos/class-info-dto'
 
 const teachers = ref<TeacherDto[]>([])
 const newTeacherEmail = ref('')
@@ -75,17 +77,17 @@ const formConfigFlags = ref({
 	fileUploadEnabled: {
 		label: 'Enable File Upload',
 		value: false,
-		enabled: true,
+		enabled: false,
 	},
 	freeTextEnabled: {
 		label: 'Enable Free Text Input',
 		value: false,
-		enabled: true,
+		enabled: false,
 	},
 	ndaEnabled: {
 		label: 'Enable NDA Agreement Selection',
 		value: false,
-		enabled: true,
+		enabled: false,
 	},
 	friendsEnabled: {
 		label: 'Enable Selecting Partner Preferences',
@@ -104,6 +106,8 @@ const isCurrentTeacherOwner = computed(() => {
 const hasValidEmail = computed(() => {
 	return newTeacherEmail.value.trim().includes('@')
 })
+let classInfo: undefined | ClassInfoDto = undefined; 
+const processingUpload = ref(false);
 
 const loadTeachers = async () => {
 	isLoading.value = true
@@ -112,6 +116,7 @@ const loadTeachers = async () => {
 		if (response) {
 			teachers.value = response
 		}
+		classInfo = await ApiService.get<ClassInfoDto>(`/class/code/${classId}`)
 	} catch {
 		toast.add({ severity: 'error', summary: 'Failed', detail: `Failed to get teachers`, life: 3000 });
 	} finally {
@@ -154,11 +159,41 @@ const deleteTeacher = async (teacherEmail: string) => {
 }
 
 const downloadBackupJson = () => {
-	downloadFromUrl("")
+	const dateString = new Date().toISOString().split('T')[0];
+	downloadFromUrl(`/class/${classId}/download`, `class_backup_${classInfo?.name}_${dateString}.json`)
 }
 
 const uploadBackupJson = async (event: FileUploadSelectEvent) => {
-	// call endpoint with json
+	processingUpload.value = true;
+	try {
+		const file = event.files[0];
+		if (!file) {
+			toast.add({ severity: 'error', summary: 'No file selected', life: 3000 });
+			processingUpload.value = false;
+			return;
+		}
+		const reader = new FileReader();
+		reader.onload = async (e) => {
+			try {
+				const json = JSON.parse(e.target?.result as string);
+				// Optionally validate structure here
+				await ApiService.post(`/class/${classId}/import`, json);
+				toast.add({ severity: 'success', summary: 'Import successful', life: 3000 });
+			} catch (err) {
+				toast.add({ severity: 'error', summary: 'Invalid JSON or import failed', life: 3000 });
+			} finally {
+				processingUpload.value = false;
+			}
+		};
+		reader.onerror = () => {
+			toast.add({ severity: 'error', summary: 'File read error', life: 3000 });
+			processingUpload.value = false;
+		};
+		reader.readAsText(file);
+	} catch (err) {
+		toast.add({ severity: 'error', summary: 'Unexpected error', life: 3000 });
+		processingUpload.value = false;
+	}
 }
 
 onMounted(() => {

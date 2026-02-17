@@ -5,6 +5,7 @@ using GroupAllocator.DTOs;
 using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace GroupAllocator.Controllers;
@@ -12,7 +13,7 @@ namespace GroupAllocator.Controllers;
 [ApiController]
 [Route("class")]
 public class ClassForTeacherController(ApplicationDbContext db, PaymentService paymentService, IUserService userService,
-	ProjectsController projectsController, StudentsForTeacherController studentsForTeacherController) : ControllerBase
+	ProjectsService projectsService, StudentsService studentsService) : ControllerBase
 {
 	[HttpGet("list")]
 	[Authorize(Policy = "TeacherOnly")]
@@ -242,13 +243,50 @@ public class ClassForTeacherController(ApplicationDbContext db, PaymentService p
 
 	[HttpGet("{id}/download")]
 	[Authorize(Policy = "TeacherOnly")]
-	public async Task<ExportDto> GetClassBackup(int id)
+	public async Task<ActionResult<ExportDto>> GetClassBackup(int id)
 	{
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
+		{
+			return Forbid("Teacher is not in this class");
+		}
+
 		return new ExportDto()
 		{
 			ClassInfo = (await GetClassInfo(id)).Value ?? throw new InvalidOperationException("Failed to get class info"),
-			Projects = (await projectsController.GetProjects(id)).Value ?? throw new InvalidOperationException("Failed to get projects"),
-			Students = await studentsForTeacherController.GetStudents(id)
+			Projects = await projectsService.GetProjects(id),
+			Students = await studentsService.GetStudents(id)
+		};
+	}
+
+	[HttpPost("{id}/import")]
+	[Authorize(Policy = "TeacherOnly")]
+	public async Task<IActionResult> ImportClassBackup(int id, [FromBody, BindRequired] ExportDto backup)
+	{
+		if (!await userService.IsCurrentTeacherPartOfClass(id, User))
+		{
+			return Forbid("Teacher is not in this class");
 		}
+
+		var projectIdMapping = new Dictionary<int, int>();
+		foreach (var project in backup.Projects)
+		{
+			var newProject = (await projectsService.CreateProject(id, project.ToCreateProjectDto()))!;
+			projectIdMapping[project.Id] = newProject.Id;
+		}
+
+		foreach (var preference in backup.Students)
+		{
+			await userService.AddStudentToClass(id, preference.StudentInfo.Email);
+			var newSubmission = new StudentSubmissionDto()
+			{
+				ClassId = id,
+				Files = [], // We can't support files in backups for now
+				Notes = preference.StudentSubmission.Notes,
+				WillSignContract = preference.StudentSubmission.WillSignContract,
+				OrderedPreferences = preference.StudentSubmission.OrderedPreferences.Select(x => projectIdMapping[x])
+			};
+			await SubmissionController.SubmitPreferences(newSubmission, db, User);
+		}
+		return Ok();
 	}
 }
