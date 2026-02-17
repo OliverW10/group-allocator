@@ -115,7 +115,7 @@ import { Dialog, useToast, type FileUploadSelectEvent } from 'primevue';
 import { ProjectDto } from '../../dtos/project-dto';
 import FileUploader from '../../components/FileUploader.vue';
 import type { StudentInfoAndSubmission } from '../../dtos/student-info-and-submission';
-import { downloadData, downloadFromUrl } from '../../helpers/download';
+import { downloadFromUrl } from '../../helpers/download';
 import { FilterMatchMode } from '@primevue/core/api';
 
 interface StudentTableRow extends StudentInfoAndSubmission {
@@ -233,20 +233,6 @@ const addStudent = async () => {
         addingStudent.value = false;
     }
 }
-
-const downloadStudentsJson = () => {
-    const studentsWithProjects = students.value.map(s => {
-        return {
-            id: s.studentInfo.studentId,
-            email: s.studentInfo.email,
-            name: s.studentInfo.name,
-            notes: s.studentSubmission.notes,
-            willSignContract: s.studentSubmission.willSignContract,
-            preferences: s.studentSubmission.orderedPreferences.map(prefId => projects.value.find(p => p.id == prefId)?.name),
-        }
-    })
-    downloadData(JSON.stringify(studentsWithProjects, null, 2), 'application/json', 'json', 'students');
-};
 
 const truncate = (s: string, len: number = 15) => {
     if (s.length > len){

@@ -179,7 +179,7 @@ const uploadBackupJson = async (event: FileUploadSelectEvent) => {
 				// Optionally validate structure here
 				await ApiService.post(`/class/${classId}/import`, json);
 				toast.add({ severity: 'success', summary: 'Import successful', life: 3000 });
-			} catch (err) {
+			} catch {
 				toast.add({ severity: 'error', summary: 'Invalid JSON or import failed', life: 3000 });
 			} finally {
 				processingUpload.value = false;
@@ -190,7 +190,7 @@ const uploadBackupJson = async (event: FileUploadSelectEvent) => {
 			processingUpload.value = false;
 		};
 		reader.readAsText(file);
-	} catch (err) {
+	} catch {
 		toast.add({ severity: 'error', summary: 'Unexpected error', life: 3000 });
 		processingUpload.value = false;
 	}
