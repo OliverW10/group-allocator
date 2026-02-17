@@ -12,7 +12,7 @@ namespace GroupAllocator.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProjectsController(ApplicationDbContext db, IUserService userService) : ControllerBase
+public class ProjectsController(ApplicationDbContext db, IUserService userService, ProjectsService projectsService) : ControllerBase
 {
 	[HttpPost("upload")]
 	[Authorize(Policy = "TeacherOnly")]
@@ -91,46 +91,13 @@ public class ProjectsController(ApplicationDbContext db, IUserService userServic
 	[Authorize(Policy = "TeacherOnly")]
 	public async Task<ActionResult<ProjectDto>> CreateProject([FromQuery, BindRequired] int classId, [FromBody] CreateProjectDto createProjectDto)
 	{
-		var userId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
-		
-		var @class = await db.Classes
-			.Include(c => c.Teachers)
-				.ThenInclude(t => t.Teacher)
-			.FirstOrDefaultAsync(c => c.Id == classId);
-			
-		if (@class == null)
-		{
-			return NotFound($"No class with id {classId}");
+		int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? throw new InvalidOperationException("No subject claim"));
+		var result = await projectsService.CreateProject(classId, createProjectDto);
+		if (result is null) {
+			return NotFound($"No Class with ID {classId}");
 		}
 
-		// Get or create client
-		var client = await db.Clients.FirstOrDefaultAsync(c => c.Name == createProjectDto.Client && c.Class.Id == classId);
-		if (client == null)
-		{
-			client = new ClientModel
-			{
-				Name = createProjectDto.Client,
-				Class = @class,
-			};
-			db.Clients.Add(client);
-		}
-
-		var project = new ProjectModel
-		{
-			Name = createProjectDto.Name,
-			Client = client,
-			MinStudents = createProjectDto.MinStudents,
-			MaxStudents = createProjectDto.MaxStudents,
-			RequiresNda = createProjectDto.RequiresNda,
-			MinInstances = createProjectDto.MinInstances,
-			MaxInstances = createProjectDto.MaxInstances,
-			Class = @class,
-		};
-
-		db.Projects.Add(project);
-		await db.SaveChangesAsync();
-
-		return project.ToDto();
+		return result;
 	}
 
 	string RemoveWhitespace(string s) => new string(s.Where(c => !Char.IsWhiteSpace(c)).ToArray());
@@ -139,7 +106,7 @@ public class ProjectsController(ApplicationDbContext db, IUserService userServic
 	[Authorize]
 	public async Task<ActionResult<List<ProjectDto>>> GetProjects([FromQuery, BindRequired] int classId)
 	{
-		return await db.Projects.Include(p => p.Client).Include(p => p.Class).Where(x => x.Class.Id == classId).Select(x => x.ToDto()).ToListAsync();
+		return await projectsService.GetProjects(classId);
 	}
 
 	[HttpGet("clients")]

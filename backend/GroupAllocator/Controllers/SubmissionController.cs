@@ -2,7 +2,6 @@ using System.Security.Claims;
 using GroupAllocator.Database;
 using GroupAllocator.Database.Model;
 using GroupAllocator.DTOs;
-using GroupAllocator.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -12,8 +11,8 @@ using Microsoft.IdentityModel.JsonWebTokens;
 namespace GroupAllocator.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class StudentsController(ApplicationDbContext db) : ControllerBase
+[Route("students")]
+public class SubmissionController(ApplicationDbContext db) : ControllerBase
 {
 	[HttpGet("me")]
 	[Authorize(Policy = "StudentOnly")]
@@ -96,7 +95,7 @@ public class StudentsController(ApplicationDbContext db) : ControllerBase
 
 		await db.SaveChangesAsync();
 
-		return new OkObjectResult(preferenceModels);
+		return new OkResult();
 	}
 
 	[HttpPost("file")]

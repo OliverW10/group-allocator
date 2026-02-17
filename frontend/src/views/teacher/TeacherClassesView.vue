@@ -197,7 +197,7 @@ const isPurchaseLoading = ref(false)
 const fetchClasses = async () => {
   try {
     classes.value = await ApiService.get<ClassResponseDto[]>(
-      '/Class/list-teacher'
+      '/class/list'
     )
   } catch (error) {
     console.error('Error fetching classes:', error)
@@ -206,7 +206,7 @@ const fetchClasses = async () => {
 
 const createClass = async () => {
   try {
-    await ApiService.post('/Class', newClass.value)
+    await ApiService.post('/class', newClass.value)
     showCreateModal.value = false
     newClass.value = { name: '' }
     await fetchClasses()

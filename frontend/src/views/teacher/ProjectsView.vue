@@ -6,21 +6,23 @@
         </div>
         <Divider style="margin: 0;" />
         <div class="flex justify-between items-end">
-            <FileUploader label="Import Projects" @projects-changed="uploadProjects">
-                    Please upload a csv file with the following format and no header
-                    <table>
-                        <thead>
-                            <tr class="">
-                                <th
-                                    v-for="col of ['project_name', 'client', 'min_students', 'max_students', 'requires_nda', 'min_instances', 'max_instances']"
-                                    :key="col"
-                                    class="border border-black p-2"
-                                >{{ col }}</th>
-                            </tr>
-                        </thead>
-                    </table>
-                    New projects will be added in addition to existing ones.
-            </FileUploader>
+            <div class="flex">
+                <FileUploader label="Import Projects" @projects-changed="uploadProjects">
+                        Please upload a csv file with the following format and no header
+                        <table>
+                            <thead>
+                                <tr class="">
+                                    <th
+                                        v-for="col of ['project_name', 'client', 'min_students', 'max_students', 'requires_nda', 'min_instances', 'max_instances']"
+                                        :key="col"
+                                        class="border border-black p-2"
+                                    >{{ col }}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        New projects will be added in addition to existing ones.
+                </FileUploader>
+            </div>
             <Button 
                 label="Create Project" 
                 @click="showCreateModal = true"

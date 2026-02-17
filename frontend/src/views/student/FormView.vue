@@ -102,9 +102,9 @@
 						/>
 					</div>
 
-					<div>
+					<!-- <div class="">
 						Friend selector
-					</div>
+					</div> -->
 
 					<Button 
 						label="Save Preferences" 
@@ -113,32 +113,16 @@
 						size="large"
 						@click="submitForm"
 					/>
+					<div v-if="submitSuccessState !== 'unsubmitted'" class="flex items-center gap-2">
+						<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+						<span class="text-sm font-medium" :class="submitSuccessMessageColor">
+							{{ submitSuccessMessage }}
+						</span>
+					</div>
 				</div>
 			</template>
 		</Card>
 		<LogoutButton />
-		
-		<!-- Success Dialog -->
-		<Dialog 
-			v-model:visible="showSuccessDialog" 
-			modal 
-			header="Success"
-			:closable="true"
-			:close-on-escape="true"
-			:style="{ width: '90vw', maxWidth: '500px' }"
-		>
-			<p class="text-base mb-2">Your project preferences have been successfully submitted.</p>
-			<p class="text-base mb-4">You can return to this page anytime to update your preferences.</p>
-			
-			<div class="flex flex-col sm:flex-row gap-2 justify-center">
-				<Button 
-					label="Close" 
-					class="flex-1 sm:flex-none"
-					severity="secondary"
-					@click="showSuccessDialog = false"
-				/>
-			</div>
-		</Dialog>
 	</div>
 </template>
 
@@ -161,7 +145,6 @@ import type { FileDetailsDto } from "../../dtos/file-details-dto";
 import type { StudentSubmissionDto } from "../../dtos/student-submission-dto";
 import { Column, DataTable } from "primevue";
 import { useRoute } from 'vue-router';
-import Dialog from "primevue/dialog";
 
 const toast = useToast();
 const route = useRoute();
@@ -174,7 +157,29 @@ const maxNumberOfPreferences = 10;
 const warningMessage = "A maximum of " + maxNumberOfPreferences + " preferences has been selected. Anything more than the top " + maxNumberOfPreferences + " preferences will not be saved";
 let exceededPreferenceLimit = false
 const loading = ref(false)
-const showSuccessDialog = ref(false)
+const submitSuccessState = ref("unsubmitted" as "loading" | "success" | "error" | "unsubmitted")
+const submitSuccessMessage = computed(() => {
+	if (submitSuccessState.value === "success") {
+		return "Preferences saved successfully"
+	} else if (submitSuccessState.value === "error") {
+		return "Failed to save preferences. Please try again."
+	} else if (submitSuccessState.value === "loading") {
+		return "Saving..."
+	} else {
+		return ""
+	}
+})
+const submitSuccessMessageColor = computed(() => {
+	if (submitSuccessState.value === "success") {
+		return "text-green-800 dark:text-green-300"
+	} else if (submitSuccessState.value === "error") {
+		return "text-red-600 dark:text-red-400"
+	} else if (submitSuccessState.value === "loading") {
+		return "text-gray-600 dark:text-gray-400"
+	} else {
+		return ""
+	}
+})
 
 const projectsRaw = ref([] as ProjectDto[]);
 const projects = ref([[], []] as ProjectDto[][]);
@@ -258,6 +263,7 @@ const warnIfExceededPreferenceLimit = () => {
 }
 
 const submitForm = async () => {
+	submitSuccessState.value = "loading"
 	const submitModel: StudentSubmissionDto = {
 		files: files.value,
 		orderedPreferences: projects.value[1].map(p => p.id).splice(0, maxNumberOfPreferences),
@@ -268,8 +274,9 @@ const submitForm = async () => {
 	const result = await ApiService.post("/students/me", submitModel)
 	if (result == null) {
 		toast.add({ severity: 'error', summary: 'Failed', detail: 'Submission failed. If the issue persists contact developers', life: 5000 });
+		submitSuccessState.value = "error"
 	} else {
-		showSuccessDialog.value = true;
+		setTimeout(() => submitSuccessState.value = "success", 100)
 	}
 };
 

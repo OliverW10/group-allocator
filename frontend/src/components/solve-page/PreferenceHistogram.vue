@@ -1,7 +1,7 @@
 <template>
 	<div v-if="histogram.length > 0" class="mt-6">
-		<h3 class="text-lg font-semibold mb-3">Preference Distribution</h3>
-		<div class="bg-white border border-gray-200 rounded-lg p-4">
+		<h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Preference Distribution</h3>
+		<div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
 			<svg :width="400" :height="200" class="w-full">
 				<!-- Chart background -->
 				<rect width="400" height="200" fill="var(--p-surface-0, #fff)" />

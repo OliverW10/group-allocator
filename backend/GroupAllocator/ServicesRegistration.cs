@@ -1,3 +1,4 @@
+using GroupAllocator.Controllers;
 using GroupAllocator.Services;
 
 namespace GroupAllocator;
@@ -10,6 +11,8 @@ public static class ServicesRegistration
 			.AddScoped<IUserService, UserService>()
 			.AddScoped<IAllocationSolver, AllocationSolver>()
 			.AddScoped<PaymentService>()
+			.AddScoped<ProjectsService>()
+			.AddScoped<StudentsService>()
 			;
 	}
 }
