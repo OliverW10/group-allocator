@@ -27,7 +27,8 @@ builder.Services.AddCors(options =>
 					"https://group-allocator.pages.dev",
 					"https://*.group-allocator.pages.dev",
 					"https://oliverw10.github.io",
-					"https://group-allocator.vercel.app"
+					"https://group-allocator.vercel.app",
+					"https://app.group-allocator.com"
 				)
 				.AllowAnyMethod()
 				.AllowAnyHeader();

@@ -16,7 +16,7 @@ public class StatusController(ApplicationDbContext db) : ControllerBase
     public async Task<ActionResult<string>> Status()
     {
         var response = new StringBuilder();
-        response.AppendLine("Backend: GOOD");
+        response.AppendLine("Backend: GOOD (v1.0.1)");
         await AppendDbStatus(response);
         await AppendStripeStatus(response);
         return Ok(response.ToString());
