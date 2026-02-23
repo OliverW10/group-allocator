@@ -55,7 +55,7 @@
 						name="demo[]" 
 						url="/api/upload" 
 						:multiple="true" 
-						:max-file-size="10000000"
+						:max-file-size="maxFileSize * 1024 * 1024"
 						custom-upload 
 						class="mobile-fileupload"
 						@uploader="onUpload($event)"
@@ -141,7 +141,7 @@ import PickList from 'primevue/picklist'
 import ProgressBar from 'primevue/progressbar'
 import ApiService from "../../services/ApiService";
 import { useToast } from "primevue/usetoast";
-import type { FileDetailsDto } from "../../dtos/file-details-dto";
+import { FileDetailsDto } from "../../dtos/file-details-dto";
 import type { StudentSubmissionDto } from "../../dtos/student-submission-dto";
 import { Column, DataTable } from "primevue";
 import { useRoute } from 'vue-router';
@@ -149,6 +149,8 @@ import { useRoute } from 'vue-router';
 const toast = useToast();
 const route = useRoute();
 const classId = parseInt(route.params.classId as string);
+
+const maxFileSize = FileDetailsDto.mAX_FILE_SIZE_MB;
 
 const files = ref([] as FileDetailsDto[])
 const willSignContract = ref(true)
@@ -205,9 +207,18 @@ onMounted(async () => {
 			files.value = maybeStudent.files ?? []
 			willSignContract.value = true
 			personalStatement.value = maybeStudent.notes ?? ""
-			const isSelected = (x: ProjectDto) => maybeStudent.orderedPreferences.some(id => x.id == id)
-			projects.value[0] = projectsRaw.value.filter(not(isSelected))
-			projects.value[1] = projectsRaw.value.filter(isSelected)
+			
+			const selected: ProjectDto[] = []
+			for (const selectedProjId of maybeStudent.orderedPreferences) {
+				const projWithId = projectsRaw.value.find(x => x.id == selectedProjId)
+				if (!projWithId) {
+					toast.add({ severity: 'warn', summary: 'Warning', detail: 'Had a removed project selected, it has been removed.'})
+					continue
+				}
+				selected.push(projWithId)
+			}
+			projects.value[0] = selected
+			projects.value[1] = projectsRaw.value.filter(x => !selected.includes(x))
 			toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
 		}
 		loading.value = false
@@ -301,8 +312,6 @@ const deleteFile = async (id: string) => {
 	files.value = await ApiService.get<FileDetailsDto[]>(`/students/files?classId=${classId}`)
 	toast.add({ severity: 'success', summary: 'Success', detail: 'File deleted successfully', life: 5000 });
 }
-
-const not = <Args extends unknown[]>(f: (...args: Args) => boolean) => (...args: Args): boolean => !f(...args);
 
 // Cleanup resize listener on unmount
 onUnmounted(() => {

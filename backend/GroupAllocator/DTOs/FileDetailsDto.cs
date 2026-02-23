@@ -9,4 +9,5 @@ public class FileDetailsDto
 	public required int Id { get; set; }
 	public required string Name { get; set; }
 	public required int UserId { get; set; }
+	public const int MAX_FILE_SIZE_MB = 100;
 }

@@ -98,6 +98,8 @@ public class SubmissionController(ApplicationDbContext db) : ControllerBase
 		return new OkResult();
 	}
 
+	const int FILE_SIZE_LIMIT_MB = 100;
+
 	[HttpPost("file")]
 	[Authorize(Policy = "StudentOnly")]
 	public async Task<ActionResult<FileDetailsDto>> PostFile([BindRequired] int classId, [FromForm] IFormFile file)
@@ -106,7 +108,7 @@ public class SubmissionController(ApplicationDbContext db) : ControllerBase
 		{
 			case 0:
 				return BadRequest("No file uploaded.");
-			case > 10 * 1024 * 1024:
+			case > FILE_SIZE_LIMIT_MB * 1024 * 1024:
 				return BadRequest("File is too large (>10MB)");
 		}
 

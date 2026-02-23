@@ -4,6 +4,7 @@
  */
 
 export class FileDetailsDto {
+    static readonly mAX_FILE_SIZE_MB: number = 100;
     id: number;
     name: string;
     userId: number;
