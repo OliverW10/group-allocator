@@ -217,8 +217,8 @@ onMounted(async () => {
 				}
 				selected.push(projWithId)
 			}
-			projects.value[0] = selected
-			projects.value[1] = projectsRaw.value.filter(x => !selected.includes(x))
+			projects.value[1] = selected
+			projects.value[0] = projectsRaw.value.filter(x => !selected.includes(x))
 			toast.add({ severity: 'success', summary: 'Success', detail: 'Loaded previous submission', life: 3000 });
 		}
 		loading.value = false

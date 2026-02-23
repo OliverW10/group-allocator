@@ -1,0 +1,11 @@
+
+audit data / observability
+    - timestamps and user on solverun, class, 
+    - submission counts
+    - persist logs
+    - record errors and exceptions
+    - record failed solve runs
+    - setup health checks + alerts
+
+make client limit saving default
+finish form customisation + friend selection feature
