@@ -1,0 +1,15 @@
+Privacy Policy
+
+"The tool" refers to the Group Allocator web application available at https://group-allocator.com
+
+Upon sign in to the tool using the google OAuth integration, it collects the 1. Email address and 2. Full name, associated with the google account.
+Upon submission of the form shown when signed in as a student the tool stores data entered into the form such as: Selected preferences for project, personal statement, uploaded files.
+When signed in as a teacher, data uploaded or entered to configure a "class" is stored, this includes: projects details, student emails, clients details.
+
+This data required for the function or legitimate interest of the tool in assigning students to project groups based on preferences.
+
+The data is not shared with any third parties, and is stored on a server located in Australia.
+
+Data is retained until it's associated "class" is deleted via the tool.
+
+Compaints and Deletion requests can be emailed to oliver.warrick@student.uts.edu.au

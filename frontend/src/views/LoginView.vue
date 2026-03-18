@@ -149,6 +149,13 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Footer -->
+		<footer class="bg-white border-t border-gray-200 py-4">
+			<div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-600">
+				<a href="/privacy.txt" class="hover:text-blue-600" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+			</div>
+		</footer>
 	</div>
 </template>
 <script setup lang="ts">

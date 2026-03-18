@@ -1,11 +1,30 @@
 
+bugs
+    x Alphabetical preferences
+    x File upload limit
+    - Auth issues
+    - Max instances GUI is >=1, should be >=0
+    - Solve page layout on large classes
+    - Fix pre allocations merge not working
+low priority
+    - try repro solve timeout
+
 audit data / observability
     - timestamps and user on solverun, class, 
     - submission counts
     - persist logs
     - record errors and exceptions
     - record failed solve runs
-    - setup health checks + alerts
+    x setup health checks + alerts
 
-make client limit saving default
-finish form customisation + friend selection feature
+features
+    - Save table settings (shown items)
+    - Save client limits
+    - rework placeholder students
+    - number of groups
+    - finish form customisation + friend selection feature
+
+
+Privacy notes:
+- Don't need a cookie banner as all cookies are essential. If I add analytics this will change
+- Don't need a DPO (Data protection officer)
